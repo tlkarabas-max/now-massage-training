@@ -2,6 +2,142 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>NOW Schedule Optimization Training (Upgraded)</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: linear-gradient(120deg, #6f7bf7 0%, #a7bfff 100%);
+            margin: 0;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 36px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 2px 18px rgba(35,49,123,0.08);
+            padding: 40px 48px 50px 48px;
+        }
+        .header {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #4a54c4;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .subhead {
+            font-size: 1.1rem;
+            color: #444;
+            margin-bottom: 28px;
+        }
+        .nav-bar {
+            display: flex;
+            gap: 48px;
+            justify-content: flex-start;
+            align-items: center;
+            border-bottom: 2px solid #ecedfa;
+            margin-bottom: 28px;
+            padding-bottom: 4px;
+        }
+        .nav-tab {
+            font-size: 1.18em;
+            font-weight: 500;
+            background: none;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            padding: 18px 0 12px 0;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .nav-tab.active, .nav-tab:focus {
+            color: #5a6cf7;
+            font-weight: 700;
+        }
+        .nav-tab.active:after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: -6px;
+            height: 4px;
+            background: #5973e7;
+            border-radius: 6px;
+        }
+        .content {
+            display: none;
+            margin-top: 16px;
+        }
+        .content.active {
+            display: block;
+        }
+        @media (max-width: 900px) {
+            .container {
+                padding: 20px 5vw;
+            }
+            .nav-bar {gap:24px;}
+        }
+        @media (max-width: 700px) {
+            .container {padding: 12px 2vw;}
+            .nav-bar {gap: 10px;flex-wrap: wrap;}
+            .nav-tab {padding: 12px 0 8px 0;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Schedule Optimization Training (Upgraded)</div>
+        <div class="subhead">Master the art of maximizing revenue through smart scheduling</div>
+        <div class="nav-bar">
+            <button class="nav-tab active" onclick="showTab('overview')">Overview</button>
+            <button class="nav-tab" onclick="showTab('simulator')">Schedule Simulator</button>
+            <button class="nav-tab" onclick="showTab('calculator')">Revenue Calculator</button>
+            <button class="nav-tab" onclick="showTab('scenarios')">Practice Scenarios</button>
+            <button class="nav-tab" onclick="showTab('quiz')">Knowledge Quiz</button>
+            <button class="nav-tab" onclick="showTab('templates')">Script Templates</button>
+            <button class="nav-tab" onclick="showTab('progress')">Progress Tracker</button>
+        </div>
+        <div id="overview" class="content active">
+            <h2>Overview</h2>
+            <p>Welcome! Use the tabs above to access all modules for schedule optimization and training.</p>
+        </div>
+        <div id="simulator" class="content">
+            <h2>Schedule Simulator</h2>
+            <p>[Your interactive simulator goes here]</p>
+        </div>
+        <div id="calculator" class="content">
+            <h2>Revenue Calculator</h2>
+            <p>[Your revenue calculator goes here]</p>
+        </div>
+        <div id="scenarios" class="content">
+            <h2>Practice Scenarios</h2>
+            <p>[Your scenarios and solution guidance go here]</p>
+        </div>
+        <div id="quiz" class="content">
+            <h2>Knowledge Quiz</h2>
+            <p>[Your knowledge quiz goes here]</p>
+        </div>
+        <div id="templates" class="content">
+            <h2>Script Templates</h2>
+            <p>[Your script templates go here]</p>
+        </div>
+        <div id="progress" class="content">
+            <h2>Progress Tracker</h2>
+            <p>[Your progress tracking dashboard goes here]</p>
+        </div>
+    </div>
+<script>
+function showTab(tab){
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelector(`[onclick="showTab('${tab}')"]`).classList.add('active');
+    document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+    document.getElementById(tab).classList.add('active');
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NOW Massage - Schedule Optimization Training (Upgraded)</title>
     <style>
