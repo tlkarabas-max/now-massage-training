@@ -34,10 +34,10 @@
       .tabs { flex-direction: column; }
       .tab { padding: 12px 16px; }
     }
-    #simulator-form { margin: 1.5rem 0; }
-    #simulator-form label { margin-right: 8px; }
-    #simulator-form select { margin-right: 16px; font-size: 1rem; padding: 6px 10px; border-radius: 5px; border: 1px solid #e3e6ef; }
-    #simulator-form button { font-size: 1rem; }
+    #simulator-form, #scenarios-form { margin: 1.5rem 0; }
+    #simulator-form label, #scenarios-form label { margin-right: 8px; }
+    #simulator-form select, #scenarios-form select { margin-right: 16px; font-size: 1rem; padding: 6px 10px; border-radius: 5px; border: 1px solid #e3e6ef; }
+    #simulator-form button, #scenarios-form button { font-size: 1rem; }
     .simulator-metrics { display: flex; gap: 32px; margin: 1.5rem 0 1rem 0; }
     .sim-metric { background: #f2f3f8; border-radius: 8px; padding: 16px 24px; text-align: center; min-width: 120px; }
     .sim-metric-value { font-size: 2rem; color: #6170f7; font-weight: bold; }
@@ -53,9 +53,9 @@
     .schedule-block-gap { background: #fcf3cf; color: #b7950b; font-weight: bold; }
     .schedule-block-callout { background: #f5b7b1; color: #c0392b; font-weight: bold; }
     .schedule-block-lunch { background: #d5d8dc; color: #636e72; font-weight: bold; }
-    .schedule-block-pt { background: #aed6f1; color: #21618c; font-weight: bold; }
     .schedule-block-session { background: #d6eaf8; color: #1f618d; }
     .schedule-block { border-radius: 6px; padding: 8px 0; }
+    .scenario-desc { background: #f2f3f8; border-radius: 8px; padding: 16px 24px; margin-top: 1rem; margin-bottom: 1rem; }
   </style>
 </head>
 <body>
@@ -90,15 +90,12 @@
       </p>
     </div>
 
-    <!-- Schedule Simulator -->
+    <!-- Schedule Simulator Section -->
     <div id="simulator" class="section">
       <h2>Schedule Simulator</h2>
-      <p>
-        <em>Practice building and optimizing therapist schedules. Drag-and-drop blocks, adjust shift times, and see your utilization stats update live!</em>
-      </p>
       <form id="simulator-form">
-        <label for="sim-day" style="font-weight:bold;">Select Day:</label>
-        <select id="sim-day" name="sim-day" onchange="updateScenarioOptions()">
+        <label for="sim-day-sim">Select Day:</label>
+        <select id="sim-day-sim" name="sim-day-sim" onchange="updateScenarioOptionsSim()">
           <option>Sunday</option>
           <option>Monday</option>
           <option>Tuesday</option>
@@ -107,205 +104,21 @@
           <option>Friday</option>
           <option>Saturday</option>
         </select>
-        <label for="sim-scenario" style="font-weight:bold;">Scenario:</label>
-        <select id="sim-scenario" name="sim-scenario" onchange="updateScheduleTable()">
+        <label for="sim-scenario-sim">Scenario:</label>
+        <select id="sim-scenario-sim" name="sim-scenario-sim" onchange="updateScheduleTableSim()">
           <!-- Scenario options will update based on selected day -->
         </select>
-        <button type="button" style="background:#6170f7;color:white;border:none;padding:8px 20px;border-radius:5px;font-weight:bold;" onclick="updateScheduleTable()">Load</button>
-        <button type="reset" style="background:white;color:#6170f7;border:2px solid #6170f7;padding:8px 20px;border-radius:5px;font-weight:bold;margin-left:8px;" onclick="clearSchedule()">Clear</button>
+        <button type="button" onclick="updateScheduleTableSim()">Load</button>
+        <button type="reset" onclick="clearScheduleSim()">Clear</button>
       </form>
       <div class="simulator-metrics">
-        <div class="sim-metric">
-          <div class="sim-metric-value" id="moves-count">0</div>
-          <div class="sim-metric-label">Moves</div>
-        </div>
-        <div class="sim-metric">
-          <div class="sim-metric-value" id="gaps-count">0</div>
-          <div class="sim-metric-label">Gaps Fixed</div>
-        </div>
-        <div class="sim-metric">
-          <div class="sim-metric-value" id="rev-saved">$0</div>
-          <div class="sim-metric-label">Revenue Saved</div>
-        </div>
-        <div class="sim-metric">
-          <div class="sim-metric-value" id="rev-lost">$0</div>
-          <div class="sim-metric-label">Revenue Lost</div>
-        </div>
-        <div class="sim-metric">
-          <div class="sim-metric-value" id="grade">-</div>
-          <div class="sim-metric-label">Grade</div>
-        </div>
-      </div>
-      <div class="simulator-actions">
-        <button type="button">Hint</button>
-        <button type="button" disabled>Show Solution</button>
-        <button type="button">Next Scenario</button>
+        <div class="sim-metric"><div class="sim-metric-value" id="moves-count">0</div><div class="sim-metric-label">Moves</div></div>
+        <div class="sim-metric"><div class="sim-metric-value" id="gaps-count">0</div><div class="sim-metric-label">Gaps Fixed</div></div>
+        <div class="sim-metric"><div class="sim-metric-value" id="rev-saved">$0</div><div class="sim-metric-label">Revenue Saved</div></div>
+        <div class="sim-metric"><div class="sim-metric-value" id="rev-lost">$0</div><div class="sim-metric-label">Revenue Lost</div></div>
+        <div class="sim-metric"><div class="sim-metric-value" id="grade">-</div><div class="sim-metric-label">Grade</div></div>
       </div>
       <div id="schedule-table-wrapper"></div>
-      <ul>
-        <li>Drag blocks to rearrange or add new ones</li>
-        <li>Color codes reflect block type</li>
-        <li>Utilization stats update automatically</li>
-        <li>See RED block alerts when coverage is needed</li>
-      </ul>
-      <script>
-        // Sample scenarios for each day
-        const scenariosByDay = {
-          "Sunday": [
-            "Sunday Morning: Call-Out Recovery",
-            "Sunday Afternoon: Gap Reduction",
-            "Sunday Full Day: Lunch Optimization"
-          ],
-          "Monday": [
-            "Monday Morning: Call-Out Recovery",
-            "Monday Afternoon: Gap Reduction",
-            "Monday Full Day: Lunch Optimization"
-          ],
-          "Tuesday": [
-            "Tuesday Morning: Call-Out Recovery",
-            "Tuesday Afternoon: Gap Reduction",
-            "Tuesday Full Day: Lunch Optimization"
-          ],
-          "Wednesday": [
-            "Wednesday Morning: Call-Out Recovery",
-            "Wednesday Afternoon: Gap Reduction",
-            "Wednesday Full Day: Lunch Optimization"
-          ],
-          "Thursday": [
-            "Thursday Morning: Call-Out Recovery",
-            "Thursday Afternoon: Gap Reduction",
-            "Thursday Full Day: Lunch Optimization"
-          ],
-          "Friday": [
-            "Friday Morning: Call-Out Recovery",
-            "Friday Afternoon: Gap Reduction",
-            "Friday Full Day: Lunch Optimization"
-          ],
-          "Saturday": [
-            "Saturday Morning: Call-Out Recovery",
-            "Saturday Afternoon: Gap Reduction",
-            "Saturday Full Day: Lunch Optimization"
-          ]
-        };
-
-        // Sample schedule blocks for each scenario (for demonstration)
-        const sampleSchedules = {
-          "Morning: Call-Out Recovery": [
-            ["09:00 AM", "50m", "Call-out", "OPEN", "80m"],
-            ["09:30 AM", "GAP", "Call-out", "50m", "OPEN"],
-            ["10:00 AM", "80m", "Call-out", "GAP", "OPEN"],
-            ["10:30 AM", "OPEN", "Call-out", "Lunch", "OPEN"],
-            ["11:00 AM", "Lunch", "Call-out", "OPEN", "Lunch"],
-            ["11:30 AM", "50m", "Call-out", "80m", "50m"],
-          ],
-          "Afternoon: Gap Reduction": [
-            ["12:00 PM", "OPEN", "GAP", "80m", "OPEN"],
-            ["12:30 PM", "80m", "OPEN", "GAP", "OPEN"],
-            ["01:00 PM", "OPEN", "80m", "GAP", "OPEN"],
-            ["01:30 PM", "Lunch", "OPEN", "GAP", "Lunch"],
-            ["02:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
-            ["02:30 PM", "50m", "OPEN", "80m", "50m"],
-          ],
-          "Full Day: Lunch Optimization": [
-            ["09:00 AM", "80m", "OPEN", "OPEN", "80m"],
-            ["09:30 AM", "OPEN", "80m", "OPEN", "OPEN"],
-            ["10:00 AM", "OPEN", "OPEN", "80m", "OPEN"],
-            ["10:30 AM", "Lunch", "OPEN", "OPEN", "Lunch"],
-            ["11:00 AM", "OPEN", "Lunch", "Lunch", "OPEN"],
-            ["11:30 AM", "80m", "80m", "80m", "80m"],
-            ["12:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
-            ["12:30 PM", "80m", "80m", "80m", "80m"],
-            ["01:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
-            ["01:30 PM", "Lunch", "Lunch", "Lunch", "Lunch"],
-            ["02:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
-            ["02:30 PM", "80m", "80m", "80m", "80m"],
-            ["03:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
-            ["03:30 PM", "80m", "80m", "80m", "80m"],
-            ["04:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
-            ["04:30 PM", "Lunch", "Lunch", "Lunch", "Lunch"],
-            ["05:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
-            ["05:30 PM", "80m", "80m", "80m", "80m"],
-            ["06:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
-            ["06:30 PM", "80m", "80m", "80m", "80m"],
-          ]
-        };
-
-        // Therapist labels
-        const therapistLabels = ["MT1", "MT2", "MT3", "MT4"];
-
-        function updateScenarioOptions() {
-          const daySelect = document.getElementById('sim-day');
-          const scenarioSelect = document.getElementById('sim-scenario');
-          const selectedDay = daySelect.value;
-          scenarioSelect.innerHTML = "";
-          (scenariosByDay[selectedDay] || []).forEach(function(scenario) {
-            const option = document.createElement('option');
-            option.value = scenario;
-            option.textContent = scenario;
-            scenarioSelect.appendChild(option);
-          });
-          updateScheduleTable();
-        }
-
-        function updateScheduleTable() {
-          // Update metrics (for demo, set to random values)
-          document.getElementById('moves-count').textContent = Math.floor(Math.random() * 10);
-          document.getElementById('gaps-count').textContent = Math.floor(Math.random() * 25);
-          document.getElementById('rev-saved').textContent = "$" + (Math.floor(Math.random() * 2000) + 500);
-          document.getElementById('rev-lost').textContent = "$" + (Math.floor(Math.random() * 4000));
-          document.getElementById('grade').textContent = ["A", "B", "C"][Math.floor(Math.random() * 3)];
-
-          const scenarioSelect = document.getElementById('sim-scenario');
-          const selectedScenario = scenarioSelect.value || "";
-          let displayKey = "";
-          if (selectedScenario.includes("Morning")) displayKey = "Morning: Call-Out Recovery";
-          else if (selectedScenario.includes("Afternoon")) displayKey = "Afternoon: Gap Reduction";
-          else if (selectedScenario.includes("Full Day")) displayKey = "Full Day: Lunch Optimization";
-          else displayKey = "Morning: Call-Out Recovery";
-
-          const schedule = sampleSchedules[displayKey] || [];
-
-          let table = '<table class="schedule-table"><tr><th>Time</th>';
-          therapistLabels.forEach(label => table += `<th>${label}</th>`);
-          table += '</tr>';
-
-          schedule.forEach(row => {
-            table += '<tr>';
-            row.forEach((cell, idx) => {
-              if (idx === 0) {
-                table += `<td>${cell}</td>`;
-              } else {
-                let blockClass = 'schedule-block';
-                if (cell === "OPEN") blockClass += " schedule-block-open";
-                else if (cell === "GAP") blockClass += " schedule-block-gap";
-                else if (cell === "Call-out") blockClass += " schedule-block-callout";
-                else if (cell === "Lunch") blockClass += " schedule-block-lunch";
-                else if (cell.endsWith("m")) blockClass += " schedule-block-session";
-                else blockClass += " schedule-block-open";
-                table += `<td class="${blockClass}">${cell}</td>`;
-              }
-            });
-            table += '</tr>';
-          });
-          table += '</table>';
-
-          document.getElementById('schedule-table-wrapper').innerHTML = table;
-        }
-
-        function clearSchedule() {
-          document.getElementById('schedule-table-wrapper').innerHTML = "";
-          document.getElementById('moves-count').textContent = "0";
-          document.getElementById('gaps-count').textContent = "0";
-          document.getElementById('rev-saved').textContent = "$0";
-          document.getElementById('rev-lost').textContent = "$0";
-          document.getElementById('grade').textContent = "-";
-        }
-
-        // Initialize scenario options and schedule table on page load
-        document.addEventListener('DOMContentLoaded', function() {
-          updateScenarioOptions();
-        });
-      </script>
     </div>
 
     <!-- Revenue Calculator -->
@@ -322,117 +135,57 @@
       </ul>
     </div>
 
-    <!-- Practice Scenarios -->
+    <!-- Practice Scenarios Section -->
     <div id="scenarios" class="section">
       <h2>Practice Scenarios</h2>
-      <p>
-        <em>Work through realistic scheduling challenges. Rearrange blocks, answer questions, and optimize the schedule for best results.</em>
-      </p>
-      <div style="margin: 2rem 0; color: #999;">[Scenario gallery coming soon: select a challenge and practice optimizing the schedule.]</div>
-      <ul>
-        <li>Choose a scenario (e.g., therapist call-out, schedule gaps)</li>
-        <li>Apply best practices using block types</li>
-        <li>Get feedback on your solution</li>
-      </ul>
+      <form id="scenarios-form">
+        <label for="sim-day-prac">Day:</label>
+        <select id="sim-day-prac" name="sim-day-prac" onchange="updateScenarioOptionsPrac()">
+          <option>Sunday</option>
+          <option>Monday</option>
+          <option>Tuesday</option>
+          <option>Wednesday</option>
+          <option>Thursday</option>
+          <option>Friday</option>
+          <option>Saturday</option>
+        </select>
+        <label for="sim-scenario-prac">Scenario:</label>
+        <select id="sim-scenario-prac" name="sim-scenario-prac" onchange="updateScenarioDescriptionPrac()">
+          <!-- Scenario options will update based on selected day -->
+        </select>
+        <button type="button" onclick="updateScenarioDescriptionPrac()">Load Scenario</button>
+      </form>
+      <div id="scenario-description-prac"></div>
+      <div id="scenario-schedule-table-prac"></div>
     </div>
 
     <!-- Knowledge Quiz -->
     <div id="quiz" class="section">
       <h2>Knowledge Quiz</h2>
       <p>
-        <em>Test your understanding of scheduling blocks, utilization, and best practices.</em>
+        <strong>[Your knowledge quiz goes here]</strong>
       </p>
-      <div style="margin: 2rem 0; color: #999;">[Interactive quiz coming soon: mixture of drag-and-drop, multiple choice, and scenario questions.]</div>
-      <ul>
-        <li>Answer questions about block types, color codes, and scheduling logic</li>
-        <li>Earn points for correct answers</li>
-        <li>Review explanations for each answer</li>
-      </ul>
     </div>
 
     <!-- Script Templates -->
     <div id="scripts" class="section">
       <h2>Script Templates</h2>
-      <div class="script-box">
-        <span class="script-label">Phone Call Script:</span><br>
-        “Hi [Name]! This is [Experience Guide] calling from The NOW [Boutique]. How are you today?<br>
-        I’m calling about your upcoming appointment on [Date]. We’re optimizing our schedule and wanted to see if you could move your appointment to [Option 1] or [Option 2] instead of your original time at [Original Time]. Would either of those work for you?”
-      </div>
-      <div class="script-box">
-        <span class="script-label">Text Message Script:</span><br>
-        “Hi [Name]! This is the NOW [Boutique] reaching out about your appointment on [Date] with [Therapist Name].<br>
-        We’re hoping you can begin your service 30 minutes earlier at [New Time].<br>
-        Please call us at [Phone Number] or reply to this text to confirm. Thank you!”
-      </div>
-      <div class="script-box">
-        <span class="script-label">Email Template:</span><br>
-        <strong>Subject:</strong> Appointment Adjustment Request<br>
-        <strong>Body:</strong><br>
-        Dear [Name],<br>
-        We are reviewing our schedule for [Date] and would like to offer you an earlier appointment at [New Time].<br>
-        This helps us provide the best experience for all guests and maximize therapist availability.<br>
-        Please reply or call us at [Phone Number] to confirm your new time.
-      </div>
-      <div class="script-box">
-        <span class="script-label">In-Person Script (Post-Service Rebooking):</span><br>
-        “Hi [Name], how was your experience today? Your Massage Therapist recommends coming back in [Weeks].<br>
-        Based on our schedule, we suggest booking your next appointment on [Day] at [Time].<br>
-        Would that work for you, or is there another time you prefer?”
-      </div>
-      <div class="script-box">
-        <span class="script-label">Guest Declines Change Script:</span><br>
-        “We understand if the new time doesn’t work for you.<br>
-        If you’d like, we can keep your original appointment.<br>
-        Thank you for your flexibility!”
-      </div>
+      <p>
+        <strong>[Your script templates go here]</strong>
+      </p>
     </div>
 
     <!-- Progress Tracker -->
     <div id="progress" class="section">
       <h2>Progress Tracker</h2>
       <p>
-        <em>Track your progress as you complete scenarios, quizzes, and optimize schedules.</em>
+        <strong>[Your progress tracking dashboard goes here]</strong>
       </p>
-      <table class="progress-table">
-        <tr>
-          <th>Metric</th>
-          <th>Current</th>
-          <th>Goal</th>
-        </tr>
-        <tr>
-          <td>Scenarios Completed</td>
-          <td>0</td>
-          <td>12</td>
-        </tr>
-        <tr>
-          <td>Avg. Optimization</td>
-          <td>-</td>
-          <td>A</td>
-        </tr>
-        <tr>
-          <td>Revenue Saved</td>
-          <td>$0</td>
-          <td>$2,000</td>
-        </tr>
-        <tr>
-          <td>Quiz Accuracy</td>
-          <td>-</td>
-          <td>95%</td>
-        </tr>
-        <tr>
-          <td>Notes</td>
-          <td colspan="2"><textarea class="notes-area" placeholder="Add your notes here"></textarea></td>
-        </tr>
-      </table>
-      <div style="margin-top: 1rem; color: #999;">[Progress tracker will update automatically as you complete activities.]</div>
     </div>
 
     <!-- Scheduling Blocks Guide -->
     <div id="blocks" class="section">
       <h2>Zenoti Scheduling Blocks Reference Guide</h2>
-      <p>
-        <strong>Color-Coded Scheduling Blocks:</strong> Reference the definitions, color codes, and inclusion/exclusion rules below. Use these blocks to build optimal therapist schedules and maximize boutique revenue.
-      </p>
       <table class="block-table">
         <tr>
           <th>Color</th>
@@ -544,6 +297,7 @@
     </div>
   </div>
   <script>
+    // -------- Tab navigation --------
     function showSection(id) {
       document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
       document.getElementById(id).classList.add('active');
@@ -553,6 +307,253 @@
       }[id];
       document.querySelectorAll('.tab')[index].classList.add('active');
     }
+
+    // -------- Scenarios data --------
+    const scenariosByDay = {
+      "Sunday": [
+        "Sunday Morning: Call-Out Recovery",
+        "Sunday Afternoon: Gap Reduction",
+        "Sunday Full Day: Lunch Optimization"
+      ],
+      "Monday": [
+        "Monday Morning: Call-Out Recovery",
+        "Monday Afternoon: Gap Reduction",
+        "Monday Full Day: Lunch Optimization"
+      ],
+      "Tuesday": [
+        "Tuesday Morning: Call-Out Recovery",
+        "Tuesday Afternoon: Gap Reduction",
+        "Tuesday Full Day: Lunch Optimization"
+      ],
+      "Wednesday": [
+        "Wednesday Morning: Call-Out Recovery",
+        "Wednesday Afternoon: Gap Reduction",
+        "Wednesday Full Day: Lunch Optimization"
+      ],
+      "Thursday": [
+        "Thursday Morning: Call-Out Recovery",
+        "Thursday Afternoon: Gap Reduction",
+        "Thursday Full Day: Lunch Optimization"
+      ],
+      "Friday": [
+        "Friday Morning: Call-Out Recovery",
+        "Friday Afternoon: Gap Reduction",
+        "Friday Full Day: Lunch Optimization"
+      ],
+      "Saturday": [
+        "Saturday Morning: Call-Out Recovery",
+        "Saturday Afternoon: Gap Reduction",
+        "Saturday Full Day: Lunch Optimization"
+      ]
+    };
+
+    // Scenario Descriptions
+    const scenarioDescriptions = {
+      "Morning: Call-Out Recovery": `
+        <div class="scenario-desc">
+          <strong>MT2 called out sick. Redistribute appointments to minimize gaps.</strong><br>
+          <strong>Optimal Solution:</strong>
+          <ul>
+            <li>Move appointments from MT2 to open slots</li>
+            <li>Fill gaps</li>
+          </ul>
+          <strong>Avoid:</strong>
+          <ul>
+            <li>Leaving gaps</li>
+            <li>Unused open slots</li>
+          </ul>
+        </div>
+      `,
+      "Afternoon: Gap Reduction": `
+        <div class="scenario-desc">
+          <strong>Multiple gaps in the afternoon. Optimize therapist schedules to avoid idle time.</strong><br>
+          <strong>Optimal Solution:</strong>
+          <ul>
+            <li>Identify gaps</li>
+            <li>Reassign appointments to fill gaps</li>
+          </ul>
+          <strong>Avoid:</strong>
+          <ul>
+            <li>Idle therapists</li>
+          </ul>
+        </div>
+      `,
+      "Full Day: Lunch Optimization": `
+        <div class="scenario-desc">
+          <strong>Ensure therapists are available during busy periods. Adjust lunch breaks to keep coverage steady.</strong><br>
+          <strong>Optimal Solution:</strong>
+          <ul>
+            <li>Stagger lunch break schedules</li>
+            <li>Maximize coverage during peak hours</li>
+          </ul>
+        </div>
+      `
+    };
+
+    // Sample schedule tables for scenarios (can be expanded later)
+    const sampleSchedules = {
+      "Morning: Call-Out Recovery": [
+        ["09:00 AM", "50m", "Call-out", "OPEN", "80m"],
+        ["09:30 AM", "GAP", "Call-out", "50m", "OPEN"],
+        ["10:00 AM", "80m", "Call-out", "GAP", "OPEN"],
+        ["10:30 AM", "OPEN", "Call-out", "Lunch", "OPEN"],
+        ["11:00 AM", "Lunch", "Call-out", "OPEN", "Lunch"],
+        ["11:30 AM", "50m", "Call-out", "80m", "50m"],
+      ],
+      "Afternoon: Gap Reduction": [
+        ["12:00 PM", "OPEN", "GAP", "80m", "OPEN"],
+        ["12:30 PM", "80m", "OPEN", "GAP", "OPEN"],
+        ["01:00 PM", "OPEN", "80m", "GAP", "OPEN"],
+        ["01:30 PM", "Lunch", "OPEN", "GAP", "Lunch"],
+        ["02:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
+        ["02:30 PM", "50m", "OPEN", "80m", "50m"],
+      ],
+      "Full Day: Lunch Optimization": [
+        ["09:00 AM", "80m", "OPEN", "OPEN", "80m"],
+        ["09:30 AM", "OPEN", "80m", "OPEN", "OPEN"],
+        ["10:00 AM", "OPEN", "OPEN", "80m", "OPEN"],
+        ["10:30 AM", "Lunch", "OPEN", "OPEN", "Lunch"],
+        ["11:00 AM", "OPEN", "Lunch", "Lunch", "OPEN"],
+        ["11:30 AM", "80m", "80m", "80m", "80m"],
+        ["12:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
+        ["12:30 PM", "80m", "80m", "80m", "80m"],
+        ["01:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
+        ["01:30 PM", "Lunch", "Lunch", "Lunch", "Lunch"],
+        ["02:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
+        ["02:30 PM", "80m", "80m", "80m", "80m"],
+        ["03:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
+        ["03:30 PM", "80m", "80m", "80m", "80m"],
+        ["04:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
+        ["04:30 PM", "Lunch", "Lunch", "Lunch", "Lunch"],
+        ["05:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
+        ["05:30 PM", "80m", "80m", "80m", "80m"],
+        ["06:00 PM", "OPEN", "OPEN", "OPEN", "OPEN"],
+        ["06:30 PM", "80m", "80m", "80m", "80m"],
+      ]
+    };
+
+    // Therapists for table headers
+    const therapistLabels = ["MT1", "MT2", "MT3", "MT4"];
+
+    // -------- Schedule Simulator logic --------
+    function updateScenarioOptionsSim() {
+      const daySelect = document.getElementById('sim-day-sim');
+      const scenarioSelect = document.getElementById('sim-scenario-sim');
+      const selectedDay = daySelect.value;
+      scenarioSelect.innerHTML = "";
+      (scenariosByDay[selectedDay] || []).forEach(function(scenario) {
+        const option = document.createElement('option');
+        option.value = scenario;
+        option.textContent = scenario;
+        scenarioSelect.appendChild(option);
+      });
+      updateScheduleTableSim();
+    }
+    function updateScheduleTableSim() {
+      // Demo only: update metrics
+      document.getElementById('moves-count').textContent = Math.floor(Math.random() * 10);
+      document.getElementById('gaps-count').textContent = Math.floor(Math.random() * 25);
+      document.getElementById('rev-saved').textContent = "$" + (Math.floor(Math.random() * 2000) + 500);
+      document.getElementById('rev-lost').textContent = "$" + (Math.floor(Math.random() * 4000));
+      document.getElementById('grade').textContent = ["A", "B", "C"][Math.floor(Math.random() * 3)];
+
+      const scenarioSelect = document.getElementById('sim-scenario-sim');
+      const selectedScenario = scenarioSelect.value || "";
+      let displayKey = "";
+      if (selectedScenario.includes("Morning")) displayKey = "Morning: Call-Out Recovery";
+      else if (selectedScenario.includes("Afternoon")) displayKey = "Afternoon: Gap Reduction";
+      else if (selectedScenario.includes("Full Day")) displayKey = "Full Day: Lunch Optimization";
+      else displayKey = "Morning: Call-Out Recovery";
+      const schedule = sampleSchedules[displayKey] || [];
+      let table = '<table class="schedule-table"><tr><th>Time</th>';
+      therapistLabels.forEach(label => table += `<th>${label}</th>`);
+      table += '</tr>';
+      schedule.forEach(row => {
+        table += '<tr>';
+        row.forEach((cell, idx) => {
+          if (idx === 0) {
+            table += `<td>${cell}</td>`;
+          } else {
+            let blockClass = 'schedule-block';
+            if (cell === "OPEN") blockClass += " schedule-block-open";
+            else if (cell === "GAP") blockClass += " schedule-block-gap";
+            else if (cell === "Call-out") blockClass += " schedule-block-callout";
+            else if (cell === "Lunch") blockClass += " schedule-block-lunch";
+            else if (cell.endsWith("m")) blockClass += " schedule-block-session";
+            else blockClass += " schedule-block-open";
+            table += `<td class="${blockClass}">${cell}</td>`;
+          }
+        });
+        table += '</tr>';
+      });
+      table += '</table>';
+      document.getElementById('schedule-table-wrapper').innerHTML = table;
+    }
+    function clearScheduleSim() {
+      document.getElementById('schedule-table-wrapper').innerHTML = "";
+      document.getElementById('moves-count').textContent = "0";
+      document.getElementById('gaps-count').textContent = "0";
+      document.getElementById('rev-saved').textContent = "$0";
+      document.getElementById('rev-lost').textContent = "$0";
+      document.getElementById('grade').textContent = "-";
+    }
+
+    // -------- Practice Scenarios logic --------
+    function updateScenarioOptionsPrac() {
+      const daySelect = document.getElementById('sim-day-prac');
+      const scenarioSelect = document.getElementById('sim-scenario-prac');
+      const selectedDay = daySelect.value;
+      scenarioSelect.innerHTML = "";
+      (scenariosByDay[selectedDay] || []).forEach(function(scenario) {
+        const option = document.createElement('option');
+        option.value = scenario;
+        option.textContent = scenario;
+        scenarioSelect.appendChild(option);
+      });
+      updateScenarioDescriptionPrac();
+    }
+    function updateScenarioDescriptionPrac() {
+      const scenarioSelect = document.getElementById('sim-scenario-prac');
+      const selectedScenario = scenarioSelect.value || "";
+      let key = "";
+      if (selectedScenario.includes("Morning")) key = "Morning: Call-Out Recovery";
+      else if (selectedScenario.includes("Afternoon")) key = "Afternoon: Gap Reduction";
+      else if (selectedScenario.includes("Full Day")) key = "Full Day: Lunch Optimization";
+      else key = "Morning: Call-Out Recovery";
+      document.getElementById('scenario-description-prac').innerHTML =
+        `<h3>${selectedScenario}</h3>${scenarioDescriptions[key] || ""}`;
+      // Add schedule table for scenario
+      const schedule = sampleSchedules[key] || [];
+      let table = '<table class="schedule-table"><tr><th>Time</th>';
+      therapistLabels.forEach(label => table += `<th>${label}</th>`);
+      table += '</tr>';
+      schedule.forEach(row => {
+        table += '<tr>';
+        row.forEach((cell, idx) => {
+          if (idx === 0) {
+            table += `<td>${cell}</td>`;
+          } else {
+            let blockClass = 'schedule-block';
+            if (cell === "OPEN") blockClass += " schedule-block-open";
+            else if (cell === "GAP") blockClass += " schedule-block-gap";
+            else if (cell === "Call-out") blockClass += " schedule-block-callout";
+            else if (cell === "Lunch") blockClass += " schedule-block-lunch";
+            else if (cell.endsWith("m")) blockClass += " schedule-block-session";
+            else blockClass += " schedule-block-open";
+            table += `<td class="${blockClass}">${cell}</td>`;
+          }
+        });
+        table += '</tr>';
+      });
+      table += '</table>';
+      document.getElementById('scenario-schedule-table-prac').innerHTML = table;
+    }
+
+    // -------- Initialize dropdowns on page load --------
+    document.addEventListener('DOMContentLoaded', function() {
+      updateScenarioOptionsSim();
+      updateScenarioOptionsPrac();
+    });
   </script>
 </body>
 </html>
