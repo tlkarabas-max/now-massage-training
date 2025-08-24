@@ -3,303 +3,323 @@
 <head>
   <meta charset="UTF-8">
   <title>Schedule Optimization Training (Upgraded)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css?family=Inter:700,600,400&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: 'Inter', Arial, sans-serif; background: #f7fafd; margin: 0;}
-    .container { max-width: 1400px; margin: 32px auto; background: #fff; border-radius: 18px; box-shadow: 0 2px 16px rgba(35,49,123,0.06); padding: 36px 40px 48px 40px;}
-    .header { font-size: 2.5rem; font-weight: 700; color: #5962ea; margin-bottom: 8px; letter-spacing: 1px;}
-    .subhead { font-size: 1.15rem; color: #444; margin-bottom: 38px;}
-    .nav-bar { display: flex; gap: 36px; border-bottom: 2px solid #ecedfa; margin-bottom: 30px;}
-    .nav-tab { font-size: 1.18em; font-weight: 700; background: none; border: none; color: #5962ea; cursor: pointer; padding: 14px 0 8px 0; position: relative;}
-    .nav-tab:not(.active) { color: #525252; font-weight: 500;}
-    .nav-tab.active { color: #5962ea;}
-    .nav-tab.active:after { content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 4px; background: #5962ea; border-radius: 6px;}
-    .content { display: none; margin-top: 30px;}
-    .content.active { display: block;}
-    .scenario-controls { margin-bottom: 18px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;}
-    label { font-weight: 500; margin-right: 6px;}
-    select, .btn { font-size: 1em; padding: 7px 20px; border-radius: 7px; border: 1px solid #bfcbe6; background: #f7fafd; color: #5962ea; margin-right: 6px;}
-    .btn { cursor: pointer; font-weight: 600;}
-    .btn-primary { background: #5962ea; color: #fff; border: none;}
-    .btn:disabled, .btn[disabled] { background: #e0e0e0; color: #aaa; cursor: not-allowed; opacity: 0.7;}
-    .score-panel { display: flex; gap: 28px; margin: 24px 0 14px 0; flex-wrap: wrap;}
-    .stat-card { background: #f1f3fe; border-radius: 12px; box-shadow: 0 1px 4px #e0e0e0; padding: 20px 32px; min-width: 120px; text-align: center; font-size: 1em;}
-    .stat-value { font-size: 2em; font-weight: 700; color: #5962ea; letter-spacing: 1px;}
-    .stat-label { font-size: 1em; color: #6d7ba1;}
-    .schedule-grid { display: grid; gap: 2px; margin-top: 16px; background: #e7ecf5; border-radius: 10px; overflow-x: auto; font-size: 1em;}
-    .time-slot { background: #fff; border-radius: 6px; min-height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1em; border: 1px solid #d2d8ee; transition: box-shadow 0.2s; cursor: pointer;}
-    .time-slot.header { background: #5962ea; color: #fff; font-weight: bold; border-radius: 6px 6px 0 0; min-height: 35px;}
-    .time-slot.time-header { background: #f3f6fc; color: #6d7ba1; font-weight: bold;}
-    .block-break { background: #9c27b0; color: #fff;}
-    .block-lunch { background: #9e9e9e; color: #fff;}
-    .block-open { background: #c8e6c9;}
-    .block-callout, .block-running-late, .block-leaving-early, .block-shift-adj { background: #f44336; color: #fff;}
-    .block-gap { background: #ffeb3b; color: #333; font-weight: bold;}
-    .block-group { background: #ffc107; color: #000;}
-    .block-training, .block-admin, .block-meeting, .block-personal-time, .block-pto { background: #9c27b0; color: #fff;}
-    .block-80 { background: #2196f3; color: #fff;}
-    .block-50 { background: #4caf50; color: #fff;}
-    .block-end, .block-close { background: #607d8b; color: #fff;}
-    .block-x { background: #9e9e9e;}
-    .solution-highlight { box-shadow: 0 0 0 3px #5962ea inset, 0 0 12px #5962ea; border-radius: 10px; font-weight: bold;}
-    @media (max-width: 900px) { .container { padding: 18px 4vw; } .nav-bar {gap:24px;} }
-    @media (max-width: 700px) { .container {padding: 12px 2vw;} .nav-bar {gap: 10px;flex-wrap: wrap;} .nav-tab {padding: 8px 0 4px 0;} .schedule-grid {font-size: 0.9em;} }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fd; margin: 0; }
+    .container { max-width: 1200px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 10px #eee; padding: 32px; }
+    h1 { color: #6170f7; font-size: 2.8rem; margin-bottom: 0.5rem; }
+    .subtitle { color: #333; font-size: 1.2rem; margin-bottom: 2rem; }
+    .tabs { display: flex; border-bottom: 2px solid #e3e6ef; margin-bottom: 2rem; }
+    .tab { padding: 16px 32px; cursor: pointer; font-size: 1.1rem; color: #444; border: none; background: none; outline: none; }
+    .tab.active { color: #6170f7; font-weight: bold; border-bottom: 3px solid #6170f7; }
+    .tab:not(.active):hover { color: #6170f7; background: #eaf0ff; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .block-table { border-collapse: collapse; width: 100%; margin-top: 1.5rem; }
+    .block-table th, .block-table td { border: 1px solid #e3e6ef; padding: 10px; text-align: left; }
+    .block-table th { background: #6170f7; color: #fff; }
+    .block-table td.color { width: 60px; text-align: center; font-weight: bold; border-right: 8px solid #fff; }
+    .color-purple { background: #c39bd3; }
+    .color-grey { background: #d5d8dc; }
+    .color-red { background: #f1948a; }
+    .color-pink { background: #f7cac9; }
+    .script-box { background: #f2f3f8; padding: 16px; border-radius: 8px; margin-bottom: 1rem; }
+    .script-label { font-weight: bold; color: #6170f7; }
+    .progress-table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    .progress-table th, .progress-table td { border: 1px solid #e3e6ef; padding: 10px; text-align: left; }
+    .progress-table th { background: #6170f7; color: #fff; }
+    .notes-area { width: 100%; height: 80px; border-radius: 6px; border: 1px solid #e3e6ef; margin-top: 8px; padding: 8px; font-size: 1rem; }
+    @media (max-width: 900px) {
+      .container { padding: 12px; }
+      .tabs { flex-direction: column; }
+      .tab { padding: 12px 16px; }
+    }
+    #simulator-form { margin: 1.5rem 0; }
+    #simulator-form label { margin-right: 8px; }
+    #simulator-form select { margin-right: 16px; font-size: 1rem; padding: 6px 10px; border-radius: 5px; border: 1px solid #e3e6ef; }
+    #simulator-form button { font-size: 1rem; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">Schedule Optimization Training (Upgraded)</div>
-    <div class="subhead">Master the art of maximizing revenue through smart scheduling</div>
-    <div class="nav-bar">
-      <button class="nav-tab active" onclick="showTab('overview')">Overview</button>
-      <button class="nav-tab" onclick="showTab('simulator')">Schedule Simulator</button>
-      <button class="nav-tab" onclick="showTab('calculator')">Revenue Calculator</button>
-      <button class="nav-tab" onclick="showTab('scenarios')">Practice Scenarios</button>
-      <button class="nav-tab" onclick="showTab('quiz')">Knowledge Quiz</button>
-      <button class="nav-tab" onclick="showTab('templates')">Script Templates</button>
-      <button class="nav-tab" onclick="showTab('progress')">Progress Tracker</button>
+    <h1>Schedule Optimization Training (Upgraded)</h1>
+    <div class="subtitle">Master the art of maximizing revenue through smart scheduling</div>
+    <div class="tabs">
+      <button class="tab active" onclick="showSection('overview')">Overview</button>
+      <button class="tab" onclick="showSection('simulator')">Schedule Simulator</button>
+      <button class="tab" onclick="showSection('calculator')">Revenue Calculator</button>
+      <button class="tab" onclick="showSection('scenarios')">Practice Scenarios</button>
+      <button class="tab" onclick="showSection('quiz')">Knowledge Quiz</button>
+      <button class="tab" onclick="showSection('scripts')">Script Templates</button>
+      <button class="tab" onclick="showSection('progress')">Progress Tracker</button>
+      <button class="tab" onclick="showSection('blocks')">Scheduling Blocks Guide</button>
     </div>
-    <div id="overview" class="content active">
-      <h2>Overview</h2>
-      <p>Welcome! Use the tabs above to access all modules for schedule optimization and training.</p>
+
+    <!-- Overview Section -->
+    <div id="overview" class="section active">
+      <h2>Welcome to Schedule Optimization Training!</h2>
+      <p>
+        This platform will help you master scheduling logic, maximize therapist utilization, and optimize boutique revenue using industry best practices and Zenoti Scheduling Blocks.<br>
+        <ul>
+          <li>Practice making smart scheduling decisions</li>
+          <li>Learn block types, color codes, and utilization rules</li>
+          <li>Access script templates for guest communications</li>
+          <li>Track your progress and quiz yourself</li>
+        </ul>
+      </p>
+      <p>
+        <strong>Start by exploring the tabs above!</strong>
+      </p>
     </div>
-    <div id="simulator" class="content">
+
+    <!-- Schedule Simulator -->
+    <div id="simulator" class="section">
       <h2>Schedule Simulator</h2>
-      <div class="scenario-controls">
-        <label for="simDay">Select Day:</label>
-        <select id="simDay"></select>
-        <label for="simScenario">Scenario:</label>
-        <select id="simScenario"></select>
-        <button class="btn btn-primary" onclick="loadSimulatorScenario()">Load</button>
-        <button class="btn btn-secondary" onclick="clearSchedule()">Clear</button>
-      </div>
-      <div class="score-panel">
-        <div class="stat-card"><div class="stat-value" id="movesCount">0</div><div class="stat-label">Moves</div></div>
-        <div class="stat-card"><div class="stat-value" id="gapsFixedCount">0</div><div class="stat-label">Gaps Fixed</div></div>
-        <div class="stat-card"><div class="stat-value" id="revenueSaved">$0</div><div class="stat-label">Revenue Saved</div></div>
-        <div class="stat-card"><div class="stat-value" id="revenueLost">$0</div><div class="stat-label">Revenue Lost</div></div>
-        <div class="stat-card"><div class="stat-value" id="gradeValue">C</div><div class="stat-label">Grade</div></div>
-      </div>
-      <div id="hintBox" class="hint-box" style="display:none;"></div>
-      <div class="controls" style="margin-top:18px;">
-        <button class="btn btn-secondary" onclick="showHint()">Hint</button>
-        <button id="showSolutionBtn" class="btn btn-primary" onclick="showSolution()" disabled>Show Solution</button>
-        <button class="btn btn-secondary" onclick="nextSimulatorScenario()">Next Scenario</button>
-      </div>
-      <div class="schedule-grid" id="scheduleGrid"></div>
+      <p>
+        <em>Practice building and optimizing therapist schedules. Drag-and-drop blocks, adjust shift times, and see your utilization stats update live!</em>
+      </p>
+      <form id="simulator-form">
+        <label for="sim-day" style="font-weight:bold;">Select Day:</label>
+        <select id="sim-day" name="sim-day" onchange="updateScenarioOptions()">
+          <option>Sunday</option>
+          <option>Monday</option>
+          <option>Tuesday</option>
+          <option>Wednesday</option>
+          <option>Thursday</option>
+          <option>Friday</option>
+          <option>Saturday</option>
+        </select>
+        <label for="sim-scenario" style="font-weight:bold;">Scenario:</label>
+        <select id="sim-scenario" name="sim-scenario">
+          <!-- Scenario options will update based on selected day -->
+        </select>
+        <button type="button" style="background:#6170f7;color:white;border:none;padding:8px 20px;border-radius:5px;font-weight:bold;">Load</button>
+        <button type="reset" style="background:white;color:#6170f7;border:2px solid #6170f7;padding:8px 20px;border-radius:5px;font-weight:bold;margin-left:8px;">Clear</button>
+      </form>
+      <div style="margin: 2rem 0; color: #999;">[Interactive simulator coming soon: drag-and-drop blocks, utilization calculation, RED block alerts, etc.]</div>
+      <ul>
+        <li>Drag blocks to rearrange or add new ones</li>
+        <li>Color codes reflect block type</li>
+        <li>Utilization stats update automatically</li>
+        <li>See RED block alerts when coverage is needed</li>
+      </ul>
+      <script>
+        // Sample scenarios for each day
+        const scenariosByDay = {
+          "Sunday": [
+            "Sunday Medium: Lunch Optimization",
+            "Sunday High: Call-Out Coverage",
+            "Sunday Low: Gap Reduction"
+          ],
+          "Monday": [
+            "Monday Medium: Lunch Optimization",
+            "Monday High: Call-Out Coverage",
+            "Monday Low: Gap Reduction"
+          ],
+          "Tuesday": [
+            "Tuesday Medium: Lunch Optimization",
+            "Tuesday High: Call-Out Coverage",
+            "Tuesday Low: Gap Reduction"
+          ],
+          "Wednesday": [
+            "Wednesday Medium: Lunch Optimization",
+            "Wednesday High: Call-Out Coverage",
+            "Wednesday Low: Gap Reduction"
+          ],
+          "Thursday": [
+            "Thursday Medium: Lunch Optimization",
+            "Thursday High: Call-Out Coverage",
+            "Thursday Low: Gap Reduction"
+          ],
+          "Friday": [
+            "Friday Medium: Lunch Optimization",
+            "Friday High: Call-Out Coverage",
+            "Friday Low: Gap Reduction"
+          ],
+          "Saturday": [
+            "Saturday Medium: Lunch Optimization",
+            "Saturday High: Call-Out Coverage",
+            "Saturday Low: Gap Reduction"
+          ]
+        };
+
+        function updateScenarioOptions() {
+          const daySelect = document.getElementById('sim-day');
+          const scenarioSelect = document.getElementById('sim-scenario');
+          const selectedDay = daySelect.value;
+          scenarioSelect.innerHTML = "";
+          (scenariosByDay[selectedDay] || []).forEach(function(scenario) {
+            const option = document.createElement('option');
+            option.value = scenario;
+            option.textContent = scenario;
+            scenarioSelect.appendChild(option);
+          });
+        }
+
+        // Initialize scenario options on page load
+        document.addEventListener('DOMContentLoaded', function() {
+          updateScenarioOptions();
+        });
+      </script>
     </div>
-    <div id="calculator" class="content">
+
+    <!-- Revenue Calculator -->
+    <div id="calculator" class="section">
       <h2>Revenue Calculator</h2>
-      <div class="card">[Your revenue calculator goes here]</div>
+      <p>
+        <em>Estimate your boutique's revenue based on scheduled service hours, utilization rates, and block types.</em>
+      </p>
+      <div style="margin: 2rem 0; color: #999;">[Revenue calculator coming soon: input schedule, see estimated revenue and impact of block placement.]</div>
+      <ul>
+        <li>Input number of sessions, gaps, RED blocks, and utilization rate</li>
+        <li>Calculate estimated revenue</li>
+        <li>See recommendations to optimize scheduling</li>
+      </ul>
     </div>
-    <div id="scenarios" class="content">
+
+    <!-- Practice Scenarios -->
+    <div id="scenarios" class="section">
       <h2>Practice Scenarios</h2>
-      <div class="scenario-controls">
-        <label for="scenarioDay">Day:</label>
-        <select id="scenarioDay"></select>
-        <label for="scenarioNum">Scenario:</label>
-        <select id="scenarioNum"></select>
-        <button class="btn btn-primary" onclick="loadPracticeScenario()">Load Scenario</button>
-      </div>
-      <div id="practiceScenarioBox"></div>
+      <p>
+        <em>Work through realistic scheduling challenges. Rearrange blocks, answer questions, and optimize the schedule for best results.</em>
+      </p>
+      <div style="margin: 2rem 0; color: #999;">[Scenario gallery coming soon: select a challenge and practice optimizing the schedule.]</div>
+      <ul>
+        <li>Choose a scenario (e.g., therapist call-out, schedule gaps)</li>
+        <li>Apply best practices using block types</li>
+        <li>Get feedback on your solution</li>
+      </ul>
     </div>
-    <div id="quiz" class="content">
+
+    <!-- Knowledge Quiz -->
+    <div id="quiz" class="section">
       <h2>Knowledge Quiz</h2>
-      <div class="card">[Your knowledge quiz goes here]</div>
+      <p>
+        <em>Test your understanding of scheduling blocks, utilization, and best practices.</em>
+      </p>
+      <div style="margin: 2rem 0; color: #999;">[Interactive quiz coming soon: mixture of drag-and-drop, multiple choice, and scenario questions.]</div>
+      <ul>
+        <li>Answer questions about block types, color codes, and scheduling logic</li>
+        <li>Earn points for correct answers</li>
+        <li>Review explanations for each answer</li>
+      </ul>
     </div>
-    <div id="templates" class="content">
+
+    <!-- Script Templates -->
+    <div id="scripts" class="section">
       <h2>Script Templates</h2>
-      <div class="card">[Your script templates go here]</div>
+      <div class="script-box">
+        <span class="script-label">Phone Call Script:</span><br>
+        “Hi [Name]! This is [Experience Guide] calling from The NOW [Boutique]. How are you today?<br>
+        I’m calling about your upcoming appointment on [Date]. We’re optimizing our schedule and wanted to see if you could move your appointment to [Option 1] or [Option 2] instead of your original time at [Original Time]. Would either of those work for you?”
+      </div>
+      <div class="script-box">
+        <span class="script-label">Text Message Script:</span><br>
+        “Hi [Name]! This is the NOW [Boutique] reaching out about your appointment on [Date] with [Therapist Name].<br>
+        We’re hoping you can begin your service 30 minutes earlier at [New Time].<br>
+        Please call us at [Phone Number] or reply to this text to confirm. Thank you!”
+      </div>
+      <div class="script-box">
+        <span class="script-label">Email Template:</span><br>
+        <strong>Subject:</strong> Appointment Adjustment Request<br>
+        <strong>Body:</strong><br>
+        Dear [Name],<br>
+        We are reviewing our schedule for [Date] and would like to offer you an earlier appointment at [New Time].<br>
+        This helps us provide the best experience for all guests and maximize therapist availability.<br>
+        Please reply or call us at [Phone Number] to confirm your new time.
+      </div>
+      <div class="script-box">
+        <span class="script-label">In-Person Script (Post-Service Rebooking):</span><br>
+        “Hi [Name], how was your experience today? Your Massage Therapist recommends coming back in [Weeks].<br>
+        Based on our schedule, we suggest booking your next appointment on [Day] at [Time].<br>
+        Would that work for you, or is there another time you prefer?”
+      </div>
+      <div class="script-box">
+        <span class="script-label">Guest Declines Change Script:</span><br>
+        “We understand if the new time doesn’t work for you.<br>
+        If you’d like, we can keep your original appointment.<br>
+        Thank you for your flexibility!”
+      </div>
     </div>
-    <div id="progress" class="content">
+
+    <!-- Progress Tracker -->
+    <div id="progress" class="section">
       <h2>Progress Tracker</h2>
-      <div class="card">[Your progress tracking dashboard goes here]</div>
+      <p>
+        <em>Track your progress as you complete scenarios, quizzes, and optimize schedules.</em>
+      </p>
+      <table class="progress-table">
+        <tr>
+          <th>Metric</th>
+          <th>Current</th>
+          <th>Goal</th>
+        </tr>
+        <tr>
+          <td>Scenarios Completed</td>
+          <td>0</td>
+          <td>12</td>
+        </tr>
+        <tr>
+          <td>Avg. Optimization</td>
+          <td>-</td>
+          <td>A</td>
+        </tr>
+        <tr>
+          <td>Revenue Saved</td>
+          <td>$0</td>
+          <td>$2,000</td>
+        </tr>
+        <tr>
+          <td>Quiz Accuracy</td>
+          <td>-</td>
+          <td>95%</td>
+        </tr>
+        <tr>
+          <td>Notes</td>
+          <td colspan="2"><textarea class="notes-area" placeholder="Add your notes here"></textarea></td>
+        </tr>
+      </table>
+      <div style="margin-top: 1rem; color: #999;">[Progress tracker will update automatically as you complete activities.]</div>
     </div>
-  </div>
-<script>
-// ==== CONFIGURATION (from your Apps Script) ====
-const BUSINESS_HOURS = {
-  sunday: { open: 9, close: 20 },
-  monday: { open: 9, close: 20 },
-  tuesday: { open: 9, close: 20 },
-  wednesday: { open: 9, close: 20 },
-  thursday: { open: 9, close: 20 },
-  friday: { open: 9, close: 21 },
-  saturday: { open: 9, close: 21 }
-};
-const BLOCK_TYPES = {
-  BREAK: { color: 'block-break', label:'Break', revenueLoss:0 },
-  LUNCH: { color: 'block-lunch', label:'Lunch', revenueLoss:0 },
-  PERSONAL_TIME: { color:'block-personal-time', label:'Personal', revenueLoss:0 },
-  PTO: { color:'block-pto', label:'PTO', revenueLoss:0 },
-  ADMIN: { color:'block-admin', label:'Admin', revenueLoss:0 },
-  MEETING: { color:'block-meeting', label:'Meeting', revenueLoss:0 },
-  TRAINING: { color:'block-training', label:'Training', revenueLoss:0 },
-  CALL_OUT: { color:'block-callout', label:'Call-out', revenueLoss:485 },
-  RUNNING_LATE: { color:'block-running-late', label:'Running Late', revenueLoss:108 },
-  LEAVE_EARLY: { color:'block-leaving-early', label:'Leaving Early', revenueLoss:213 },
-  SHIFT_ADJ: { color:'block-shift-adj', label:'Shift Adj.', revenueLoss:425 },
-  GAP: { color:'block-gap', label:'GAP', revenueLoss:120 },
-  OPEN: { color:'block-open', label:'OPEN', revenueLoss:0 },
-  GROUP: { color:'block-group', label:'Group', revenueLoss:0 },
-  '80': { color:'block-80', label:'80m', revenueLoss:0 },
-  '50': { color:'block-50', label:'50m', revenueLoss:0 },
-  END: { color:'block-end', label:'END', revenueLoss:0 },
-  CLOSE: { color:'block-close', label:'CLOSE', revenueLoss:0 },
-  X: { color:'block-x', label:'X', revenueLoss:0 }
-};
-// ==== DYNAMIC TIME SLOT GENERATOR ====
-function generateTimeSlots(day) {
-  const hours = BUSINESS_HOURS[day.toLowerCase()];
-  let slots = [];
-  for (let h = hours.open; h <= hours.close; h++) {
-    let displayH = h > 12 ? h - 12 : h;
-    let period = h >= 12 ? 'PM' : 'AM';
-    slots.push((displayH < 10 ? '0' : '') + displayH + ':00 ' + period);
-    if (h < hours.close) slots.push((displayH < 10 ? '0' : '') + displayH + ':30 ' + period);
-  }
-  return slots;
-}
-// ==== SAMPLE SCENARIOS (expandable) ====
-const SCENARIOS = {
-  monday: [
-    {
-      name: 'Monday Morning - Call-Out Recovery',
-      description: 'MT2 called out sick. Redistribute appointments to minimize gaps.',
-      times: generateTimeSlots('monday').slice(0,6),
-      therapists: ['MT1','MT2','MT3','MT4'],
-      grid: [
-        ['50','CALL_OUT','OPEN','80'],
-        ['GAP','CALL_OUT','50','↓'],
-        ['80','CALL_OUT','GAP','OPEN'],
-        ['OPEN','CALL_OUT','LUNCH','OPEN'],
-        ['LUNCH','CALL_OUT','OPEN','LUNCH'],
-        ['50','CALL_OUT','80','50']
-      ],
-      correctMoves: ['Move appointments from MT2 to open slots','Fill gaps'],
-      incorrectMoves: ['Leaving gaps','Unused open slots']
-    }
-  ]
-};
-// ==== MAIN TAB LOGIC ====
-function showTab(tab) {
-  document.querySelectorAll('.nav-tab').forEach((t)=>t.classList.remove('active'));
-  document.querySelector(`[onclick="showTab('${tab}')"]`).classList.add('active');
-  document.querySelectorAll('.content').forEach((c)=>c.classList.remove('active'));
-  document.getElementById(tab).classList.add('active');
-  if (tab==='simulator') renderSimulatorControls();
-  if (tab==='scenarios') renderScenarioControls();
-}
-// ==== SIMULATOR CONTROLS ====
-function renderSimulatorControls() {
-  let daySel = document.getElementById('simDay');
-  let scenSel = document.getElementById('simScenario');
-  daySel.innerHTML = Object.keys(SCENARIOS).map(d=>`<option value="${d}">${d.charAt(0).toUpperCase()+d.slice(1)}</option>`).join('');
-  let scens = SCENARIOS[Object.keys(SCENARIOS)[0]];
-  scenSel.innerHTML = scens.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
-  daySel.onchange = function() {
-    let scens = SCENARIOS[daySel.value];
-    scenSel.innerHTML = scens.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
-  };
-}
-function loadSimulatorScenario() {
-  let day = document.getElementById('simDay').value;
-  let idx = +document.getElementById('simScenario').value;
-  let scenario = SCENARIOS[day][idx];
-  renderScheduleGrid(scenario);
-}
-function clearSchedule() {
-  let grid = document.getElementById('scheduleGrid');
-  grid.innerHTML = '';
-}
-function renderScheduleGrid(scenario) {
-  let grid = document.getElementById('scheduleGrid');
-  grid.innerHTML = '';
-  grid.style.gridTemplateColumns = `repeat(${scenario.therapists.length+1}, 1fr)`;
-  grid.innerHTML += `<div class="time-slot header">Time</div>`;
-  scenario.therapists.forEach(t=>grid.innerHTML += `<div class="time-slot header">${t}</div>`);
-  for(let r=0;r<scenario.times.length;r++) {
-    grid.innerHTML += `<div class="time-slot time-header">${scenario.times[r]}</div>`;
-    for(let c=0;c<scenario.therapists.length;c++) {
-      let val = scenario.grid[r][c];
-      let block = BLOCK_TYPES[val] || BLOCK_TYPES[val==='80'?'80':val==='50'?'50':'OPEN'];
-      grid.innerHTML += `<div class="time-slot ${block.colorclass||block.color}" draggable="true" onclick="toggleSlot(this,'${val}')" data-type="${val}" data-row="${r}" data-col="${c}">${block.label}</div>`;
-    }
-  }
-  updateScheduleStats();
-}
-function toggleSlot(el,val) {
-  // Cycle through block types: open -> 50 -> 80 -> gap -> break -> lunch -> callout
-  let types=['OPEN','50','80','GAP','BREAK','LUNCH','CALL_OUT'];
-  let idx=types.indexOf(val);
-  let nextType=types[(idx+1)%types.length];
-  let block=BLOCK_TYPES[nextType]||BLOCK_TYPES['OPEN'];
-  el.dataset.type=nextType;
-  el.className='time-slot '+block.colorclass||block.color;
-  el.textContent=block.label;
-  updateScheduleStats();
-}
-function updateScheduleStats() {
-  let slots=document.querySelectorAll('.schedule-grid .time-slot:not(.header):not(.time-header)');
-  let booked=0,gaps=0,open=0,moves=0,revenueSaved=0,revenueLost=0;
-  slots.forEach(s=>{
-    let type=s.dataset.type;
-    if(type==='OPEN') open++;
-    if(type==='GAP') { gaps++; revenueLost+=120; }
-    if(type==='50') { booked++; revenueSaved+=85; }
-    if(type==='80') { booked++; revenueSaved+=125; }
-    if(BLOCK_TYPES[type] && BLOCK_TYPES[type].revenueLoss) revenueLost+=BLOCK_TYPES[type].revenueLoss;
-  });
-  document.getElementById('movesCount').textContent=moves;
-  document.getElementById('gapsFixedCount').textContent=gaps===0?'All':slots.length-gaps;
-  document.getElementById('revenueSaved').textContent='$'+revenueSaved;
-  document.getElementById('revenueLost').textContent='$'+revenueLost;
-  document.getElementById('gradeValue').textContent=booked>5&&gaps===0?'A':booked>2?'B':'C';
-}
-function showHint() {
-  let box = document.getElementById('hintBox');
-  box.style.display = "block";
-  box.textContent = "Hint: Move appointments from call-out to open slots, fill gaps, and stagger breaks/lunches!";
-}
-function showSolution() {
-  // Placeholder
-}
-function nextSimulatorScenario() {
-  let daySel=document.getElementById('simDay');
-  let scenSel=document.getElementById('simScenario');
-  let day=daySel.value;
-  let idx=(+scenSel.value+1)%SCENARIOS[day].length;
-  scenSel.value=idx;
-  loadSimulatorScenario();
-}
-// ==== PRACTICE SCENARIOS ====
-function renderScenarioControls() {
-  let daySel = document.getElementById('scenarioDay');
-  let scenSel = document.getElementById('scenarioNum');
-  daySel.innerHTML = Object.keys(SCENARIOS).map(d=>`<option value="${d}">${d.charAt(0).toUpperCase()+d.slice(1)}</option>`).join('');
-  let scens = SCENARIOS[Object.keys(SCENARIOS)[0]];
-  scenSel.innerHTML = scens.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
-  daySel.onchange = function() {
-    let scens = SCENARIOS[daySel.value];
-    scenSel.innerHTML = scens.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
-  };
-}
-function loadPracticeScenario() {
-  let day = document.getElementById('scenarioDay').value;
-  let idx = +document.getElementById('scenarioNum').value;
-  let scenario = SCENARIOS[day][idx];
-  let box = document.getElementById('practiceScenarioBox');
-  box.innerHTML = `<div style="font-size:1.2em;font-weight:600;margin-bottom:6px;">${scenario.name}</div>
-    <div style="margin-bottom:16px;">${scenario.description}</div>
-    <div class="solution-box"><b>Optimal Solution:</b><br>${scenario.correctMoves.join('<br>')}</div>
-    <div class="avoid-box"><b>Avoid:</b><br>${scenario.incorrectMoves.join('<br>')}</div>`;
-}
-window.onload=function(){
-  showTab('overview');
-  renderSimulatorControls();
-  renderScenarioControls();
-};
-</script>
-</body>
-</html>
+
+    <!-- Scheduling Blocks Guide -->
+    <div id="blocks" class="section">
+      <h2>Zenoti Scheduling Blocks Reference Guide</h2>
+      <p>
+        <strong>Color-Coded Scheduling Blocks:</strong> Reference the definitions, color codes, and inclusion/exclusion rules below. Use these blocks to build optimal therapist schedules and maximize boutique revenue.
+      </p>
+      <table class="block-table">
+        <tr>
+          <th>Color</th>
+          <th>Reason</th>
+          <th>Definition</th>
+          <th>Included in Scheduled Service Hours?</th>
+        </tr>
+        <tr>
+          <td class="color color-purple">Purple</td>
+          <td>BREAK</td>
+          <td>Required PAID break for employees, mandated by labor laws and company policy.</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td class="color color-grey">Grey</td>
+          <td>LUNCH</td>
+          <td>Designated 30-minute UNPAID meal break, scheduled midway through shift.</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td class="color color-grey">Grey</td>
+          <td>PERSONAL TIME</td>
+          <td>Pre-approved UNPAID time off for personal matters (appointments, errands, family).</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td class="color color-purple">Purple</td>
+          <td>PTO (Paid Time Off)</td>
+          <td>Approved paid time off (vacations, mental health, personal days).</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td class="color color-purple">Purple</td>
+          <td>ADMIN</td>
+          <td>Reserved time for administrative duties assigned
