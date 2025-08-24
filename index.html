@@ -5,12 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NOW Massage - Schedule Optimization Training (Upgraded)</title>
     <style>
-        /* Existing styles ... */
-        .solution-highlight {
-            box-shadow: 0 0 0 3px #3866e6 inset, 0 0 12px #3866e6;
-            border-radius: 8px;
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f7fafc;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+            padding: 30px 40px 40px 40px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ececec;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 12px 28px;
+            cursor: pointer;
+            background: #f1f3f4;
+            border: none;
+            outline: none;
+            font-size: 1.1em;
+            color: #444;
+            transition: background 0.2s;
+            margin-right: 2px;
+        }
+        .tab.active {
+            background: #3866e6;
+            color: #fff;
             font-weight: bold;
-            z-index: 2;
+            border-bottom: 2px solid #3866e6;
+        }
+        .content {
+            display: none;
+            margin-top: 15px;
+        }
+        .content.active {
+            display: block;
+        }
+        .score-panel {
+            display: flex;
+            gap: 30px;
+            margin: 18px 0 12px 0;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: #eef2fb;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px #e0e0e0;
+            padding: 18px 26px;
+            min-width: 120px;
+            text-align: center;
+            font-size: 1em;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #3866e6;
+        }
+        .stat-label {
+            font-size: 1em;
+            color: #6d7ba1;
+        }
+        .controls {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            padding: 8px 22px;
+            font-size: 1em;
+            border-radius: 6px;
+            border: 1px solid #bfcbe6;
+            background: #f7fafd;
+            color: #3866e6;
+            cursor: pointer;
+            margin-right: 8px;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background: #3866e6;
+            color: #fff;
+            border: none;
+        }
+        .btn-secondary {
+            background: #f7fafd;
+            color: #3866e6;
+            border: 1px solid #3866e6;
         }
         .btn:disabled, .btn[disabled] {
             background: #e0e0e0;
@@ -18,20 +103,120 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 2px;
+            margin-top: 12px;
+            background: #e7ecf5;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .time-slot {
+            background: #fff;
+            border-radius: 4px;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            border: 1px solid #d2d8ee;
+            transition: box-shadow 0.2s;
+        }
+        .time-slot.header {
+            background: #3866e6;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 4px 4px 0 0;
+            min-height: 32px;
+        }
+        .time-slot.time-header {
+            background: #f3f6fc;
+            color: #6d7ba1;
+            font-weight: bold;
+        }
+        .booked-80 {
+            background: #3866e6;
+            color: #fff;
+            font-weight: bold;
+        }
+        .booked-50 {
+            background: #5ab2ff;
+            color: #fff;
+        }
+        .gap {
+            background: #f7ca4d;
+            color: #333;
+            font-weight: bold;
+        }
+        .open {
+            background: #e4f8e7;
+            color: #22613c;
+        }
+        .break {
+            background: #f3e0fa;
+            color: #7c3aed;
+        }
+        .lunch {
+            background: #e3e9ff;
+            color: #2c3e86;
+        }
+        .callout {
+            background: #ff5757;
+            color: #fff;
+            font-weight: bold;
+        }
+        .solution-highlight {
+            box-shadow: 0 0 0 3px #3866e6 inset, 0 0 12px #3866e6;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 2;
+        }
+        .hint-box {
+            background: #e3e3fa;
+            border-radius: 8px;
+            padding: 10px 18px;
+            margin: 18px 0 12px 0;
+            color: #3866e6;
+            font-size: 1em;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ...header and tabs as previously... -->
-
-        <!-- PRACTICE SCENARIOS -->
-        <div id="scenarios" class="content">
-            <!-- ...directions and controls... -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('overview')">Overview</div>
+            <div class="tab" onclick="showTab('scenarios')">Practice Scenarios</div>
+            <div class="tab" onclick="showTab('simulator')">Schedule Simulator</div>
         </div>
-
-        <!-- SCHEDULE SIMULATOR -->
+        <!-- Overview Tab -->
+        <div id="overview" class="content active">
+            <h2>Schedule Optimization Training</h2>
+            <p>Practice filling gaps, staggering breaks/lunches, and maximizing therapist coverage using real-life scenarios from NOW Massage. Try the simulator, then check your solution!</p>
+        </div>
+        <!-- Practice Scenarios Tab -->
+        <div id="scenarios" class="content">
+            <h2>Practice Scenarios</h2>
+            <div>
+                <label for="scenarioDay"><strong>Select Day:</strong></label>
+                <select id="scenarioDay"></select>
+                <label for="scenarioNum"><strong>Scenario:</strong></label>
+                <select id="scenarioNum"></select>
+                <button class="btn btn-secondary" onclick="loadPracticeScenario()">Load</button>
+            </div>
+            <div id="practiceScenarioBox" style="margin-top:16px;"></div>
+        </div>
+        <!-- Schedule Simulator Tab -->
         <div id="simulator" class="content">
-            <!-- ...directions and controls... -->
+            <h2>Schedule Simulator</h2>
+            <div>
+                <label for="simDay"><strong>Select Day:</strong></label>
+                <select id="simDay"></select>
+                <label for="simScenario"><strong>Scenario:</strong></label>
+                <select id="simScenario"></select>
+                <button class="btn btn-secondary" onclick="loadSimulatorScenario()">Load</button>
+                <button class="btn btn-secondary" onclick="clearSchedule()">Clear</button>
+            </div>
             <div id="addMassagePanel" style="margin-bottom:24px;">
                 <strong>Add Massage:</strong>
                 <div style="display:flex; gap:10px; margin-top:8px;">
@@ -39,9 +224,23 @@
                     <div class="time-slot booked-50" draggable="true" ondragstart="dragStart(event)" data-type="booked_50">50m</div>
                 </div>
             </div>
-            <div class="schedule-grid" id="scheduleGrid"></div>
             <div class="score-panel">
-                <!-- ...score/stat cards as previously... -->
+                <div class="stat-card">
+                    <div class="stat-value" id="movesCount">0</div>
+                    <div class="stat-label">Moves</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="gapsFixedCount">0</div>
+                    <div class="stat-label">Gaps Fixed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="revenueSaved">$0</div>
+                    <div class="stat-label">Revenue Saved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="gradeValue">C</div>
+                    <div class="stat-label">Grade</div>
+                </div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="utilizationRate">0%</div>
@@ -55,14 +254,14 @@
                 <div class="stat-value" id="optimalPatterns">0</div>
                 <div class="stat-label">Optimal Patterns</div>
             </div>
-            <!-- ...displaced appointments box, hint box... -->
+            <div id="hintBox" class="hint-box" style="display:none;"></div>
             <div class="controls">
                 <button class="btn btn-secondary" onclick="showHint()">Hint</button>
                 <button id="showSolutionBtn" class="btn btn-primary" onclick="showSolution()" disabled>Show Solution</button>
                 <button class="btn btn-secondary" onclick="nextSimulatorScenario()">Next Scenario</button>
             </div>
+            <div class="schedule-grid" id="scheduleGrid"></div>
         </div>
-        <!-- ...rest of your tabs... -->
     </div>
 <script>
 /* ---- CONFIG ---- */
@@ -111,8 +310,61 @@ const THERAPISTS_REAL = {
   wednesday: ["Amy", "Jayna", "Spencer", "Trang", "Alexis", "Hank", "Bill", "Corey", "Diaz", "Frankie", "Yari"]
 };
 
-/* ---- Real-Life and Mixed Scenarios (some same, some different) ---- */
-// ...ALL_SCENARIOS as before...
+/* ---- Real-Life and Mixed Scenarios (example placeholder, add your real scenarios here) ---- */
+const ALL_SCENARIOS = {
+    sunday: [
+        {
+            name: "Sunday Example",
+            description: "Fill all late gaps and stagger breaks/lunches.",
+            therapists: THERAPISTS_REAL.sunday,
+            schedule: Array(THERAPISTS_REAL.sunday.length).fill(0).map((_,i)=>({
+                therapist: THERAPISTS_REAL.sunday[i],
+                slots: Array(24).fill(i%2==0?'booked_80':'open')
+            })),
+            correctMoves: ["Stagger breaks.", "Fill gaps in late slots.", "Limit callouts."],
+            incorrectMoves: ["All breaks at once.", "Leaving late gaps."]
+        }
+    ],
+    monday: [
+        {
+            name: "Monday Example",
+            description: "Lunches and breaks must be staggered and no overlap.",
+            therapists: THERAPISTS_REAL.monday,
+            schedule: Array(THERAPISTS_REAL.monday.length).fill(0).map((_,i)=>({
+                therapist: THERAPISTS_REAL.monday[i],
+                slots: Array(24).fill(i%3==0?'lunch':i%2==0?'booked_80':'open')
+            })),
+            correctMoves: ["Stagger lunch times.", "No more than 2 on break at once."],
+            incorrectMoves: ["Lunch overlap.", "Gaps not filled."]
+        }
+    ],
+    tuesday: [
+        {
+            name: "Tuesday Example",
+            description: "Mix of breaks and late bookings.",
+            therapists: THERAPISTS_REAL.tuesday,
+            schedule: Array(THERAPISTS_REAL.tuesday.length).fill(0).map((_,i)=>({
+                therapist: THERAPISTS_REAL.tuesday[i],
+                slots: Array(24).fill(i%4==0?'break':i%2==0?'booked_80':'open')
+            })),
+            correctMoves: ["Fill late slots.", "Breaks staggered."],
+            incorrectMoves: ["Break overlap.", "Empty late slots."]
+        }
+    ],
+    wednesday: [
+        {
+            name: "Wednesday Example",
+            description: "Callouts and optimal coverage.",
+            therapists: THERAPISTS_REAL.wednesday,
+            schedule: Array(THERAPISTS_REAL.wednesday.length).fill(0).map((_,i)=>({
+                therapist: THERAPISTS_REAL.wednesday[i],
+                slots: Array(24).fill(i%5==0?'callout':i%2==0?'booked_80':'open')
+            })),
+            correctMoves: ["Reassign callouts.", "Fill gaps late day."],
+            incorrectMoves: ["Unfilled callouts.", "Lunch overlap."]
+        }
+    ]
+};
 
 const DAY_LIST = Object.keys(BUSINESS_HOURS);
 function capitalize(str) {return str.charAt(0).toUpperCase()+str.slice(1);}
