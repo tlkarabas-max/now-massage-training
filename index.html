@@ -12,7 +12,7 @@
             margin: 0;
         }
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 32px auto;
             background: #fff;
             border-radius: 18px;
@@ -22,7 +22,7 @@
         .header {
             font-size: 2.8rem;
             font-weight: 700;
-            color: #5661e9;
+            color: #5962ea;
             margin-bottom: 8px;
             letter-spacing: 1px;
         }
@@ -33,7 +33,7 @@
         }
         .nav-bar {
             display: flex;
-            gap: 56px;
+            gap: 48px;
             justify-content: flex-start;
             align-items: center;
             border-bottom: 2px solid #ecedfa;
@@ -41,11 +41,11 @@
             padding-bottom: 7px;
         }
         .nav-tab {
-            font-size: 1.35em;
+            font-size: 1.25em;
             font-weight: 700;
             background: none;
             border: none;
-            color: #5661e9;
+            color: #5962ea;
             cursor: pointer;
             padding: 14px 0 8px 0;
             position: relative;
@@ -57,14 +57,14 @@
             font-weight: 500;
         }
         .nav-tab.active {
-            color: #5661e9;
+            color: #5962ea;
         }
         .nav-tab.active:after {
             content: "";
             position: absolute;
             left: 0; right: 0; bottom: -7px;
             height: 4px;
-            background: #5661e9;
+            background: #5962ea;
             border-radius: 6px;
         }
         .content {
@@ -73,13 +73,6 @@
         }
         .content.active {
             display: block;
-        }
-        .card {
-            background: #f7fafd;
-            border-radius: 12px;
-            box-shadow: 0 1px 12px #ececec;
-            padding: 24px 30px;
-            margin-top: 28px;
         }
         .scenario-controls {
             margin-bottom: 18px;
@@ -98,7 +91,7 @@
             border-radius: 7px;
             border: 1px solid #bfcbe6;
             background: #f7fafd;
-            color: #5661e9;
+            color: #5962ea;
             margin-right: 6px;
         }
         .btn {
@@ -106,7 +99,7 @@
             font-weight: 600;
         }
         .btn-primary {
-            background: #5661e9;
+            background: #5962ea;
             color: #fff;
             border: none;
         }
@@ -123,7 +116,7 @@
             flex-wrap: wrap;
         }
         .stat-card {
-            background: #eaf0ff;
+            background: #f1f3fe;
             border-radius: 12px;
             box-shadow: 0 1px 4px #e0e0e0;
             padding: 20px 32px;
@@ -134,7 +127,7 @@
         .stat-value {
             font-size: 2em;
             font-weight: 700;
-            color: #5661e9;
+            color: #5962ea;
             letter-spacing: 1px;
         }
         .stat-label {
@@ -190,7 +183,7 @@
             cursor: pointer;
         }
         .time-slot.header {
-            background: #5661e9;
+            background: #5962ea;
             color: #fff;
             font-weight: bold;
             border-radius: 6px 6px 0 0;
@@ -202,7 +195,7 @@
             font-weight: bold;
         }
         .booked-80 {
-            background: #5661e9;
+            background: #5962ea;
             color: #fff;
             font-weight: bold;
         }
@@ -235,7 +228,7 @@
             font-weight: bold;
         }
         .solution-highlight {
-            box-shadow: 0 0 0 3px #5661e9 inset, 0 0 12px #5661e9;
+            box-shadow: 0 0 0 3px #5962ea inset, 0 0 12px #5962ea;
             border-radius: 10px;
             font-weight: bold;
             z-index: 2;
@@ -464,7 +457,6 @@ function showTab(tab){
     document.querySelector(`[onclick="showTab('${tab}')"]`).classList.add('active');
     document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
     document.getElementById(tab).classList.add('active');
-    // Load controls for dynamic tabs
     if(tab==="scenarios")renderScenarioControls();
     if(tab==="simulator")renderSimulatorControls();
 }
