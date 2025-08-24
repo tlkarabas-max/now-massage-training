@@ -1,1 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOW Massage - Schedule Optimization Training (Upgraded)</title>
+    <style>
+        body {
+            font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg,#667eea,#764ba2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            white-space: nowrap;
+        }
+        .tab:hover,.tab.active {
+            color: #667eea;
+        }
+        .tab.active {
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+        .content { display: none; }
+        .content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
 
+        .controls, .score-panel, .progress-tracker-table {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg,#667eea,#764ba2);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        .score-panel {
+            gap: 30px;
+            margin-bottom: 10px;
+        }
+        .score-panel .score {
+            background: #f3f4f6;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            min-width: 110px;
+            text-align: center;
+        }
+        .score-panel .score-label {
+            color: #666;
+            font-size: 13px;
+            display: block;
+        }
+
+        .progress-tracker-table {
+            width: 100%;
+            margin: 30px 0 10px 0;
+        }
+        .progress-tracker-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .progress-tracker-table th, .progress-tracker-table td {
+            border: 1px solid #e0e0e0;
+            padding: 8px 6px;
+            text-align: center;
+        }
+        .progress-tracker-table th {
+            background: #667eea;
+            color: white;
+        }
+        .progress-tracker-table tr:nth-child(even) {
+            background: #f3f4f6;
+        }
+        .progress-tracker-table td input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+        .progress-tracker-table td.complete {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .schedule-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 10px 0 20px 0;
+        }
+        .schedule-controls select {
+            padding: 8px 14px;
+            font-size: 1em;
+            border-radius: 7px;
+            border: 1px solid #ddd;
+        }
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(6, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+        .time-slot {
+            padding: 10px 5px;
+            text-align: center;
+            background: white;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+        .time-slot.header {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        .time-slot.time-header {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+        /* Block types color coding */
+        .time-slot.booked-25 { background: #dbeafe; color: #222; }
+        .time-slot.booked-50 { background: #4caf50; color: white; }
+        .time-slot.booked-80 { background: #2196f3; color: white; }
+        .time-slot.sanctuaryx2 { background: #c084fc; color: white; }
+        .time-slot.pamperedx2 { background: #fae8ff; color: #222; }
+        .time-slot.break { background: #9c27b0; color: white; }
+        .time-slot.lunch { background: #9e9e9e; color: white; }
+        .time-slot.pto { background: #9c27b0; color: white; }
+        .time-slot.callout { background: #f44336; color: white; }
+        .time-slot.runninglate { background: #f44336; color: white; }
+        .time-slot.leaveearly { background: #f44336; color: white; }
+        .time-slot.admin { background: #9c27b0; color: white; }
+        .time-slot.training { background: #9c27b0; color: white; }
+        .time-slot.meeting { background: #9c27b0; color: white; }
+        .time-slot.gap { background: #fbbf24; color: #222; animation: pulse 2s infinite; }
+        .time-slot.enhancement { background: #4ade80; color: white; }
+        .time-slot.open { background: #c8e6c9; color: #222; }
+        .time-slot.group { background: #ffc107; color: black; }
+        .time-slot.end, .time-slot.close { background: #607d8b; color: white; }
+        .time-slot.x { background: #9e9e9e; color: white; }
+        @keyframes pulse { 0%,100% { opacity:1;} 50%{opacity:0.7;} }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #34d399;
+        }
+        .alert-warning {
+            background: #fed7aa;
+            color: #92400e;
+            border: 1px solid #fb923c;
+        }
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+        }
+        .displaced-box {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .hint-box {
+            background: #e0e7ff;
+            border: 1px solid #6366f1;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        @media (max-width: 900px) {
+            .schedule-grid { grid-template-columns: 70px repeat(6, 1fr); font-size: 10px; }
+            .tabs { flex-direction: column; }
+            .tab { width: 100%; }
+            .score-panel { flex-direction: column; }
+        }
+        .stat-card { background: linear-gradient(135deg,#f3f4f6,#ffffff); padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #e5e7eb; }
+        .stat-value { font-size: 2em; font-weight: bold; color: #667eea; margin-bottom: 5px; }
+        .stat-label { color: #666; font-size: 14px; }
+        .progress-bar { width:100%; height:30px; background:#e5e7eb; border-radius:15px; overflow:hidden; margin:20px 0; }
+        .progress-fill { height:100%; background:linear-gradient(135deg,#667eea,#764ba2); transition:width 0.5s ease; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; }
+        .template-box { background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:15px; margin:15px 0; font-family:monospace; white-space:pre-wrap; }
+        .quiz-container { background:#f9fafb; padding:20px; border-radius:10px; margin:20px 0; }
+        .question { margin-bottom:20px;}
+        .question h3 { margin-bottom:10px; color:#333; }
+        .options label { display:block; padding:10px; margin:5px 0; background:white; border:2px solid #e5e7eb; border-radius:5px; cursor:pointer; transition:all 0.2s;}
+        .options label:hover { border-color:#667eea; }
+        .options input[type="radio"]:checked + span { font-weight:600; color:#667eea; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <div class="logo">NOW</div>
+            Schedule Optimization Training (Upgraded)
+        </h1>
+        <div class="subtitle">Master the art of maximizing revenue through smart scheduling</div>
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('overview')">Overview</button>
+            <button class="tab" onclick="showTab('simulator')">Schedule Simulator</button>
+            <button class="tab" onclick="showTab('calculator')">Revenue Calculator</button>
+            <button class="tab" onclick="showTab('scenarios')">Practice Scenarios</button>
+            <button class="tab" onclick="showTab('quiz')">Knowledge Quiz</button>
+            <button class="tab" onclick="showTab('templates')">Script Templates</button>
+            <button class="tab" onclick="showTab('progress')">Progress Tracker</button>
+        </div>
+
+        <!-- OVERVIEW -->
+        <div id="overview" class="content active">
+            <h2>Why Optimization Matters</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">$108+</div>
+                    <div class="stat-label">Lost per 30-min gap</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">40%</div>
+                    <div class="stat-label">Online bookings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">85%</div>
+                    <div class="stat-label">Target utilization</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$28K+</div>
+                    <div class="stat-label">Annual loss per daily gap</div>
+                </div>
+            </div>
+            <h3>Key Optimization Rules</h3>
+            <div class="alert alert-success">
+                <strong>✓ Optimal Patterns:</strong><br>
+                • 80/80 - Two 80-minute services back-to-back<br>
+                • 50/50 - Two 50-minute services back-to-back<br>
+                • 80/50 or 50/80 - Mixed services that complement each other
+            </div>
+            <div class="alert alert-warning">
+                <strong>⚠ What to Avoid:</strong><br>
+                • 30-minute gaps between services<br>
+                • Single 50-minute services followed by breaks<br>
+                • Scattered bookings that create unusable time slots
+            </div>
+            <h3>Revenue Impact Breakdown</h3>
+            <div class="template-box" style="background:#fff;">
+                <strong>Latest Service Menu & Pricing:</strong>
+                <ul style="margin:10px 0 0 18px;">
+                    <li>Sanctuary x1 50 min — $85.00</li>
+                    <li>Pampered x1 80 min — $125.00</li>
+                    <li>Sanctuary x2 50 min — $170.00</li>
+                    <li>Pampered x2 80 min — $250.00</li>
+                    <li style="background:#fffbeb;">25 min — $70.00</li>
+                    <li>50 min — $120.00</li>
+                    <li>80 min — $160.00</li>
+                    <li>Hemp Calm Balm — $15.00</li>
+                    <li>Herbal Heat — $15.00</li>
+                    <li>Gua Sha — $15.00</li>
+                    <li style="background:#fffbeb;">Deep Tissue — $20.00</li>
+                    <li>Crystal Hot Stone — $30.00</li>
+                    <li>Cupping — $30.00</li>
+                    <li>All other — $10.00</li>
+                </ul>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="overviewProgress" style="width:0%">0% Complete</div>
+            </div>
+        </div>
+
+        <!-- SIMULATOR -->
+        <div id="simulator" class="content">
+            <h2>Interactive Schedule Simulator</h2>
+            <div class="schedule-controls">
+                <label for="simDay">Day:</label>
+                <select id="simDay"></select>
+                <label for="simScenario">Scenario:</label>
+                <select id="simScenario"></select>
+                <button class="btn btn-primary" onclick="loadSimulatorScenario()">Load Scenario</button>
+                <button class="btn btn-secondary" onclick="clearSchedule()">Clear Schedule</button>
+            </div>
+            <div class="schedule-grid" id="scheduleGrid"></div>
+            <div class="score-panel">
+                <div class="score">
+                    <span id="movesCount">0</span>
+                    <span class="score-label">Moves</span>
+                </div>
+                <div class="score">
+                    <span id="gapsFixedCount">0</span>
+                    <span class="score-label">Gaps Fixed</span>
+                </div>
+                <div class="score">
+                    <span id="revenueSaved">$0</span>
+                    <span class="score-label">Revenue Saved</span>
+                </div>
+                <div class="score">
+                    <span id="gradeValue">--</span>
+                    <span class="score-label">Grade</span>
+                </div>
+            </div>
+            <div class="stat-card" style="display:inline-block;">
+                <div class="stat-value" id="utilizationRate">0%</div>
+                <div class="stat-label">Utilization Rate</div>
+            </div>
+            <div class="stat-card" style="display:inline-block;">
+                <div class="stat-value" id="gapCount">0</div>
+                <div class="stat-label">Gaps</div>
+            </div>
+            <div class="stat-card" style="display:inline-block;">
+                <div class="stat-value" id="optimalPatterns">0</div>
+                <div class="stat-label">Optimal Patterns</div>
+            </div>
+            <div id="displacedAppointmentsBox" class="displaced-box" style="display:none;">
+                <strong>Displaced Appointments:</strong>
+                <ul id="displacedAppointmentsList"></ul>
+            </div>
+            <div id="hintBox" class="hint-box" style="display:none;"></div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="showHint()">Hint</button>
+                <button class="btn btn-primary" onclick="showSolution()">Show Solution</button>
+                <button class="btn btn-secondary" onclick="nextSimulatorScenario()">Next Scenario</button>
+            </div>
+        </div>
+
+        <!-- CALCULATOR -->
+        <div id="calculator" class="content">
+            <h2>Revenue Impact Calculator</h2>
+            <p>Calculate the financial impact of schedule gaps across your spa</p>
+            <div class="template-box" style="margin-bottom:20px;">
+                <strong>Current Service Pricing:</strong>
+                <ul style="margin:10px 0 0 18px;" id="servicePriceList"></ul>
+            </div>
+            <div class="calculator">
+                <div class="input-group">
+                    <label>Number of Therapists:</label>
+                    <input type="number" id="therapistCount" value="6" min="1" max="50">
+                </div>
+                <div class="input-group">
+                    <label>Average 30-min gaps per therapist per day:</label>
+                    <input type="number" id="gapsPerDay" value="2" min="0" max="20">
+                </div>
+                <div class="input-group">
+                    <label>Days open per week:</label>
+                    <input type="number" id="daysPerWeek" value="7" min="1" max="7">
+                </div>
+                <div class="input-group">
+                    <label>Service Type Most Affected:</label>
+                    <select id="serviceType"></select>
+                </div>
+                <button class="btn btn-primary" onclick="calculateRevenue()">Calculate Impact</button>
+                <div class="result-box" id="calculatorResults" style="display:none;">
+                    <h3>Financial Impact Analysis</h3>
+                    <div class="result-row">
+                        <span>Daily Revenue Loss:</span>
+                        <span id="dailyLoss">$0</span>
+                    </div>
+                    <div class="result-row">
+                        <span>Weekly Revenue Loss:</span>
+                        <span id="weeklyLoss">$0</span>
+                    </div>
+                    <div class="result-row">
+                        <span>Monthly Revenue Loss:</span>
+                        <span id="monthlyLoss">$0</span>
+                    </div>
+                    <div class="result-row">
+                        <span>Annual Revenue Loss:</span>
+                        <span id="annualLoss">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCENARIOS -->
+        <div id="scenarios" class="content">
+            <h2>Practice Scenarios</h2>
+            <div class="schedule-controls">
+                <label for="scenarioDay">Day:</label>
+                <select id="scenarioDay"></select>
+                <label for="scenarioNum">Scenario:</label>
+                <select id="scenarioNum"></select>
+                <button class="btn btn-primary" onclick="loadPracticeScenario()">Load Scenario</button>
+            </div>
+            <div id="practiceScenarioBox"></div>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="content">
+            <h2>Test Your Optimization Knowledge</h2>
+            <div class="quiz-container">
+                <div class="question">
+                    <h3>1. What is the minimum revenue loss from a single 30-minute gap?</h3>
+                    <div class="options">
+                        <label><input type="radio" name="q1" value="a"><span> $60</span></label>
+                        <label><input type="radio" name="q1" value="b"><span> $85</span></label>
+                        <label><input type="radio" name="q1" value="c"><span> $108</span></label>
+                        <label><input type="radio" name="q1" value="d"><span> $125</span></label>
+                    </div>
+                </div>
+                <div class="question">
+                    <h3>2. Which booking pattern should you AVOID?</h3>
+                    <div class="options">
+                        <label><input type="radio" name="q2" value="a"><span> 80/80</span></label>
+                        <label><input type="radio" name="q2" value="b"><span> 50/gap/50</span></label>
+                        <label><input type="radio" name="q2" value="c"><span> 50/50</span></label>
+                        <label><input type="radio" name="q2" value="d"><span> 80/50</span></label>
+                    </div>
+                </div>
+                <div class="question">
+                    <h3>3. What percentage of bookings typically come from online?</h3>
+                    <div class="options">
+                        <label><input type="radio" name="q3" value="a"><span> 20%</span></label>
+                        <label><input type="radio" name="q3" value="b"><span> 30%</span></label>
+                        <label><input type="radio" name="q3" value="c"><span> 40%</span></label>
+                        <label><input type="radio" name="q3" value="d"><span> 50%</span></label>
+                    </div>
+                </div>
+                <div class="question">
+                    <h3>4. When contacting guests about schedule changes, you should:</h3>
+                    <div class="options">
+                        <label><input type="radio" name="q4" value="a"><span> Give them one alternative time</span></label>
+                        <label><input type="radio" name="q4" value="b"><span> Offer multiple time options</span></label>
+                        <label><input type="radio" name="q4" value="c"><span> Tell them the original time won't work</span></label>
+                        <label><input type="radio" name="q4" value="d"><span> Wait until day-of to contact them</span></label>
+                    </div>
+                </div>
+                <div class="question">
+                    <h3>5. The annual revenue loss from ONE daily 30-min gap is approximately:</h3>
+                    <div class="options">
+                        <label><input type="radio" name="q5" value="a"><span> $10,000</span></label>
+                        <label><input type="radio" name="q5" value="b"><span> $18,000</span></label>
+                        <label><input type="radio" name="q5" value="c"><span> $28,000</span></label>
+                        <label><input type="radio" name="q5" value="d"><span> $35,000</span></label>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="submitQuiz()">Submit Quiz</button>
+                <div id="quizResults" style="display:none; margin-top:20px;">
+                    <h3>Your Results:</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="quizScore" style="width:0%">0%</div>
+                    </div>
+                    <div id="quizFeedback"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCRIPT TEMPLATES -->
+        <div id="templates" class="content">
+            <h2>Communication Script Templates</h2>
+            <h3>Online Booking Adjustment</h3>
+            <div class="template-box">
+Hello [Guest Name],
+
+Thank you for booking with The NOW! We're looking forward to your visit on [DATE].
+
+To ensure you have the most relaxing experience with us, would you be available for either [TIME OPTION 1] or [TIME OPTION 2] instead of your original [ORIGINAL TIME]?
+
+Both times will allow us to provide you with our full attention and service.
+
+Please let us know which works best for you!
+
+The NOW Team
+            </div>
+            <h3>Group Booking Coordination</h3>
+            <div class="template-box">
+Hi [Guest Name],
+
+We're excited to accommodate your group of [NUMBER]! 
+
+To ensure everyone can enjoy their services together, we can offer:
+• Option 1: [TIME] - All [NUMBER] guests together
+• Option 2: [TIME 1] - [X] guests, then [TIME 2] - remaining guests
+• Option 3: Split across [TIME 1] and [TIME 2] with overlapping relaxation time
+
+Which option would work best for your group?
+
+Looking forward to providing you all with a wonderful experience!
+
+The NOW Team
+            </div>
+            <h3>Gap Prevention Call</h3>
+            <div class="template-box">
+Hello [Guest Name],
+
+This is [Your Name] from The NOW. I'm calling about your [SERVICE] appointment tomorrow at [TIME].
+
+We've had a cancellation that would allow us to accommodate you at [BETTER TIME], which would give you:
+• Less wait time upon arrival
+• Your preferred therapist
+• A more peaceful environment
+
+Would you like to move to this preferable time slot?
+
+[If yes]: Perfect! I've updated your appointment.
+[If no]: No problem! We'll see you at your original time.
+
+Thank you!
+            </div>
+            <h3>Walk-In Optimization</h3>
+            <div class="template-box">
+Welcome to The NOW!
+
+We can get you in for your [SERVICE] at:
+• [IMMEDIATE TIME] - Available now with [THERAPIST 1]
+• [OPTIMAL TIME] - In [X] minutes with our lead therapist
+• [LATER TIME] - Your choice of any therapist
+
+The [OPTIMAL TIME] would ensure the most relaxing experience as it's during our quieter period.
+
+Which would you prefer?
+            </div>
+            <div class="alert alert-success">
+                <strong>Pro Tips for Using Scripts:</strong><br>
+                • Always offer multiple options (people prefer choosing)<br>
+                • Frame changes as benefits to the guest<br>
+                • Be specific about advantages (preferred therapist, quieter time, etc.)<br>
+                • Keep tone friendly and accommodating<br>
+                • Document successful scripts for team use
+            </div>
+        </div>
+
+        <!-- PROGRESS TRACKER -->
+        <div id="progress" class="content">
+            <h2>Progress Tracker</h2>
+            <div class="progress-tracker-table" id="progressTracker"></div>
+        </div>
+    </div>
+<script>
+/* ---- CONFIG ---- */
+const BUSINESS_HOURS = {
+  sunday: { open: "9:00", close: "20:00" },
+  monday: { open: "9:00", close: "20:00" },
+  tuesday: { open: "9:00", close: "20:00" },
+  wednesday: { open: "9:00", close: "20:00" },
+  thursday: { open: "9:00", close: "20:00" },
+  friday: { open: "9:00", close: "21:00" },
+  saturday: { open: "9:00", close: "21:00" }
+};
+const SERVICE_PRICES = {
+  "Sanctuary x1 50 min": 85,
+  "Pampered x1 80 min": 125,
+  "Sanctuary x2 50 min": 170,
+  "Pampered x2 80 min": 250,
+  "25 min": 70,
+  "50 min": 120,
+  "80 min": 160,
+  "Hemp Calm Balm": 15,
+  "Herbal Heat": 15,
+  "Gua Sha": 15,
+  "Deep Tissue": 20,
+  "Crystal Hot Stone": 30,
+  "Cupping": 30,
+  "All other": 10
+};
+const ENHANCEMENT_LIST = ["Hemp Calm Balm", "Herbal Heat", "Gua Sha", "Deep Tissue", "Crystal Hot Stone", "Cupping", "All other"];
+
+const BLOCK_TYPES = {
+    booked_25: { label: "25m", colorclass: "booked-25"},
+    booked_50: { label: "50m", colorclass: "booked-50"},
+    booked_80: { label: "80m", colorclass: "booked-80"},
+    sanctuaryx2: { label: "Sanctuary x2", colorclass: "sanctuaryx2"},
+    pamperedx2: { label: "Pampered x2", colorclass: "pamperedx2"},
+    break: { label: "Break", colorclass: "break"},
+    lunch: { label: "Lunch", colorclass: "lunch"},
+    pto: { label: "PTO", colorclass: "pto"},
+    callout: { label: "Call-out", colorclass: "callout"},
+    runninglate: { label: "Running Late", colorclass: "runninglate"},
+    leaveearly: { label: "Leave Early", colorclass: "leaveearly"},
+    admin: { label: "Admin", colorclass: "admin"},
+    training: { label: "Training", colorclass: "training"},
+    meeting: { label: "Meeting", colorclass: "meeting"},
+    gap: { label: "GAP", colorclass: "gap"},
+    enhancement: { label: "Enhancement", colorclass: "enhancement"},
+    open: { label: "OPEN", colorclass: "open"},
+    group: { label: "Group", colorclass: "group"},
+    end: { label: "End", colorclass: "end"},
+    close: { label: "Close", colorclass: "close"},
+    x: { label: "X", colorclass: "x"}
+};
+
+/* ---- Sample Therapists ---- */
+const THERAPISTS = ["Emma", "Sofia", "James", "Olivia", "Liam", "Ava"];
+
+/* ---- Scenarios Data ---- */
+// For brevity, we'll keep 3 sample scenarios per day; you can expand as needed.
+const ALL_SCENARIOS = {
+  monday: [
+    {
+      name: "Monday Easy: Call-out Recovery",
+      description: "MT2 called out sick. Redistribute appointments to minimize gaps.",
+      displaced: ["50-Wilson (was MT2 9:00)", "80-Taylor (was MT2 10:00)"],
+      schedule: [
+        // For each therapist, array of block types (for 9:00, 9:30, ..., based on generated times)
+        { therapist: "Emma", slots: ["booked_50", "gap", "booked_80", "open", "lunch", "booked_50"] },
+        { therapist: "Sofia", slots: ["callout", "callout", "callout", "callout", "callout", "callout"] },
+        { therapist: "James", slots: ["open", "booked_50", "gap", "lunch", "open", "booked_80"] },
+        { therapist: "Olivia", slots: ["booked_80", "open", "open", "open", "lunch", "booked_50"] },
+        { therapist: "Liam", slots: ["open","open","open","open","lunch","booked_80"] },
+        { therapist: "Ava", slots: ["break","booked_50","gap","open","lunch","open"] }
+      ],
+      correctMoves: ["Wilson to James 9:00", "Taylor to Olivia 10:00", "Fill all gaps"],
+      incorrectMoves: ["Leaving gaps", "Unused open slots"]
+    },
+    {
+      name: "Monday Medium: Lunch Optimization",
+      description: "Stagger lunches to maintain coverage during peak hours.",
+      displaced: [],
+      schedule: [
+        { therapist: "Emma", slots: ["lunch", "gap", "booked_50", "booked_80", "open", "booked_50"] },
+        { therapist: "Sofia", slots: ["booked_50", "lunch", "booked_80", "open", "gap", "booked_50"] },
+        { therapist: "James", slots: ["booked_80", "open", "lunch", "booked_50", "gap", "booked_80"] },
+        { therapist: "Olivia", slots: ["booked_50", "gap", "lunch", "booked_50", "gap", "booked_80"] },
+        { therapist: "Liam", slots: ["open","open","open","open","lunch","booked_80"] },
+        { therapist: "Ava", slots: ["break","booked_50","gap","open","lunch","open"] }
+      ],
+      correctMoves: ["Stagger lunches", "Fill afternoon gaps", "Max 2 at lunch"],
+      incorrectMoves: ["All at lunch simultaneously", "Gaps during peak hours"]
+    },
+    {
+      name: "Monday Hard: Coverage Challenge",
+      description: "MT3 leaving early, MT2 in training. Optimize evening coverage.",
+      displaced: ["80-Martin (was James 5:00)"],
+      schedule: [
+        { therapist: "Emma", slots: ["booked_80", "open", "booked_50", "gap", "booked_80"] },
+        { therapist: "Sofia", slots: ["training", "training", "open", "booked_80", "open"] },
+        { therapist: "James", slots: ["booked_50", "gap", "leaveearly", "x", "x"] },
+        { therapist: "Olivia", slots: ["booked_80", "open", "booked_50", "gap", "booked_50"] },
+        { therapist: "Liam", slots: ["open","open","open","open","lunch"] },
+        { therapist: "Ava", slots: ["break","open","gap","open","open"] }
+      ],
+      correctMoves: ["Martin to Sofia 5:00", "Fill all gaps", "Use post-training slots"],
+      incorrectMoves: ["Leaving evening gaps", "Not using Sofia after training"]
+    }
+  ],
+  // ... add tuesday, wednesday, etc. (for brevity, only monday is filled here; you can copy pattern)
+};
+const DAY_LIST = Object.keys(BUSINESS_HOURS);
+
+/* ---- Progress Tracker Data ---- */
+function defaultProgress() {
+    return {
+        monday: [false,false,false],
+        tuesday: [false,false,false],
+        wednesday: [false,false,false],
+        thursday: [false,false,false],
+        friday: [false,false,false],
+        saturday: [false,false,false],
+        sunday: [false,false,false]
+    };
+}
+let progressData = JSON.parse(localStorage.getItem('nowProgressTracker') || 'null') || defaultProgress();
+
+/* ---- Training Progress ---- */
+let trainingProgress = JSON.parse(localStorage.getItem('nowTrainingProgress')) || {
+    overview: false,
+    simulator: false,
+    calculator: false,
+    scenarios: 0,
+    quiz: 0,
+    lastAccess: new Date().toISOString()
+};
+
+/* ---- Tab Switching ---- */
+function showTab(tabName) {
+    document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    event.target.classList.add('active');
+    if (tabName === 'overview') { trainingProgress.overview = true; updateOverviewProgress(); }
+    if (tabName === 'simulator') { trainingProgress.simulator = true; }
+    if (tabName === 'calculator') { trainingProgress.calculator = true; }
+    if (tabName === 'scenarios') { trainingProgress.scenarios = Math.max(trainingProgress.scenarios,1); }
+    if (tabName === 'quiz') { }
+    if (tabName === 'progress') { renderProgressTracker(); }
+    saveProgress();
+}
+
+/* ---- Dynamic Time Slot Generator ---- */
+function generateTimeSlots(day) {
+    let times = [];
+    let hours = BUSINESS_HOURS[day];
+    let [openH, openM] = hours.open.split(':').map(Number);
+    let [closeH, closeM] = hours.close.split(':').map(Number);
+    let dt = new Date(2020,0,1,openH,openM);
+    let end = new Date(2020,0,1,closeH,closeM);
+    while(dt < end) {
+        let s = dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        times.push(s);
+        dt.setMinutes(dt.getMinutes()+30);
+    }
+    return times;
+}
+
+/* ---- SIMULATOR ---- */
+let currentSimDay = "monday";
+let currentSimScenario = 0;
+let moves = 0, gapsFixed = 0, revenueSaved = 0, grade = "--";
+function initSimulatorDropdowns() {
+    let simDay = document.getElementById('simDay');
+    let simScenario = document.getElementById('simScenario');
+    simDay.innerHTML = DAY_LIST.map(d=>`<option value="${d}">${d.charAt(0).toUpperCase()+d.slice(1)}</option>`).join('');
+    simScenario.innerHTML = [0,1,2].map(i=>`<option value="${i}">Scenario ${i+1} (${["Easy","Medium","Hard"][i]})</option>`).join('');
+}
+function loadSimulatorScenario() {
+    currentSimDay = document.getElementById('simDay').value;
+    currentSimScenario = parseInt(document.getElementById('simScenario').value);
+    moves = 0; gapsFixed = 0; revenueSaved = 0; grade = "--";
+    showScorePanel();
+    let scenarioSet = ALL_SCENARIOS[currentSimDay] || ALL_SCENARIOS['monday'];
+    let scenario = scenarioSet[currentSimScenario];
+    renderScheduleGrid(currentSimDay, scenario);
+    showDisplacedAppointments(scenario.displaced || []);
+    hideHint();
+}
+function clearSchedule() {
+    document.querySelectorAll('.time-slot:not(.header):not(.time-header)').forEach(slot => {
+        slot.className = 'time-slot';
+        slot.textContent = '';
+        slot.dataset.type = '';
+    });
+    moves = 0; gapsFixed = 0; revenueSaved = 0; grade = "--";
+    showScorePanel();
+    hideHint();
+    document.getElementById('gapCount').textContent = "0";
+    document.getElementById('utilizationRate').textContent = "0%";
+    document.getElementById('optimalPatterns').textContent = "0";
+    showDisplacedAppointments([]);
+}
+function renderScheduleGrid(day, scenario) {
+    let times = generateTimeSlots(day);
+    let grid = document.getElementById('scheduleGrid');
+    let therapists = THERAPISTS;
+    grid.innerHTML = '';
+    // headers
+    grid.innerHTML += `<div class="time-slot header">Time</div>`;
+    therapists.forEach(t=>grid.innerHTML+=`<div class="time-slot header">${t}</div>`);
+    // slots
+    for(let t=0;t<times.length;t++) {
+        grid.innerHTML+=`<div class="time-slot time-header">${times[t]}</div>`;
+        for(let i=0;i<therapists.length;i++) {
+            let type = (scenario.schedule[i] && scenario.schedule[i].slots[t]) || '';
+            let block = BLOCK_TYPES[type] || {label:"",colorclass:""};
+            grid.innerHTML+=`<div class="time-slot ${block.colorclass}" data-type="${type}" data-tidx="${i}" data-time="${times[t]}" onclick="toggleSlot(this)">${block.label||""}</div>`;
+        }
+    }
+    updateScheduleStats();
+}
+function toggleSlot(element) {
+    // Cycle through block types for demo; in production, use a context menu or popup
+    let types = Object.keys(BLOCK_TYPES);
+    let curType = element.dataset.type || "";
+    let idx = types.indexOf(curType);
+    idx = (idx+1)%types.length;
+    let nextType = types[idx];
+    let block = BLOCK_TYPES[nextType];
+    element.className = "time-slot "+block.colorclass;
+    element.textContent = block.label;
+    element.dataset.type = nextType;
+    moves++;
+    showScorePanel();
+    updateScheduleStats();
+    hideHint();
+}
+function showScorePanel() {
+    document.getElementById('movesCount').textContent = moves;
+    document.getElementById('gapsFixedCount').textContent = gapsFixed;
+    document.getElementById('revenueSaved').textContent = "$"+revenueSaved;
+    document.getElementById('gradeValue').textContent = grade;
+}
+function updateScheduleStats() {
+    let slots = document.querySelectorAll('.time-slot:not(.header):not(.time-header)');
+    let booked = [...slots].filter(s=>["booked_25","booked_50","booked_80","sanctuaryx2","pamperedx2"].includes(s.dataset.type));
+    let gaps = [...slots].filter(s=>s.dataset.type==="gap");
+    let utilization = Math.round((booked.length/slots.length)*100);
+    let gapCount = gaps.length;
+    document.getElementById('utilizationRate').textContent = utilization+"%";
+    document.getElementById('gapCount').textContent = gapCount;
+    // Optimal patterns logic (simple: count consecutive booked_80 or booked_50)
+    let optimal = 0;
+    for(let i=0;i<slots.length-6;i++) {
+        let s1 = slots[i], s2 = slots[i+6];
+        if(s1.dataset.type==="booked_80" && s2.dataset.type==="booked_80") optimal++;
+        if(s1.dataset.type==="booked_50" && s2.dataset.type==="booked_50") optimal++;
+    }
+    document.getElementById('optimalPatterns').textContent = optimal;
+}
+function showDisplacedAppointments(arr) {
+    let box = document.getElementById('displacedAppointmentsBox');
+    let list = document.getElementById('displacedAppointmentsList');
+    box.style.display = arr.length ? 'block':'none';
+    list.innerHTML = arr.map(a=>`<li>${a}</li>`).join('');
+}
+function hideHint() {
+    document.getElementById('hintBox').style.display='none';
+}
+function showHint() {
+    let scenarioSet = ALL_SCENARIOS[currentSimDay] || ALL_SCENARIOS['monday'];
+    let scenario = scenarioSet[currentSimScenario];
+    let hint = "";
+    if(scenario.displaced && scenario.displaced.length>0) {
+        hint = "You have displaced appointments. Look for OPEN slots!";
+    } else {
+        // Check for GAPS
+        let slots = document.querySelectorAll('.time-slot:not(.header):not(.time-header)');
+        let hasGap = [...slots].some(s=>s.dataset.type==="gap");
+        if(hasGap) hint = "Gap found! Can you move an adjacent appointment?";
+        else hint = "Looking good! Review for further optimization.";
+    }
+    let box = document.getElementById('hintBox');
+    box.innerText = hint;
+    box.style.display = "block";
+}
+function showSolution() {
+    let scenarioSet = ALL_SCENARIOS[currentSimDay] || ALL_SCENARIOS['monday'];
+    let scenario = scenarioSet[currentSimScenario];
+    let solution = `SOLUTION FOR: ${scenario.name}\n\nCORRECT MOVES:\n`;
+    scenario.correctMoves.forEach((move,i)=>solution+=`${i+1}. ${move}\n`);
+    solution+=`\nAVOID:\n`;
+    scenario.incorrectMoves.forEach((move,i)=>solution+=`${i+1}. ${move}\n`);
+    alert(solution);
+}
+function nextSimulatorScenario() {
+    currentSimScenario = (currentSimScenario+1)%3;
+    document.getElementById('simScenario').value = currentSimScenario;
+    loadSimulatorScenario();
+}
+
+/* ---- CALCULATOR ---- */
+function renderServicePriceList() {
+    let list = document.getElementById('servicePriceList');
+    list.innerHTML = Object.entries(SERVICE_PRICES).map(([k,v])=>`<li>${k} — $${v.toFixed(2)}</li>`).join('');
+    let sel = document.getElementById('serviceType');
+    sel.innerHTML = Object.entries(SERVICE_PRICES).map(([k,v])=>`<option value="${v}">${k} ($${v})</option>`).join('');
+}
+function calculateRevenue() {
+    let therapists = parseInt(document.getElementById('therapistCount').value);
+    let gapsPerDay = parseInt(document.getElementById('gapsPerDay').value);
+    let daysPerWeek = parseInt(document.getElementById('daysPerWeek').value);
+    let serviceValue = parseInt(document.getElementById('serviceType').value);
+    // Calculate with enhancement and tip loss
+    let gapValue = serviceValue * 0.6 + 15 + 15 + 8; // 60% of value + enhancement + tip + sit pay
+    let dailyLoss = therapists * gapsPerDay * gapValue;
+    let weeklyLoss = dailyLoss * daysPerWeek;
+    let monthlyLoss = weeklyLoss * 4.33;
+    let annualLoss = weeklyLoss * 52;
+    document.getElementById('dailyLoss').textContent = "$"+dailyLoss.toLocaleString();
+    document.getElementById('weeklyLoss').textContent = "$"+weeklyLoss.toLocaleString();
+    document.getElementById('monthlyLoss').textContent = "$"+Math.round(monthlyLoss).toLocaleString();
+    document.getElementById('annualLoss').textContent = "$"+Math.round(annualLoss).toLocaleString();
+    document.getElementById('calculatorResults').style.display = "block";
+    trainingProgress.calculator = true; saveProgress();
+}
+
+/* ---- PRACTICE SCENARIOS ---- */
+function initScenarioDropdowns() {
+    let daySel = document.getElementById('scenarioDay');
+    let scenSel = document.getElementById('scenarioNum');
+    daySel.innerHTML = DAY_LIST.map(d=>`<option value="${d}">${d.charAt(0).toUpperCase()+d.slice(1)}</option>`).join('');
+    scenSel.innerHTML = [0,1,2].map(i=>`<option value="${i}">Scenario ${i+1} (${["Easy","Medium","Hard"][i]})</option>`).join('');
+}
+function loadPracticeScenario() {
+    let day = document.getElementById('scenarioDay').value;
+    let idx = parseInt(document.getElementById('scenarioNum').value);
+    let scenarioSet = ALL_SCENARIOS[day] || ALL_SCENARIOS['monday'];
+    let scenario = scenarioSet[idx];
+    let box = document.getElementById('practiceScenarioBox');
+    let displacedHtml = scenario.displaced && scenario.displaced.length
+        ? `<div class="displaced-box"><strong>Displaced Appointments:</strong><ul>${scenario.displaced.map(a=>`<li>${a}</li>`).join('')}</ul></div>`
+        : "";
+    let movesHtml = `<div class="alert alert-success"><strong>Optimal Solution:</strong><br>${scenario.correctMoves.map(a=>a).join('<br>')}</div>`;
+    let avoidsHtml = `<div class="alert alert-warning"><strong>Avoid:</strong><br>${scenario.incorrectMoves.map(a=>a).join('<br>')}</div>`;
+    box.innerHTML = `<h3>${scenario.name}</h3>
+        <div>${scenario.description}</div>
+        ${displacedHtml}
+        ${movesHtml}
+        ${avoidsHtml}`;
+    trainingProgress.scenarios = Math.max(trainingProgress.scenarios,idx+1);
+    saveProgress();
+}
+
+/* ---- QUIZ ---- */
+function submitQuiz() {
+    const answers = {q1:'c',q2:'b',q3:'c',q4:'b',q5:'c'};
+    let correct = 0, feedback = "<ul>";
+    for(let q in answers) {
+        let selected = document.querySelector(`input[name="${q}"]:checked`);
+        if(selected && selected.value===answers[q]) {
+            correct++; feedback += `<li>✅ Question ${q.substr(1)}: Correct!</li>`;
+        } else {
+            feedback += `<li>❌ Question ${q.substr(1)}: Review this topic</li>`;
+        }
+    }
+    feedback += "</ul>";
+    let score = (correct/5)*100;
+    document.getElementById('quizScore').style.width = score+"%";
+    document.getElementById('quizScore').textContent = score+"%";
+    document.getElementById('quizFeedback').innerHTML = feedback;
+    document.getElementById('quizResults').style.display = "block";
+    trainingProgress.quiz = score; saveProgress();
+    if(score===100) document.getElementById('quizFeedback').innerHTML += '<div class="alert alert-success">🎉 Perfect score! You\'re ready to optimize schedules like a pro!</div>';
+    else if(score>=80) document.getElementById('quizFeedback').innerHTML += '<div class="alert alert-warning">Good job! Review the missed questions and try again.</div>';
+    else document.getElementById('quizFeedback').innerHTML += '<div class="alert alert-error">Keep studying! Review all materials and retake the quiz.</div>';
+}
+
+/* ---- PROGRESS TRACKER ---- */
+function renderProgressTracker() {
+    let container = document.getElementById('progressTracker');
+    let html = `<table>
+        <tr>
+            <th>Day</th>
+            <th>Easy</th>
+            <th>Medium</th>
+            <th>Hard</th>
+            <th>Complete</th>
+        </tr>`;
+    for(let day of DAY_LIST) {
+        let checks = progressData[day];
+        let complete = Math.round((checks.filter(Boolean).length/3)*100);
+        html += `<tr>
+            <td>${day.charAt(0).toUpperCase()+day.slice(1)}</td>
+            <td><input type="checkbox" ${checks[0]?"checked":""} onclick="setProgress('${day}',0,this.checked)"></td>
+            <td><input type="checkbox" ${checks[1]?"checked":""} onclick="setProgress('${day}',1,this.checked)"></td>
+            <td><input type="checkbox" ${checks[2]?"checked":""} onclick="setProgress('${day}',2,this.checked)"></td>
+            <td class="complete">${complete}%</td>
+        </tr>`;
+    }
+    html += `</table>
+        <div style="font-weight:bold;">
+            TOTAL COMPLETE: ${(Object.values(progressData).map(arr=>arr.filter(Boolean).length).reduce((a,b)=>a+b,0)/21*100).toFixed(1)}%
+        </div>`;
+    container.innerHTML = html;
+}
+function setProgress(day, idx, checked) {
+    progressData[day][idx]=checked;
+    localStorage.setItem('nowProgressTracker',JSON.stringify(progressData));
+    renderProgressTracker();
+}
+
+/* ---- Progress Save ---- */
+function saveProgress() {
+    trainingProgress.lastAccess = new Date().toISOString();
+    localStorage.setItem('nowTrainingProgress', JSON.stringify(trainingProgress));
+    updateOverviewProgress();
+}
+/* ---- Overview Progress Bar ---- */
+function updateOverviewProgress() {
+    let progress = 0;
+    if(trainingProgress.overview) progress+=20;
+    if(trainingProgress.simulator) progress+=20;
+    if(trainingProgress.calculator) progress+=20;
+    if(trainingProgress.scenarios>0) progress+=(trainingProgress.scenarios/3)*20;
+    if(trainingProgress.quiz>0) progress+=(trainingProgress.quiz/100)*20;
+    document.getElementById('overviewProgress').style.width = progress+"%";
+    document.getElementById('overviewProgress').textContent = Math.round(progress)+"% Complete";
+}
+
+/* ---- INIT ---- */
+window.onload = function() {
+    updateOverviewProgress();
+    renderServicePriceList();
+    initSimulatorDropdowns();
+    loadSimulatorScenario();
+    initScenarioDropdowns();
+    loadPracticeScenario();
+    renderProgressTracker();
+};
+</script>
+</body>
+</html>
