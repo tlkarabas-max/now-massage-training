@@ -1,642 +1,878 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOW Massage - Schedule Optimization Training (Upgraded)</title>
-    <style>
-        body {
-            font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1500px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .logo {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg,#667eea,#764ba2);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 20px;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.2em;
-        }
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e0e0e0;
-            flex-wrap: wrap;
-        }
-        .tab {
-            padding: 15px 25px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            color: #666;
-            transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-            white-space: nowrap;
-        }
-        .tab:hover,.tab.active {
-            color: #667eea;
-        }
-        .tab.active {
-            border-bottom-color: #667eea;
-            font-weight: 600;
-        }
-        .content { display: none; }
-        .content.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px);}
-            to { opacity: 1; transform: translateY(0);}
-        }
-        .directions-box {
-            background: #e0e7ff;
-            border: 1px solid #6366f1;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        .schedule-controls {
-            margin-bottom: 15px;
-        }
-        .schedule-controls label, .schedule-controls select, .schedule-controls button {
-            margin-right: 10px;
-        }
-        .btn {
-            border: none;
-            border-radius: 6px;
-            padding: 8px 18px;
-            font-size: 1em;
-            cursor: pointer;
-            margin-right: 4px;
-            margin-top: 4px;
-        }
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
-        }
-        .schedule-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            background: #f7f7fa;
-            border-radius: 12px;
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
-        .time-slot {
-            min-height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1em;
-            border-radius: 8px;
-            background: white;
-            border: 1px solid #e0e0e0;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
-        }
-        .time-slot.header {
-            background: #667eea;
-            color: white;
-            font-weight: bold;
-            border: 1px solid #667eea;
-        }
-        .time-slot.time-header {
-            background: #f0f4ff;
-            color: #667eea;
-            font-weight: bold;
-        }
-        .booked-80 { background: #3866e6; color: #fff; font-weight: bold;}
-        .booked-50 { background: #38b66e; color: #fff; font-weight: bold;}
-        .booked-25 { background: #38b6e6; color: #fff; font-weight: bold;}
-        .gap { background: #f9c846; color: #222; font-weight: bold;}
-        .open { background: #e2f7e2; color: #333;}
-        .break { background: #a259ec; color: #fff;}
-        .lunch { background: #b5b5b5; color: #fff;}
-        .callout { background: #e64c3c; color: #fff; font-weight: bold;}
-        .stat-card {
-            display: inline-block;
-            background: #f5f5fa;
-            border-radius: 8px;
-            padding: 12px 20px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-        .stat-value {
-            font-size: 1.4em;
-            font-weight: 600;
-            color: #667eea;
-        }
-        .stat-label {
-            font-size: 1em;
-            color: #666;
-        }
-        .score-panel {
-            display: flex;
-            gap: 24px;
-            margin-bottom: 12px;
-        }
-        .score {
-            background: #f5f5fa;
-            border-radius: 8px;
-            padding: 12px 20px;
-            text-align: center;
-        }
-        .score-label {
-            font-size: 1em;
-            color: #666;
-        }
-        .displaced-box {
-            background: #f4f4fc;
-            border-radius: 8px;
-            padding: 12px 20px;
-            margin-bottom: 8px;
-        }
-        .hint-box {
-            background: #f9fafc;
-            border-radius: 8px;
-            padding: 12px 20px;
-            margin-bottom: 8px;
-            color: #3866e6;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Massage Optimization Simulator - Zenoti Style</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      /* Zenoti block colors from your references */
+      --break: #dcdcdc;
+      --lunch: #b3a7d6;
+      --personal: #e7e7e7;
+      --pto: #fff0b3;
+      --admin: #e7e7e7;
+      --soap: #e7e7e7;
+      --meeting: #e7e7e7;
+      --training: #e7e7e7;
+      --offsite: #e7e7e7;
+      --closure: #e7e7e7;
+      --leaving: #ffb3b3;
+      --late: #ffb3b3;
+      --callout: #e14545;
+      --shift: #e14545;
+      --hold: #c539c5;
+      --appointment: #e6f0ff;
+      --border: #d5d5d5;
+      --header-bg: #f4f6fa;
+      --header-title: #2d3d61;
+      --header-bar: #d09cc9;
+      --therapist-bar: #3a4a62;
+      --grid-bg: #fafafd;
+      --slot-divider: #e6e6eb;
+      /* Metrics colors */
+      --metric-bg: #f7fafd;
+      --metric-title: #4861a5;
+      --metric-value: #2d3d61;
+      --metric-grade-c: #f6c2c2;
+      --metric-grade-b: #f6e9c2;
+      --metric-grade-a: #c2f6d2;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      background: var(--grid-bg);
+      color: #222;
+    }
+    h1 {
+      background: var(--header-title);
+      color: #fff;
+      margin: 0;
+      font-size: 2em;
+      font-weight: 600;
+      padding: 20px 0 14px 0;
+      text-align: center;
+      box-shadow: 0 3px 12px rgba(44,70,131,0.08);
+    }
+    .scenario-bar {
+      background: var(--header-bg);
+      border-bottom: 2px solid var(--header-bar);
+      padding: 20px 14px 8px 14px;
+      margin-bottom: 0px;
+      box-shadow: 0 1px 6px rgba(44,70,131,0.06);
+    }
+    .scenario-title {
+      font-size: 1.13em;
+      font-weight: 600;
+      color: var(--header-title);
+      margin-bottom: 2px;
+    }
+    .scenario-goal {
+      font-size: 1.07em;
+      color: #397b59;
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+    .hint-bar {
+      background: #e8f4ff;
+      color: #222;
+      font-size: 1.04em;
+      font-weight: 500;
+      padding: 10px 16px;
+      border-left: 5px solid #3a4a62;
+      margin-bottom: 12px;
+      border-radius: 0 0 12px 12px;
+    }
+    .metrics-bar {
+      display: flex; gap: 18px; justify-content: flex-start;
+      background: var(--metric-bg);
+      padding: 16px 16px 8px 16px;
+      border-bottom: 1px solid var(--header-bar);
+      margin-bottom: 0;
+      align-items: flex-end;
+    }
+    .metric {
+      flex: 1 1 120px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 7px 18px 8px 18px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(44,70,131,0.08);
+      margin-right: 0;
+      font-size: 1em;
+    }
+    .metric-title {
+      font-size: 0.98em;
+      color: var(--metric-title);
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .metric-value {
+      font-size: 1.32em;
+      color: var(--metric-value);
+      font-weight: 700;
+      margin-bottom: 1px;
+      letter-spacing: 0.03em;
+    }
+    .metric.grade .metric-value {
+      color: #fff;
+      background: var(--metric-grade-c);
+      border-radius: 8px;
+      padding: 6px 0;
+      width: 60px;
+      display: inline-block;
+      font-size: 1.12em;
+    }
+    .metric.grade.gradeA .metric-value { background: var(--metric-grade-a); color: #1c9a46;}
+    .metric.grade.gradeB .metric-value { background: var(--metric-grade-b); color: #d4b112;}
+    .metric.grade.gradeC .metric-value { background: var(--metric-grade-c); color: #c32d2d;}
+    .controls-bar {
+      display: flex;
+      gap: 14px;
+      margin: 0 0 12px 16px;
+      align-items: center;
+    }
+    .controls-bar select,
+    .controls-bar button {
+      padding: 7px 16px;
+      font-size: 1em;
+      border-radius: 7px;
+      border: 1.5px solid var(--header-bar);
+      background: #fff;
+      color: #3a4a62;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0;
+      transition: background 0.13s, color 0.13s, border 0.13s;
+    }
+    .controls-bar button {
+      background: var(--header-bar);
+      color: #fff;
+      border: none;
+    }
+    .controls-bar button:disabled {
+      background: #eee;
+      color: #999;
+      border: 1.5px solid #bbb;
+      cursor: not-allowed;
+    }
+    .zenoti-grid-wrap {
+      overflow-x: auto;
+      padding: 0 18px 36px 18px;
+      background: var(--grid-bg);
+      border-bottom: 1.5px solid var(--header-bar);
+    }
+    .zenoti-bar {
+      background: var(--header-bar);
+      height: 7px;
+      border-bottom: 1px solid #e6e6eb;
+    }
+    .zenoti-grid {
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 0 auto;
+      min-width: 820px;
+      background: var(--grid-bg);
+    }
+    .zenoti-grid th,
+    .zenoti-grid td {
+      border: 1px solid var(--border);
+      text-align: center;
+      min-width: 110px;
+      vertical-align: top;
+      font-size: 0.99em;
+      padding: 0;
+      position: relative;
+    }
+    .zenoti-grid th {
+      background: var(--therapist-bar);
+      color: #fff;
+      font-size: 1.01em;
+      font-weight: 700;
+      height: 54px;
+      border-bottom: 4px solid var(--header-bar);
+      letter-spacing: 0.02em;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .zenoti-grid th.time {
+      background: #fff;
+      color: #4861a5;
+      font-weight: 700;
+      border-right: 2px solid var(--header-bar);
+      border-bottom: 4px solid var(--header-bar);
+      z-index: 3;
+    }
+    .zenoti-grid td.time {
+      background: #fff;
+      color: #3a4a62;
+      font-weight: 700;
+      font-size: 0.97em;
+      border-right: 2px solid var(--header-bar);
+      text-align: right;
+      padding-right: 10px;
+      min-width: 78px;
+      z-index: 1;
+    }
+    .zenoti-grid td {
+      background: var(--grid-bg);
+      height: 44px;
+      min-width: 110px;
+      border-top: 1px solid var(--slot-divider);
+      border-bottom: 1px solid var(--slot-divider);
+    }
+    .block {
+      border-radius: 7px;
+      box-shadow: 0 2px 6px rgba(44,70,131,0.08);
+      margin: 1px 0;
+      font-weight: 500;
+      font-size: 1.01em;
+      padding: 7px 7px 5px 7px;
+      color: #222;
+      cursor: pointer;
+      text-align: left;
+      border: 2px solid transparent;
+      position: absolute;
+      left: 2px; right: 2px; top: 2px; bottom: 2px;
+      z-index: 5;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      transition: box-shadow 0.2s, border 0.2s;
+      word-break: break-word;
+    }
+    .block.break { background: var(--break); border-color: var(--break);}
+    .block.lunch { background: var(--lunch); border-color: var(--lunch);}
+    .block.personal { background: var(--personal); border-color: var(--personal);}
+    .block.pto { background: var(--pto); border-color: var(--pto);}
+    .block.admin, .block.soap, .block.meeting, .block.training,
+    .block.offsite, .block.closure { background: var(--admin); border-color: var(--admin);}
+    .block.leaving, .block.late { background: var(--leaving); border-color: var(--leaving);}
+    .block.callout, .block.shift { background: var(--callout); border-color: var(--callout); color: #fff;}
+    .block.hold { background: var(--hold); border-color: var(--hold); color: #fff;}
+    .block.appointment { background: var(--appointment); border-color: #aac6f8;}
+    /* Drag selection highlight */
+    .drag-select {
+      background: rgba(44,70,131,0.11) !important;
+      outline: 2px dashed var(--therapist-bar);
+      z-index: 3;
+    }
+    /* Popup menu */
+    .block-popup {
+      position: absolute;
+      z-index: 9999;
+      background: #fff;
+      border: 2px solid var(--therapist-bar);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(44,70,131,0.22);
+      padding: 18px 20px 12px 20px;
+      top: 60px;
+      left: 50px;
+      min-width: 230px;
+      animation: fadein 0.18s;
+    }
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+    .block-popup h3 { margin: 0 0 14px 0; font-size: 1.15em; color: var(--therapist-bar);}
+    .block-popup label {
+      display: block;
+      margin-bottom: 8px;
+      padding: 7px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+      border: 2px solid transparent;
+      transition: background 0.1s, border 0.1s;
+    }
+    .block-popup label:hover, .block-popup label.selected {
+      background: var(--header-bg);
+      border: 2px solid var(--therapist-bar);
+    }
+    .block-popup .block-preview {
+      display: inline-block;
+      width: 22px; height: 22px;
+      vertical-align: middle;
+      border-radius: 6px;
+      margin-right: 8px;
+      border: 2px solid #b5b5b5;
+    }
+    .block-popup .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .block-popup button {
+      padding: 7px 22px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1em;
+      background: var(--therapist-bar);
+      color: #fff;
+      transition: background 0.18s;
+    }
+    .block-popup button.cancel {
+      background: #eee;
+      color: #444;
+      border: 1px solid #bbb;
+    }
+    /* Responsive tweaks */
+    @media (max-width: 1100px) {
+      .zenoti-grid-wrap { min-width: 0; padding: 0 2vw; }
+      .zenoti-grid { min-width: 620px; }
+      .block-popup { left: 8vw; min-width: 180px;}
+    }
+    @media (max-width: 700px) {
+      .zenoti-grid { font-size: 0.87em;}
+      .block-popup { left: 4vw; min-width: 120px;}
+    }
+    /* Solution overlay */
+    .solution-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44,70,131,0.13);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.34em;
+      font-weight: 600;
+      color: var(--header-title);
+      pointer-events: none;
+      animation: fadein 0.5s;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>
-            <div class="logo">NOW</div>
-            Schedule Optimization Training (Upgraded)
-        </h1>
-        <div class="subtitle">Master the art of maximizing revenue through smart scheduling</div>
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('overview')">Overview</button>
-            <button class="tab" onclick="showTab('simulator')">Schedule Simulator</button>
-            <button class="tab" onclick="showTab('calculator')">Revenue Calculator</button>
-            <button class="tab" onclick="showTab('scenarios')">Practice Scenarios</button>
-            <button class="tab" onclick="showTab('quiz')">Knowledge Quiz</button>
-            <button class="tab" onclick="showTab('templates')">Script Templates</button>
-            <button class="tab" onclick="showTab('progress')">Progress Tracker</button>
-        </div>
-
-        <!-- PRACTICE SCENARIOS -->
-        <div id="scenarios" class="content">
-            <h2>Practice Scenarios</h2>
-            <div class="directions-box">
-                <strong>Step-by-step Directions for Trainees:</strong><br>
-                1. Select the Day and Scenario (Easy, Medium, Hard) you want to practice.<br>
-                2. Read the scenario description and review the "Optimal Solution" and "Avoid" advice.<br>
-                3. Note any displaced appointments and instructions.<br>
-                4. Switch to the <span style="color:#667eea;font-weight:bold;">Schedule Simulator</span> tab.<br>
-                5. Apply what you've learned by adjusting the schedule to meet the scenario goals.<br>
-                6. Use "Show Solution" or "Hint" buttons for guidance.<br>
-                7. When finished, check your results and compare to the optimal solution.
-            </div>
-            <div class="schedule-controls">
-                <label for="scenarioDay">Day:</label>
-                <select id="scenarioDay"></select>
-                <label for="scenarioNum">Scenario:</label>
-                <select id="scenarioNum"></select>
-                <button class="btn btn-primary" onclick="loadPracticeScenario()">Load Scenario</button>
-            </div>
-            <div id="practiceScenarioBox"></div>
-        </div>
-
-        <!-- SCHEDULE SIMULATOR -->
-        <div id="simulator" class="content">
-            <h2>Interactive Schedule Simulator</h2>
-            <div class="directions-box">
-                <strong>Step-by-step Directions for Trainees:</strong><br>
-                1. Select the Day and Scenario to load the full business day schedule grid.<br>
-                2. Drag and drop appointments between slots to optimize the schedule.<br>
-                3. Use the “Add Massage” panel below to drag new appointments into open slots.<br>
-                4. You can also click any slot to cycle its type.<br>
-                5. Fix gaps, avoid mistakes, and optimize coverage especially in the late afternoon and evening.<br>
-                6. Use "Hint" or "Show Solution" buttons for help.<br>
-                7. Review your work and compare to the optimal solution.
-            </div>
-            <div class="schedule-controls">
-                <label for="simDay">Day:</label>
-                <select id="simDay"></select>
-                <label for="simScenario">Scenario:</label>
-                <select id="simScenario"></select>
-                <button class="btn btn-primary" onclick="loadSimulatorScenario()">Load Scenario</button>
-                <button class="btn btn-secondary" onclick="clearSchedule()">Clear Schedule</button>
-            </div>
-            <div id="addMassagePanel" style="margin-bottom:24px;">
-                <strong>Add Massage:</strong>
-                <div style="display:flex; gap:10px; margin-top:8px;">
-                    <div class="time-slot booked-80" draggable="true" ondragstart="dragStart(event)" data-type="booked_80">80m</div>
-                    <div class="time-slot booked-50" draggable="true" ondragstart="dragStart(event)" data-type="booked_50">50m</div>
-                    <div class="time-slot booked-25" draggable="true" ondragstart="dragStart(event)" data-type="booked_25">25m</div>
-                </div>
-            </div>
-            <div class="schedule-grid" id="scheduleGrid"></div>
-            <div class="score-panel">
-                <div class="score">
-                    <span id="movesCount">0</span>
-                    <span class="score-label">Moves</span>
-                </div>
-                <div class="score">
-                    <span id="gapsFixedCount">0</span>
-                    <span class="score-label">Gaps Fixed</span>
-                </div>
-                <div class="score">
-                    <span id="revenueSaved">$0</span>
-                    <span class="score-label">Revenue Saved</span>
-                </div>
-                <div class="score">
-                    <span id="gradeValue">--</span>
-                    <span class="score-label">Grade</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="utilizationRate">0%</div>
-                <div class="stat-label">Utilization Rate</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="gapCount">0</div>
-                <div class="stat-label">Gaps</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="optimalPatterns">0</div>
-                <div class="stat-label">Optimal Patterns</div>
-            </div>
-            <div id="displacedAppointmentsBox" class="displaced-box" style="display:none;">
-                <strong>Displaced Appointments:</strong>
-                <ul id="displacedAppointmentsList"></ul>
-            </div>
-            <div id="hintBox" class="hint-box" style="display:none;"></div>
-            <div class="controls">
-                <button class="btn btn-secondary" onclick="showHint()">Hint</button>
-                <button class="btn btn-primary" onclick="showSolution()">Show Solution</button>
-                <button class="btn btn-secondary" onclick="nextSimulatorScenario()">Next Scenario</button>
-            </div>
-        </div>
-        <!-- ... rest of your tabs ... -->
+  <h1>Massage Optimization Simulator</h1>
+  <div class="scenario-bar">
+    <div class="scenario-title" id="scenarioTitle"></div>
+    <div class="scenario-goal" id="scenarioGoal"></div>
+  </div>
+  <div class="metrics-bar">
+    <div class="metric">
+      <div class="metric-title">Moves</div>
+      <div class="metric-value" id="metricMoves">0</div>
     </div>
-<script>
-/* ---- CONFIG ---- */
-const BUSINESS_HOURS = {
-  sunday:    { open: "9:00", close: "20:00" },
-  monday:    { open: "9:00", close: "20:00" },
-  tuesday:   { open: "9:00", close: "20:00" },
-  wednesday: { open: "9:00", close: "20:00" },
-  thursday:  { open: "9:00", close: "20:00" },
-  friday:    { open: "9:00", close: "21:00" },
-  saturday:  { open: "9:00", close: "21:00" }
-};
-const THERAPISTS = ["Emma", "Sofia", "James", "Olivia", "Liam", "Ava"];
-const BLOCK_TYPES = {
-    "booked_80": {label: "80m", colorclass: "booked-80"},
-    "booked_50": {label: "50m", colorclass: "booked-50"},
-    "booked_25": {label: "25m", colorclass: "booked-25"},
-    "gap": {label: "GAP", colorclass: "gap"},
-    "open": {label: "OPEN", colorclass: "open"},
-    "break": {label: "Break", colorclass: "break"},
-    "lunch": {label: "Lunch", colorclass: "lunch"},
-    "callout": {label: "Call-out", colorclass: "callout"}
-};
+    <div class="metric">
+      <div class="metric-title">Gaps Fixed</div>
+      <div class="metric-value" id="metricGaps">0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-title">Utilization</div>
+      <div class="metric-value" id="metricUtil">0%</div>
+    </div>
+    <div class="metric">
+      <div class="metric-title">Revenue</div>
+      <div class="metric-value" id="metricRevenue">$0</div>
+    </div>
+    <div class="metric grade gradeC" id="metricGradeWrap">
+      <div class="metric-title">Grade</div>
+      <div class="metric-value" id="metricGrade">C</div>
+    </div>
+  </div>
+  <div class="controls-bar">
+    <label>
+      Select Day:
+      <select id="daySelect"></select>
+    </label>
+    <button id="resetBtn">Reset Progress</button>
+    <button id="hintBtn">Hint</button>
+    <button id="checkBtn">Check</button>
+    <button id="showSolutionBtn" disabled>Show Solution</button>
+    <button id="nextScenarioBtn">Next Scenario</button>
+  </div>
+  <div class="hint-bar" id="hintBar" style="display:none;"></div>
+  <div class="zenoti-grid-wrap">
+    <div class="zenoti-bar"></div>
+    <table class="zenoti-grid" id="schedulerGrid"></table>
+  </div>
+  <div id="blockPopup" class="block-popup" style="display:none;"></div>
+  <div id="solutionOverlay" class="solution-overlay" style="display:none;">Optimal solution loaded.</div>
+  <script>
+    // --- SCENARIO DATA ---
+    // You can add more scenarios to this array. Each has description, goal, day, therapists, initialGrid, optimalGrid, and hint.
+    const SCENARIOS = [
+      {
+        description: "Diaz has a call-out in the afternoon, Gaia has back-to-back sessions. Optimize Jose’s lunch timing and fill gaps in Diaz's schedule.",
+        goal: "Fill Diaz’s gaps, optimize Jose’s lunch timing, and maximize utilization.",
+        day: "Tuesday",
+        hint: "Drag sessions to fill gaps. Move call-outs to OPEN. Place lunch breaks in the middle of the shift. Combine adjacent gaps to create 50 or 80-min session opportunities.",
+        therapists: ["Gaia", "Jose", "Diaz", "Frankie"],
+        // 9:00-8:00 (23 slots at 30 min intervals)
+        timeSlots: (() => {
+          let slots = [];
+          let hour = 9, min = 0;
+          for(let i=0; i<23; i++) {
+            let ap = hour >= 12 ? 'PM':'AM';
+            let h = hour > 12 ? hour-12 : hour;
+            slots.push(`${h.toString().padStart(2,'0')}:${min===0?'00':'30'} ${ap}`);
+            min += 30;
+            if(min >= 60) { min = 0; hour++; }
+          }
+          return slots;
+        })(),
+        // Initial grid: [row][col]
+        initialGrid: [
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["80m","80m","OPEN","OPEN"],
+          ["OPEN","Lunch","OPEN","OPEN"],
+          ["80m","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["Lunch","OPEN","OPEN","OPEN"],
+          ["80m","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","Call-out","OPEN"],
+          ["OPEN","OPEN","Call-out","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+        ],
+        // Optimal solution grid
+        optimalGrid: [
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["80m","80m","OPEN","OPEN"],
+          ["OPEN","Lunch","OPEN","OPEN"],
+          ["80m","50m","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","80m","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["Lunch","OPEN","OPEN","OPEN"],
+          ["80m","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+        ]
+      }
+    ];
 
-/* ---- Generate Time Slot Array ---- */
-function generateTimeSlots(day) {
-    let times = [];
-    let hours = BUSINESS_HOURS[day];
-    let [openH, openM] = hours.open.split(':').map(Number);
-    let [closeH, closeM] = hours.close.split(':').map(Number);
-    let dt = new Date(2020,0,1,openH,openM);
-    let end = new Date(2020,0,1,closeH,closeM);
-    while(dt < end) {
-        let s = dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-        times.push(s);
-        dt.setMinutes(dt.getMinutes()+30);
-    }
-    return times;
-}
+    // --- CONFIG ---
+    const BLOCK_TYPES = [
+      { key: "appointment", label: "Appointment", color: "var(--appointment)",
+        durations: ["25", "50", "80"] },
+      { key: "break", label: "Break", color: "var(--break)" },
+      { key: "lunch", label: "Lunch", color: "var(--lunch)" },
+      { key: "callout", label: "Call-out", color: "var(--callout)" }
+      // Add more if you wish
+    ];
+    const SESSION_PRICING = { // for base session revenue
+      "25": 70,
+      "50": 120,
+      "80": 160
+    };
+    // --- STATE ---
+    let scenarioIdx = 0;
+    let blocks = []; // {start, end, therapistIdx, type, duration, label}
+    let dragStart = null, dragEnd = null, dragTherapistIdx = null;
+    let popupActive = false;
+    let attemptCount = 0;
+    let gridRows = 0, gridCols = 0, timeSlots = [], therapists = [];
 
-/* ---- Scenario Generator: includes late appointments ---- */
-function makeFullDayScenario(type, day) {
-    const times = generateTimeSlots(day);
-    return THERAPISTS.map((t, i) => ({
-        therapist: t,
-        slots: times.map((tm, idx) => {
-            // Fill late slots with appointments, gaps, breaks, or callouts
-            if (idx >= times.length - 5) {
-                if (type === "easy") {
-                    return (idx % 2 === 0) ? "booked_80" : "booked_50";
-                }
-                if (type === "medium") {
-                    return (i % 2 === 0 && idx % 2 === 0) ? "booked_80" :
-                           (i % 2 === 1 && idx % 3 === 0) ? "booked_50" : "gap";
-                }
-                if (type === "hard") {
-                    return (i === 0 && idx === times.length - 1) ? "callout" :
-                           (idx % 3 === 0) ? "gap" : "open";
-                }
+    // --- INIT ---
+    function setupScenario(idx) {
+      // Load scenario
+      const scenario = SCENARIOS[idx];
+      document.getElementById("scenarioTitle").textContent = scenario.description;
+      document.getElementById("scenarioGoal").textContent = "Goal: " + scenario.goal;
+      document.getElementById("hintBar").textContent = scenario.hint;
+      document.getElementById("hintBar").style.display = "none";
+      therapists = scenario.therapists;
+      timeSlots = scenario.timeSlots;
+      gridRows = timeSlots.length;
+      gridCols = therapists.length;
+
+      blocks = [];
+      attemptCount = 0;
+      document.getElementById("showSolutionBtn").disabled = true;
+      document.getElementById("solutionOverlay").style.display = "none";
+
+      // Render grid
+      renderGrid();
+      // Load initial blocks from scenario.initialGrid
+      for(let r=0; r<gridRows; r++) {
+        for(let c=0; c<gridCols; c++) {
+          let cell = scenario.initialGrid[r][c];
+          if(cell && cell !== "OPEN") {
+            if(cell === "Lunch") {
+              blocks.push({ start:r, end:r, therapistIdx:c, type:"lunch", label:"Lunch" });
+            } else if(cell === "Call-out") {
+              blocks.push({ start:r, end:r, therapistIdx:c, type:"callout", label:"Call-out" });
+            } else if(cell === "80m" || cell === "50m" || cell === "25m") {
+              let duration = cell.replace("m","");
+              blocks.push({ start:r, end:r, therapistIdx:c, type:"appointment", duration:duration, label:cell });
             }
-            // Lunch and breaks
-            if (type === "medium" && idx === Math.floor(times.length/2)) return "lunch";
-            if (type === "hard" && idx === Math.floor(times.length/3)) return "break";
-            if (type === "hard" && idx === Math.floor(times.length/4)) return "callout";
-            // Morning and midday logic
-            if (type === "easy") return (idx % 3 === 0) ? "booked_80" : "booked_50";
-            if (type === "medium") return (idx % 4 === 1) ? "booked_80" : "open";
-            if (type === "hard") return (idx % 5 === 0) ? "gap" : "open";
-            return "open";
-        })
-    }));
-}
-
-/* ---- Scenarios Data (full day, late appts) ---- */
-const ALL_SCENARIOS = {};
-["sunday","monday","tuesday","wednesday","thursday","friday","saturday"].forEach(day=>{
-  ALL_SCENARIOS[day] = [
-    {
-      name: `${capitalize(day)} Easy: Full Day Bookings`,
-      description: "Book most slots throughout the day, including late appointments. Fill gaps as needed.",
-      displaced: [],
-      schedule: makeFullDayScenario("easy", day),
-      correctMoves: ["Fill gaps throughout the day", "Maximize utilization, especially in late slots"],
-      incorrectMoves: ["Leaving gaps during late hours", "Unused evening slots"]
-    },
-    {
-      name: `${capitalize(day)} Medium: Staggered & Evening Coverage`,
-      description: "Stagger breaks/lunches, and maintain coverage in late afternoon/evening.",
-      displaced: [],
-      schedule: makeFullDayScenario("medium", day),
-      correctMoves: ["Stagger breaks", "Fill gaps in late slots", "Limit callouts"],
-      incorrectMoves: ["Multiple gaps in evening", "All at lunch at once"]
-    },
-    {
-      name: `${capitalize(day)} Hard: Gaps, Callouts, Late Optimization`,
-      description: "Handle callouts, breaks, and evening gaps; optimize for revenue.",
-      displaced: ["Emma (callout late)", "James (break midday)"],
-      schedule: makeFullDayScenario("hard", day),
-      correctMoves: ["Fill late gaps", "Recover from callouts", "Optimize breaks"],
-      incorrectMoves: ["Leaving therapists unused after 5 PM", "Too many gaps in evening"]
-    }
-  ];
-});
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-const DAY_LIST = Object.keys(BUSINESS_HOURS);
-
-/* ---- UI Tab Logic ---- */
-function showTab(tab) {
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-    document.querySelector(`[onclick="showTab('${tab}')"]`).classList.add('active');
-    document.getElementById(tab).classList.add('active');
-    if(tab === "scenarios") renderScenarioControls();
-    if(tab === "simulator") renderSimulatorControls();
-}
-
-/* ---- PRACTICE SCENARIOS LOGIC ---- */
-function renderScenarioControls() {
-    let daySel = document.getElementById('scenarioDay');
-    let scenSel = document.getElementById('scenarioNum');
-    daySel.innerHTML = DAY_LIST.map(d=>`<option value="${d}">${capitalize(d)}</option>`).join('');
-    let scens = ALL_SCENARIOS[DAY_LIST[0]];
-    scenSel.innerHTML = scens.map((s,i)=>`<option value="${i}">Scenario ${i+1} (${['Easy','Medium','Hard'][i]})</option>`).join('');
-    daySel.onchange = function() {
-        let scens = ALL_SCENARIOS[daySel.value];
-        scenSel.innerHTML = scens.map((s,i)=>`<option value="${i}">Scenario ${i+1} (${['Easy','Medium','Hard'][i]})</option>`).join('');
-    };
-}
-function loadPracticeScenario() {
-    let day = document.getElementById('scenarioDay').value;
-    let idx = +document.getElementById('scenarioNum').value;
-    let scenario = ALL_SCENARIOS[day][idx];
-    let box = document.getElementById('practiceScenarioBox');
-    box.innerHTML = `
-        <h3>${scenario.name}</h3>
-        <div>${scenario.description}</div>
-        ${scenario.displaced && scenario.displaced.length ? `<div class="displaced-box"><strong>Displaced Appointments:</strong><ul>${scenario.displaced.map(d=>`<li>${d}</li>`).join('')}</ul></div>` : ''}
-        <div class="hint-box"><strong>Optimal Solution:</strong><br>${scenario.correctMoves.join('<br>')}</div>
-        <div style="background:#ffe4c2;border-radius:8px;padding:10px;margin-top:8px;"><strong>Avoid:</strong><br>${scenario.incorrectMoves.join('<br>')}</div>
-    `;
-}
-
-/* ---- SCHEDULE SIMULATOR LOGIC ---- */
-function renderSimulatorControls() {
-    let daySel = document.getElementById('simDay');
-    let scenSel = document.getElementById('simScenario');
-    daySel.innerHTML = DAY_LIST.map(d=>`<option value="${d}">${capitalize(d)}</option>`).join('');
-    let scens = ALL_SCENARIOS[DAY_LIST[0]];
-    scenSel.innerHTML = scens.map((s,i)=>`<option value="${i}">Scenario ${i+1} (${['Easy','Medium','Hard'][i]})</option>`).join('');
-    daySel.onchange = function() {
-        let scens = ALL_SCENARIOS[daySel.value];
-        scenSel.innerHTML = scens.map((s,i)=>`<option value="${i}">Scenario ${i+1} (${['Easy','Medium','Hard'][i]})</option>`).join('');
-    };
-}
-let moves = 0;
-function loadSimulatorScenario() {
-    let day = document.getElementById('simDay').value;
-    let idx = +document.getElementById('simScenario').value;
-    let scenario = ALL_SCENARIOS[day][idx];
-    renderScheduleGrid(day, scenario);
-    moves = 0;
-    document.getElementById('movesCount').textContent = moves;
-    hideHint();
-}
-function clearSchedule() {
-    let day = document.getElementById('simDay').value;
-    let times = generateTimeSlots(day);
-    let grid = document.getElementById('scheduleGrid');
-    grid.innerHTML = '';
-    grid.innerHTML += `<div class="time-slot header">Time</div>`;
-    THERAPISTS.forEach(t=>grid.innerHTML+=`<div class="time-slot header">${t}</div>`);
-    for(let t=0;t<times.length;t++) {
-        grid.innerHTML+=`<div class="time-slot time-header">${times[t]}</div>`;
-        for(let i=0;i<THERAPISTS.length;i++) {
-            grid.innerHTML+=`<div class="time-slot open" data-type="open" data-tidx="${i}" data-time="${times[t]}" data-slot-id="${t+'-'+i}" draggable="true" ondragstart="slotDragStart(event)" ondragover="allowDrop(event)" ondrop="dropSlot(event)" onclick="toggleSlot(this)"></div>`;
+          }
         }
+      }
+      renderBlocks();
+      updateMetrics();
+      updateDaySelect(scenario.day);
     }
-}
-function nextSimulatorScenario() {
-    let daySel = document.getElementById('simDay');
-    let scenSel = document.getElementById('simScenario');
-    let day = daySel.value;
-    let idx = +scenSel.value;
-    let scens = ALL_SCENARIOS[day];
-    idx = (idx+1)%scens.length;
-    scenSel.value = idx;
-    loadSimulatorScenario();
-}
-function showHint() {
-    let box = document.getElementById('hintBox');
-    box.style.display = "block";
-    box.textContent = "Tip: Drag appointments to fill gaps, focus on late day coverage!";
-}
-function hideHint() {
-    let box = document.getElementById('hintBox');
-    box.style.display = "none";
-}
-function showSolution() {
-    let day = document.getElementById('simDay').value;
-    let idx = +document.getElementById('simScenario').value;
-    let scenario = ALL_SCENARIOS[day][idx];
-    let box = document.getElementById('hintBox');
-    box.style.display = "block";
-    box.innerHTML = `<strong>Optimal Solution:</strong><br>${scenario.correctMoves.join('<br>')}`;
-}
 
-/* ---- Drag-and-Drop Logic ---- */
-let draggedType = null;
-let draggedSlot = null;
-function dragStart(e) {
-    draggedType = e.target.dataset.type;
-    draggedSlot = null;
-    e.dataTransfer.effectAllowed = "move";
-}
-function allowDrop(e) {
-    e.preventDefault();
-}
-function dropSlot(e) {
-    e.preventDefault();
-    let slot = e.target;
-    // Dragging from Add Massage panel
-    if (draggedType) {
-        slot.dataset.type = draggedType;
-        slot.className = "time-slot " + (BLOCK_TYPES[draggedType]?.colorclass || "");
-        slot.textContent = BLOCK_TYPES[draggedType]?.label || "";
-        moves++;
-        document.getElementById('movesCount').textContent = moves;
-        hideHint();
-        draggedType = null;
-        draggedSlot = null;
-        updateScheduleStats();
-        return;
+    function updateDaySelect(day) {
+      const select = document.getElementById("daySelect");
+      select.innerHTML = "";
+      let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      days.forEach(d => {
+        let opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        if(d===day) opt.selected = true;
+        select.appendChild(opt);
+      });
+      select.onchange = () => {
+        // For now, just reload scenario with the selected day
+        // Real app: would load day-specific grid/hours
+        SCENARIOS[scenarioIdx].day = select.value;
+        setupScenario(scenarioIdx);
+      };
     }
-    // Dragging another slot, swap types
-    if (draggedSlot) {
-        let fromSlot = document.querySelector(`[data-slot-id='${draggedSlot}']`);
-        let tempType = slot.dataset.type;
-        let tempLabel = slot.textContent;
-        let tempClass = slot.className;
-        slot.dataset.type = fromSlot.dataset.type;
-        slot.className = fromSlot.className;
-        slot.textContent = fromSlot.textContent;
-        fromSlot.dataset.type = tempType;
-        fromSlot.className = tempClass;
-        fromSlot.textContent = tempLabel;
-        moves++;
-        document.getElementById('movesCount').textContent = moves;
-        hideHint();
-        draggedType = null;
-        draggedSlot = null;
-        updateScheduleStats();
-        return;
+
+    function renderGrid() {
+      const table = document.getElementById('schedulerGrid');
+      table.innerHTML = '';
+      // Header
+      const thead = document.createElement('thead');
+      const trh = document.createElement('tr');
+      const thTime = document.createElement('th');
+      thTime.className = 'time';
+      thTime.textContent = "Time";
+      trh.appendChild(thTime);
+      therapists.forEach((therapist, tIdx) => {
+        const th = document.createElement('th');
+        th.textContent = therapist;
+        th.title = therapist;
+        th.setAttribute('data-col', tIdx);
+        trh.appendChild(th);
+      });
+      thead.appendChild(trh);
+
+      // Therapist bar
+      const trBar = document.createElement('tr');
+      const tdBarTime = document.createElement('td');
+      tdBarTime.className = 'time';
+      tdBarTime.innerHTML = '&nbsp;';
+      trBar.appendChild(tdBarTime);
+      therapists.forEach(() => {
+        const td = document.createElement('td');
+        td.innerHTML = '<div class="zenoti-bar"></div>';
+        trBar.appendChild(td);
+      });
+      thead.appendChild(trBar);
+
+      table.appendChild(thead);
+
+      // Body
+      const tbody = document.createElement('tbody');
+      timeSlots.forEach((slot, rIdx) => {
+        const tr = document.createElement('tr');
+        // Time cell
+        const tdTime = document.createElement('td');
+        tdTime.className = 'time';
+        tdTime.textContent = slot;
+        tr.appendChild(tdTime);
+        // Therapist columns
+        therapists.forEach((_, cIdx) => {
+          const td = document.createElement('td');
+          td.setAttribute('data-row', rIdx);
+          td.setAttribute('data-col', cIdx);
+          td.onmousedown = e => handleCellMouseDown(e, rIdx, cIdx);
+          td.onmouseenter = e => handleCellMouseEnter(e, rIdx, cIdx);
+          td.onmouseup = e => handleCellMouseUp(e, rIdx, cIdx);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+
+      renderBlocks();
     }
-}
-function slotDragStart(e) {
-    draggedType = e.target.dataset.type;
-    draggedSlot = e.target.dataset.slotId;
-    e.dataTransfer.effectAllowed = "move";
-}
 
-/* ---- Click to cycle slot type ---- */
-const CYCLE_TYPES = ["open","booked_80","booked_50","booked_25","gap","break","lunch","callout"];
-function toggleSlot(slot) {
-    let cur = slot.dataset.type || "open";
-    let idx = CYCLE_TYPES.indexOf(cur);
-    let nextType = CYCLE_TYPES[(idx+1)%CYCLE_TYPES.length];
-    slot.dataset.type = nextType;
-    slot.className = "time-slot " + (BLOCK_TYPES[nextType]?.colorclass || "");
-    slot.textContent = BLOCK_TYPES[nextType]?.label || "";
-    moves++;
-    document.getElementById('movesCount').textContent = moves;
-    hideHint();
-    updateScheduleStats();
-}
-
-/* ---- Render Schedule Grid ---- */
-function renderScheduleGrid(day, scenario) {
-    let times = generateTimeSlots(day);
-    let grid = document.getElementById('scheduleGrid');
-    let therapists = THERAPISTS;
-    grid.innerHTML = '';
-    grid.innerHTML += `<div class="time-slot header">Time</div>`;
-    therapists.forEach(t=>grid.innerHTML+=`<div class="time-slot header">${t}</div>`);
-    let slotId = 0;
-    for(let t=0;t<times.length;t++) {
-        grid.innerHTML+=`<div class="time-slot time-header">${times[t]}</div>`;
-        for(let i=0;i<therapists.length;i++) {
-            let type = (scenario.schedule[i] && scenario.schedule[i].slots[t]) || '';
-            let block = BLOCK_TYPES[type] || {label:"",colorclass:""};
-            grid.innerHTML+=`<div class="time-slot ${block.colorclass}" data-type="${type}" data-tidx="${i}" data-time="${times[t]}" data-slot-id="${t+'-'+i}" draggable="true" ondragstart="slotDragStart(event)" ondragover="allowDrop(event)" ondrop="dropSlot(event)" onclick="toggleSlot(this)">${block.label||""}</div>`;
-            slotId++;
+    function renderBlocks(showOptimal=false) {
+      // Remove old blocks
+      document.querySelectorAll('.block').forEach(b => b.remove());
+      let renderList = showOptimal
+        ? blocksFromGrid(SCENARIOS[scenarioIdx].optimalGrid)
+        : blocks.slice();
+      renderList.forEach((block, idx) => {
+        // Only render at start row (span via height)
+        for (let r = block.start; r <= block.end; r++) {
+          if (r === block.start) {
+            const td = getCell(r, block.therapistIdx);
+            if (!td) continue;
+            const blockDiv = document.createElement('div');
+            blockDiv.className = `block ${block.type}`;
+            blockDiv.style.top = '2px';
+            blockDiv.style.height = (44 * (block.end-block.start+1) - 4) + 'px';
+            blockDiv.style.lineHeight = '1.25em';
+            blockDiv.textContent = block.label || BLOCK_TYPES.find(bt=>bt.key===block.type)?.label || "";
+            // Delete on right-click
+            if(!showOptimal) {
+              blockDiv.oncontextmenu = function(e) {
+                e.preventDefault();
+                blocks.splice(idx,1);
+                renderBlocks();
+                updateMetrics();
+              };
+            }
+            td.appendChild(blockDiv);
+          }
         }
+      });
     }
-    updateScheduleStats();
-}
 
-/* ---- Schedule Stats ---- */
-function updateScheduleStats() {
-    let slots = document.querySelectorAll('.schedule-grid .time-slot:not(.header):not(.time-header)');
-    let booked = 0, gaps = 0, open = 0, optimal = 0;
-    slots.forEach(s=>{
-        let type = s.dataset.type;
-        if(type==="open") open++;
-        if(type==="gap") gaps++;
-        if(type && type.startsWith("booked")) booked++;
-        if(type==="booked_80" || type==="booked_50") optimal++;
+    function getCell(row, col) {
+      const table = document.getElementById('schedulerGrid');
+      // Header + bar + body = body starts at 2
+      return table.rows[row + 2]?.cells[col + 1];
+    }
+
+    // --- DRAG TO SELECT ---
+    function handleCellMouseDown(e, rIdx, cIdx) {
+      if (popupActive) return;
+      dragStart = rIdx;
+      dragEnd = rIdx;
+      dragTherapistIdx = cIdx;
+      highlightCells(dragStart, dragEnd, dragTherapistIdx);
+      document.body.style.userSelect = 'none';
+    }
+    function handleCellMouseEnter(e, rIdx, cIdx) {
+      if (dragStart!==null && dragTherapistIdx===cIdx) {
+        dragEnd = rIdx;
+        highlightCells(dragStart, dragEnd, dragTherapistIdx);
+      }
+    }
+    function handleCellMouseUp(e, rIdx, cIdx) {
+      if (dragStart!==null && dragTherapistIdx===cIdx) {
+        dragEnd = rIdx;
+        const [row1,row2] = [dragStart,dragEnd].sort((a,b)=>a-b);
+        showBlockPopup(row1, row2, dragTherapistIdx, e.clientX, e.clientY);
+        clearHighlight();
+        dragStart = dragEnd = dragTherapistIdx = null;
+        document.body.style.userSelect = '';
+      }
+    }
+    function highlightCells(start, end, col) {
+      clearHighlight();
+      const [row1,row2] = [start,end].sort((a,b)=>a-b);
+      for(let r=row1;r<=row2;r++) {
+        const td = getCell(r,col);
+        if(td) td.classList.add('drag-select');
+      }
+    }
+    function clearHighlight() {
+      document.querySelectorAll('.drag-select').forEach(td=>td.classList.remove('drag-select'));
+    }
+
+    // --- BLOCK POPUP ---
+    function showBlockPopup(row1, row2, therapistIdx, x, y) {
+      popupActive = true;
+      const popup = document.getElementById('blockPopup');
+      let left = x, top = y;
+      if (window.innerWidth - x < 350) left = window.innerWidth - 350;
+      if (window.innerHeight - y < 210) top = window.innerHeight - 210;
+      popup.style.left = left + 'px';
+      popup.style.top = top + 'px';
+      popup.style.display = 'block';
+
+      let html = `<h3>Select Block Type</h3>`;
+      BLOCK_TYPES.forEach(bt=>{
+        html += `<label>
+          <span class="block-preview" style="background:${bt.color};"></span>
+          <input type="radio" name="blocktype" value="${bt.key}" data-label="${bt.label}" style="margin-right:8px;">
+          ${bt.label}`;
+        if(bt.key==="appointment") {
+          html += ` <select name="duration">
+            <option value="25">25 min</option>
+            <option value="50">50 min</option>
+            <option value="80">80 min</option>
+          </select>`;
+        }
+        html += `</label>`;
+      });
+      html += `<div class="actions">
+        <button onclick="confirmBlockType('${row1}', '${row2}', '${therapistIdx}')">Add</button>
+        <button class="cancel" onclick="closeBlockPopup()">Cancel</button>
+      </div>`;
+      popup.innerHTML = html;
+      setTimeout(()=>{
+        const firstRadio = popup.querySelector('input[type="radio"]');
+        if(firstRadio) firstRadio.checked = true;
+      },50);
+    }
+    function closeBlockPopup() {
+      document.getElementById('blockPopup').style.display = 'none';
+      popupActive = false;
+    }
+    window.closeBlockPopup = closeBlockPopup;
+
+    function confirmBlockType(row1, row2, therapistIdx) {
+      const popup = document.getElementById('blockPopup');
+      const radio = popup.querySelector('input[name="blocktype"]:checked');
+      let key = radio?.value;
+      let label = radio?.getAttribute("data-label");
+      let duration = null;
+      if(key==="appointment") {
+        duration = popup.querySelector('select[name="duration"]').value;
+        label = duration + "m";
+      }
+      if (key) {
+        blocks.push({
+          start: Number(row1),
+          end: Number(row2),
+          therapistIdx: Number(therapistIdx),
+          type: key,
+          duration: duration,
+          label: label
+        });
+        closeBlockPopup();
+        renderBlocks();
+        updateMetrics();
+      }
+    }
+    window.confirmBlockType = confirmBlockType;
+
+    // --- METRICS ---
+    function updateMetrics() {
+      // Moves: total blocks added or removed
+      document.getElementById("metricMoves").textContent = blocks.length;
+      // Gaps fixed: count how many OPEN slots have been replaced with appointment blocks (simulated)
+      let openSlots = 0, bookedSlots = 0;
+      for(let r=0; r<gridRows; r++) {
+        for(let c=0; c<gridCols; c++) {
+          let hasBlock = blocks.some(b=>b.start<=r && b.end>=r && b.therapistIdx===c);
+          if(!hasBlock) openSlots++;
+          else {
+            let block = blocks.find(b=>b.start<=r && b.end>=r && b.therapistIdx===c);
+            if(block.type==="appointment") bookedSlots++;
+          }
+        }
+      }
+      let gapsFixed = Math.max(0, bookedSlots - 4); // simulate (original 4 appointments in sample)
+      document.getElementById("metricGaps").textContent = gapsFixed;
+      // Utilization: percent of slots booked with appointments
+      let utilization = Math.round(100 * bookedSlots / (gridRows * gridCols));
+      document.getElementById("metricUtil").textContent = utilization + "%";
+      // Revenue: sum of base pricing for appointment blocks
+      let revenue = 0;
+      blocks.forEach(block => {
+        if(block.type==="appointment") {
+          let duration = block.duration || "50";
+          revenue += SESSION_PRICING[duration] || 0;
+        }
+      });
+      document.getElementById("metricRevenue").textContent = "$" + revenue;
+      // Grade: simple logic
+      let grade = "C";
+      let gradeWrap = document.getElementById("metricGradeWrap");
+      gradeWrap.classList.remove("gradeA","gradeB","gradeC");
+      if(utilization > 80 && gapsFixed>=3) { grade="A"; gradeWrap.classList.add("gradeA"); }
+      else if(utilization > 60) { grade="B"; gradeWrap.classList.add("gradeB"); }
+      else { grade="C"; gradeWrap.classList.add("gradeC"); }
+      document.getElementById("metricGrade").textContent = grade;
+    }
+
+    // --- CONTROLS ---
+    document.getElementById("resetBtn").onclick = function() {
+      setupScenario(scenarioIdx);
+    };
+    document.getElementById("hintBtn").onclick = function() {
+      document.getElementById("hintBar").style.display = "block";
+    };
+    document.getElementById("checkBtn").onclick = function() {
+      attemptCount++;
+      if(attemptCount>=4) {
+        document.getElementById("showSolutionBtn").disabled = false;
+      }
+      // Optionally: show feedback
+      updateMetrics();
+    };
+    document.getElementById("showSolutionBtn").onclick = function() {
+      renderBlocks(true); // show optimal grid
+      document.getElementById("solutionOverlay").style.display = "flex";
+      setTimeout(()=>document.getElementById("solutionOverlay").style.display="none",1700);
+    };
+    document.getElementById("nextScenarioBtn").onclick = function() {
+      scenarioIdx = (scenarioIdx+1) % SCENARIOS.length;
+      setupScenario(scenarioIdx);
+    };
+
+    // --- UTIL ---
+    function blocksFromGrid(grid) {
+      // Parse grid to blocks (single slot blocks only)
+      let result = [];
+      for(let r=0; r<grid.length; r++) {
+        for(let c=0; c<grid[r].length; c++) {
+          let cell = grid[r][c];
+          if(cell && cell !== "OPEN") {
+            if(cell === "Lunch") {
+              result.push({ start:r, end:r, therapistIdx:c, type:"lunch", label:"Lunch" });
+            } else if(cell === "Call-out") {
+              result.push({ start:r, end:r, therapistIdx:c, type:"callout", label:"Call-out" });
+            } else if(cell === "80m" || cell === "50m" || cell === "25m") {
+              let duration = cell.replace("m","");
+              result.push({ start:r, end:r, therapistIdx:c, type:"appointment", duration:duration, label:cell });
+            }
+          }
+        }
+      }
+      return result;
+    }
+
+    // --- INIT ---
+    document.addEventListener("DOMContentLoaded", function() {
+      setupScenario(scenarioIdx);
     });
-    let total = slots.length;
-    let utilization = Math.round(100*booked/total);
-    document.getElementById('utilizationRate').textContent = utilization+"%";
-    document.getElementById('gapCount').textContent = gaps;
-    document.getElementById('optimalPatterns').textContent = optimal;
-    document.getElementById('gapsFixedCount').textContent = gaps === 0 ? "All" : (total-gaps);
-    document.getElementById('revenueSaved').textContent = "$"+(booked*120);
-    document.getElementById('gradeValue').textContent = utilization>80 && gaps===0 ? "A" : utilization>70 ? "B" : "C";
-}
 
-/* ---- INIT ---- */
-window.onload = function() {
-    showTab('overview');
-    renderScenarioControls();
-    renderSimulatorControls();
-};
-</script>
+    // --- STEP-BY-STEP HOW TO ADD SCENARIOS ---
+    window.showScenarioHelp = function() {
+      alert([
+        "How to add new scenarios:",
+        "",
+        "1. Add a new object to the SCENARIOS array at the top of index.html.",
+        "2. Each scenario needs:",
+        "   - description: string describing the scenario.",
+        "   - goal: string describing the optimization goal.",
+        "   - day: string (e.g. 'Tuesday').",
+        "   - hint: string (tip for users).",
+        "   - therapists: array of therapist names/IDs.",
+        "   - timeSlots: array of slot labels (auto-generated or custom).",
+        "   - initialGrid: array of arrays (row = time slot, col = therapist), each cell is 'OPEN', 'Lunch', 'Call-out', '25m', '50m', or '80m'.",
+        "   - optimalGrid: same format, showing the optimized solution.",
+        "",
+        "3. Save and refresh. The new scenario will appear when you click 'Next Scenario'.",
+        "",
+        "You can copy and modify the existing scenario as a template."
+      ].join('\n'));
+    };
+  </script>
+  <div style="text-align:right;padding:6px 24px 12px 0;">
+    <a href="javascript:void(0)" onclick="showScenarioHelp()" style="color:#3a4a62;font-size:0.98em;text-decoration:underline;">How to add scenarios</a>
+  </div>
 </body>
 </html>
