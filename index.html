@@ -1,1 +1,125 @@
+<!-- ... keep your original HTML/CSS above ... -->
+<body>
+    <div class="container">
+        <!-- ... tabs and other content ... -->
 
+        <!-- SCHEDULE SIMULATOR -->
+        <div id="simulator" class="content">
+            <h2>Interactive Schedule Simulator</h2>
+            <div class="directions-box">
+                <strong>Directions:</strong><br>
+                1. Drag and drop appointments between slots to optimize the schedule.<br>
+                2. Use the “Add Massage” panel to drag new appointments into open slots.<br>
+                3. You can still click a slot to cycle its type if needed.<br>
+                4. Use the "Hint" or "Show Solution" buttons for guidance.
+            </div>
+            <div class="schedule-controls">
+                <label for="simDay">Day:</label>
+                <select id="simDay"></select>
+                <label for="simScenario">Scenario:</label>
+                <select id="simScenario"></select>
+                <button class="btn btn-primary" onclick="loadSimulatorScenario()">Load Scenario</button>
+                <button class="btn btn-secondary" onclick="clearSchedule()">Clear Schedule</button>
+            </div>
+            <div id="addMassagePanel" style="margin-bottom:24px;">
+                <strong>Add Massage:</strong>
+                <div style="display:flex; gap:10px; margin-top:8px;">
+                    <div class="time-slot booked-80" draggable="true" ondragstart="dragStart(event)" data-type="booked_80">80m</div>
+                    <div class="time-slot booked-50" draggable="true" ondragstart="dragStart(event)" data-type="booked_50">50m</div>
+                    <div class="time-slot booked-25" draggable="true" ondragstart="dragStart(event)" data-type="booked_25">25m</div>
+                    <!-- Add more types as needed -->
+                </div>
+            </div>
+            <div class="schedule-grid" id="scheduleGrid"></div>
+            <!-- ... score panel and other content ... -->
+        </div>
+        <!-- ... rest of your tabs ... -->
+    </div>
+<script>
+/* ---- Drag-and-Drop Logic ---- */
+let draggedType = null;
+let draggedSlot = null;
+
+function dragStart(e) {
+    draggedType = e.target.dataset.type;
+    draggedSlot = e.target.dataset.slotId || null;
+    e.dataTransfer.effectAllowed = "move";
+}
+
+function allowDrop(e) {
+    e.preventDefault();
+}
+
+function dropSlot(e) {
+    e.preventDefault();
+    let slot = e.target;
+    // If dragging from Add Massage panel, use draggedType
+    if (draggedType) {
+        slot.dataset.type = draggedType;
+        slot.className = "time-slot " + (BLOCK_TYPES[draggedType]?.colorclass || "");
+        slot.textContent = BLOCK_TYPES[draggedType]?.label || "";
+        moves++;
+        updateScheduleStats();
+        showScorePanel();
+        hideHint();
+        draggedType = null;
+        draggedSlot = null;
+        return;
+    }
+    // If dragging another slot, swap types
+    if (draggedSlot) {
+        let fromSlot = document.querySelector(`[data-slot-id='${draggedSlot}']`);
+        let tempType = slot.dataset.type;
+        let tempLabel = slot.textContent;
+        let tempClass = slot.className;
+
+        slot.dataset.type = fromSlot.dataset.type;
+        slot.className = fromSlot.className;
+        slot.textContent = fromSlot.textContent;
+
+        fromSlot.dataset.type = tempType;
+        fromSlot.className = tempClass;
+        fromSlot.textContent = tempLabel;
+
+        moves++;
+        updateScheduleStats();
+        showScorePanel();
+        hideHint();
+        draggedType = null;
+        draggedSlot = null;
+        return;
+    }
+}
+
+function slotDragStart(e) {
+    draggedType = e.target.dataset.type;
+    draggedSlot = e.target.dataset.slotId;
+    e.dataTransfer.effectAllowed = "move";
+}
+
+function renderScheduleGrid(day, scenario) {
+    let times = generateTimeSlots(day);
+    let grid = document.getElementById('scheduleGrid');
+    let therapists = THERAPISTS;
+    grid.innerHTML = '';
+    // headers
+    grid.innerHTML += `<div class="time-slot header">Time</div>`;
+    therapists.forEach(t=>grid.innerHTML+=`<div class="time-slot header">${t}</div>`);
+    // slots
+    let slotId = 0;
+    for(let t=0;t<times.length;t++) {
+        grid.innerHTML+=`<div class="time-slot time-header">${times[t]}</div>`;
+        for(let i=0;i<therapists.length;i++) {
+            let type = (scenario.schedule[i] && scenario.schedule[i].slots[t]) || '';
+            let block = BLOCK_TYPES[type] || {label:"",colorclass:""};
+            grid.innerHTML+=`<div class="time-slot ${block.colorclass}" data-type="${type}" data-tidx="${i}" data-time="${times[t]}" data-slot-id="${slotId}" draggable="true" ondragstart="slotDragStart(event)" ondragover="allowDrop(event)" ondrop="dropSlot(event)" onclick="toggleSlot(this)">${block.label||""}</div>`;
+            slotId++;
+        }
+    }
+    updateScheduleStats();
+}
+
+/* ---- rest of your JS unchanged ---- */
+</script>
+</body>
+</html>
