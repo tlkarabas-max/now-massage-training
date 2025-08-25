@@ -2,571 +2,509 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Optimization Training Scenario 2 – 48-Hour Review</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Schedule Optimization Training</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f4f6fa;
-      margin: 0;
-      padding: 0;
-    }
-    .header {
-      background: #2d3d61;
-      color: #fff;
-      padding: 24px 0 14px 0;
-      text-align: center;
-      box-shadow: 0 3px 12px rgba(44,70,131,0.08);
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 2em;
-      font-weight: 600;
-    }
-    .main-container {
-      display: flex;
-      flex-wrap: wrap;
-      margin: 40px auto;
-      max-width: 1350px;
-      gap: 38px;
-    }
-    .sidebar {
-      width: 270px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 1px 8px rgba(0,0,0,0.07);
-      padding: 30px 18px 18px 18px;
-      height: fit-content;
-      min-width: 200px;
-      margin-bottom: 24px;
-    }
-    .sidebar h3 {
-      margin-top: 0;
-      font-size: 1.2em;
-      color: #4861a5;
-      margin-bottom: 16px;
-      font-weight: 700;
-    }
-    .therapist-list, .session-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 14px 0;
-    }
-    .therapist-list li, .session-list li {
-      margin-bottom: 8px;
-      padding: 8px 12px 8px 10px;
-      background: #e6f0ff;
-      border-radius: 7px;
-      color: #324b6c;
-      cursor: grab;
-      transition: background 0.2s;
-      position: relative;
-      font-size: 1em;
-      font-weight: 500;
-      user-select: none;
-    }
-    .therapist-list li:hover, .session-list li:hover {
-      background: #d2e3fc;
-    }
-    .remove-btn {
-      position: absolute;
-      right: 8px;
-      top: 5px;
-      color: #c00;
-      background: none;
-      border: none;
-      font-size: 1em;
-      cursor: pointer;
-      padding: 0;
-    }
-    .add-controls {
-      display: flex;
-      margin-bottom: 12px;
-      gap: 5px;
-    }
-    .add-controls input {
-      flex: 1;
-      font-size: 1em;
-      padding: 4px 8px;
-      border-radius: 4px;
-      border: 1px solid #b0c4de;
-    }
-    .add-controls button {
-      padding: 4px 10px;
-      border-radius: 4px;
-      border: none;
-      background: #4861a5;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .add-controls button:hover {
-      background: #2d3d61;
-    }
-    .scenario-block {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 1px 8px rgba(0,0,0,0.08);
-      flex: 1;
-      min-width: 330px;
-      padding: 32px;
-      margin-bottom: 40px;
-    }
-    .scenario-block h2 {
-      margin-top: 0;
-      color: #2d3d61;
-      font-size: 1.3em;
-      font-weight: 700;
-      margin-bottom: 22px;
-      letter-spacing: 0.5px;
-    }
-    .scenario-block .instructions, .scenario-block .edu {
-      background: #f7fbff;
-      padding: 14px 18px;
-      border-radius: 8px;
-      margin-bottom: 18px;
-      color: #475a8c;
-      font-size: 1.05em;
-      line-height: 1.5;
-    }
-    .time-controls {
-      margin: 18px 0 7px 0;
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-    .time-controls input {
-      font-size: 1em;
-      padding: 2px 8px;
-      border-radius: 4px;
-      border: 1px solid #b0c4de;
-      width: 80px;
-    }
-    .time-controls button {
-      padding: 4px 10px;
-      border-radius: 4px;
-      border: none;
-      background: #4861a5;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .time-controls button:hover {
-      background: #2d3d61;
-    }
-    .remove-time-btn {
-      background: #c00 !important;
-      color: #fff !important;
-      margin-left: 4px;
-      cursor: pointer;
-      border-radius: 3px;
-      font-size: 1em;
-      border: none;
-      padding: 2px 6px;
-      margin-top: 2px;
-    }
-    .week-grid {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      margin-bottom: 24px;
-      font-size: 1em;
-    }
-    .week-grid th, .week-grid td {
-      text-align: center;
-      padding: 8px;
-      min-width: 110px;
-      border: 1px solid #e3e7ed;
-      background: #fff;
-    }
-    .week-grid th {
-      background: #e7f1ff;
-      color: #32547f;
-      font-size: 1em;
-      font-weight: 600;
-    }
-    .week-grid .timeslot {
-      background: #f7fbff;
-      color: #5b6d8b;
-      font-weight: 500;
-      width: 90px;
-    }
-    .session-card {
-      display: inline-block;
-      background: #fbeed7;
-      color: #965c09;
-      padding: 7px 16px;
-      margin: 2px 0;
-      border-radius: 7px;
-      font-size: 0.97em;
-      font-weight: 500;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      cursor: grab;
-      user-select: none;
-      transition: box-shadow 0.1s;
-      border: 1px solid #f6e2b9;
-    }
-    .session-card:hover {
-      box-shadow: 0 2px 6px rgba(200,150,0,0.10);
-      background: #ffe1a4;
-    }
-    .drop-target {
-      min-height: 44px;
-      border-radius: 6px;
-      background: #f6f9fc;
-      border: 1.5px dashed #c3cbe5;
-      opacity: 0.7;
-      transition: background 0.15s;
-      margin: 2px 0;
-      box-sizing: border-box;
-      position: relative;
-    }
-    .week-grid td .drop-target {
-      margin: 0 auto;
-      width: 90%;
-    }
-    .feedback-block {
-      background: #fffbe9;
-      border-left: 6px solid #f3c161;
-      padding: 18px 24px;
-      border-radius: 7px;
-      margin-bottom: 22px;
-      color: #86612c;
-      font-size: 1.07em;
-    }
-    .reveal-btn {
-      background: #f3c161;
-      color: #2d3d61;
-      border: none;
-      font-size: 1.15em;
-      font-weight: 700;
-      border-radius: 6px;
-      padding: 12px 28px;
-      margin: 18px 0 0 0;
-      cursor: pointer;
-      box-shadow: 0 1px 6px rgba(243,193,97,0.13);
-      transition: background 0.2s;
-      display: block;
-    }
-    .reveal-btn:hover {
-      background: #ffe1a4;
-    }
-    .quiz-block {
-      background: #e5f4e6;
-      border-left: 5px solid #6ac17b;
-      padding: 14px 20px;
-      border-radius: 7px;
-      margin-bottom: 18px;
-      color: #39824f;
-      font-size: 1.04em;
-    }
-    .quiz-block label {
-      display: block;
-      margin: 10px 0 0 0;
-      font-weight: 500;
-      font-size: 1em;
-      cursor: pointer;
-    }
-    .quiz-block input[type="radio"] {
-      margin-right: 8px;
-    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fd; margin: 0; padding: 0; }
+    .container { max-width: 1200px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 10px #eee; padding: 32px; }
+    h1 { color: #6170f7; font-size: 2.8em; margin-bottom: 0.5em; }
+    .subtitle { color: #333; font-size: 1.2em; margin-bottom: 2rem; }
+    .scenario-bar { display: flex; gap: 16px; margin-bottom: 14px; }
+    .scenario-label { font-weight: 600; color: #6170f7; }
+    select, button { font-size: 1em; padding: 8px 16px; border-radius: 6px; border: 1px solid #dbe2fa; margin-right: 10px; }
+    button { background: #eef3ff; color: #6170f7; font-weight: 700; border: none; margin-top: 8px; cursor: pointer;}
+    button.active, button:active { background: #dbe2fa; }
+    button:disabled { background: #eee; color: #999; }
+    .metrics { display: flex; gap: 32px; margin: 1.6em 0 1em 0;}
+    .metric { background: #f7f3fb; border-radius: 8px; padding: 18px; text-align: center; min-width: 120px; }
+    .metric-value { font-size: 2em; color: #6170f7; font-weight: bold; }
+    .metric-label { font-size: 1em; color: #555; margin-top: 6px; }
+    .metric-grade { font-size: 1.5em; font-weight: bold; color: #789f42;}
+    .scenario-description { background: #f8faff; border-radius: 6px; padding: 18px; margin: 14px 0 20px 0; color: #425b89; font-size: 1.1em;}
+    table.schedule-table { border-collapse: collapse; width: 100%; margin-top: 18px;}
+    table.schedule-table th { background: #6170f7; color: #fff; padding: 10px; border-bottom: 2px solid #dbe2fa;}
+    table.schedule-table td { background: #fff; border: 1px solid #dbe2fa; padding: 8px 0; text-align: center; font-size: 1em;}
+    .schedule-block-open { background: #fdf3cf; color: #7b950f; font-weight: bold; cursor: pointer;}
+    .schedule-block-session { background: #dbe2fa; color: #3269b7; font-weight: bold;}
+    .schedule-block-callout { background: #fcdbdb; color: #c32929; font-weight: bold;}
+    .schedule-block-lunch { background: #f3db9b; color: #b56c21; font-weight: bold;}
+    .schedule-block-gap { background: #ffe5e5; color: #c32929; font-weight: bold;}
+    .solution-toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: #f8f2ff; border: 2px solid #dbe2fa; color: #6170f7; border-radius: 10px; padding: 18px 38px; font-size: 1.3em; font-weight: 700; box-shadow: 0 2px 8px #e3e2fd; display: none; z-index: 1000;}
+    .feedback-box { margin-top: 22px; background: #fffbe9; border-left: 6px solid #f3c161; padding: 18px 24px; border-radius: 7px; color: #86612c; font-size: 1.07em;}
     @media (max-width: 900px) {
-      .main-container {
-        flex-direction: column;
-        gap: 0;
-      }
-      .sidebar {
-        width: 100%;
-        min-width: unset;
-        margin-bottom: 24px;
-      }
-      .scenario-block {
-        min-width: unset;
-      }
+      .container { padding: 10px; }
+      table.schedule-table th, table.schedule-table td { padding: 6px 2px; font-size: .88em;}
+      .metrics { gap: 10px; }
+      .metric { padding: 12px; min-width: 80px;}
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Scenario 2: 48-Hour Review – Find 5 Areas to Fix</h1>
-    <div style="font-size: 1.15em; margin-top: 12px; color: #e3e7ed;">
-      Interactive Scheduling Optimization Training
-    </div>
+<div class="container">
+  <h1>Schedule Optimization Training</h1>
+  <div class="subtitle">Interactive simulator: Fix gaps, maximize utilization, and compare your solution to the optimal schedule!</div>
+  <div class="scenario-bar">
+    <span class="scenario-label">Select Day:</span>
+    <select id="daySelect"></select>
+    <span class="scenario-label">Scenario:</span>
+    <select id="scenarioSelect"></select>
+    <button onclick="resetProgress()">Reset Progress</button>
+    <button onclick="showSolution()">Show Solution</button>
+    <button onclick="nextScenario()">Next Scenario</button>
   </div>
-  <div class="main-container">
-    <aside class="sidebar">
-      <h3>Therapists</h3>
-      <div class="add-controls">
-        <input id="addTherapistInput" type="text" placeholder="Add therapist..." />
-        <button onclick="addTherapist()">Add</button>
-      </div>
-      <ul class="therapist-list" id="therapistList">
-        <li draggable="true">Madison Jeske <button class="remove-btn" onclick="removeTherapist(this)">×</button></li>
-        <li draggable="true">Di Fisher <button class="remove-btn" onclick="removeTherapist(this)">×</button></li>
-        <li draggable="true">Nicole Ortiz <button class="remove-btn" onclick="removeTherapist(this)">×</button></li>
-        <li draggable="true">Angela McNally <button class="remove-btn" onclick="removeTherapist(this)">×</button></li>
-        <li draggable="true">Edward Franklin <button class="remove-btn" onclick="removeTherapist(this)">×</button></li>
-        <li draggable="true">Mariaelena Parra <button class="remove-btn" onclick="removeTherapist(this)">×</button></li>
-        <li draggable="true">Cheyenne Bringham <button class="remove-btn" onclick="removeTherapist(this)">×</button></li>
-      </ul>
-      <h3>Sessions</h3>
-      <div class="add-controls">
-        <input id="addSessionInput" type="text" placeholder="Add session..." />
-        <button onclick="addSession()">Add</button>
-      </div>
-      <ul class="session-list" id="sessionList">
-        <li draggable="true">Session: Nicole <button class="remove-btn" onclick="removeSession(this)">×</button></li>
-        <li draggable="true">Session: Angela <button class="remove-btn" onclick="removeSession(this)">×</button></li>
-        <li draggable="true">Session: Madison <button class="remove-btn" onclick="removeSession(this)">×</button></li>
-        <li draggable="true">Session: Di <button class="remove-btn" onclick="removeSession(this)">×</button></li>
-        <li draggable="true">Session: Edward <button class="remove-btn" onclick="removeSession(this)">×</button></li>
-        <li draggable="true">Session: Mariaelena <button class="remove-btn" onclick="removeSession(this)">×</button></li>
-      </ul>
-    </aside>
-    <main class="scenario-block">
-      <h2>Instructions</h2>
-      <div class="instructions">
-        <strong>Review the schedule grid for 48 hours out.</strong><br>
-        Identify <strong>5 areas to fix</strong:
-        <ul>
-          <li>Multiple gaps between appointments</li>
-          <li>Misaligned breaks</li>
-          <li>Inefficient booking patterns</li>
-          <li>Overlapping or double-booked sessions</li>
-          <li>Unassigned therapists</li>
-        </ul>
-        <br>
-        <strong>Drag and drop</strong> therapists or sessions into the schedule. Add or remove time slots, therapists, and sessions as needed.<br>
-        When ready, click <b>Reveal</b> to see interactive feedback, revenue loss calculation, and explanations.
-      </div>
-      <div class="edu">
-        <strong>What is Optimization?</strong><br>
-        Optimization is the process of making the best or most effective use of resources. In scheduling, it means maximizing appointments, minimizing gaps, and aligning breaks so both therapists and clients benefit. Every missed slot is a lost opportunity—and lost revenue!
-      </div>
-
-      <div class="time-controls">
-        <input id="addTimeInput" type="text" placeholder="Time (e.g. 8:00)" />
-        <button onclick="addTimeSlot()">Add Time Slot</button>
-      </div>
-      <table class="week-grid" id="weekGrid">
-        <thead>
-          <tr>
-            <th class="timeslot"></th>
-            <th>Day 1</th>
-            <th>Day 2</th>
-          </tr>
-        </thead>
-        <tbody id="weekGridBody"></tbody>
-      </table>
-      <button class="reveal-btn" onclick="revealFeedback()">Reveal</button>
-
-      <div id="feedbackContainer"></div>
-      <div class="quiz-block">
-        <strong>Quiz: What is the best way to reduce lost revenue in scheduling?</strong>
-        <label><input type="radio" name="quiz1" onclick="quizFeedback('A')"> Book sessions close together, minimize gaps, and follow client demand.</label>
-        <label><input type="radio" name="quiz1" onclick="quizFeedback('B')"> Leave large gaps between sessions for therapist breaks.</label>
-        <label><input type="radio" name="quiz1" onclick="quizFeedback('C')"> Overbook therapists for efficiency.</label>
-        <div id="quizFeedback" style="margin-top:12px; font-weight:500;"></div>
-      </div>
-    </main>
+  <div class="scenario-description" id="scenarioDescription"></div>
+  <div class="metrics">
+    <div class="metric"><span class="metric-value" id="movesMetric">0</span><div class="metric-label">Moves</div></div>
+    <div class="metric"><span class="metric-value" id="gapsMetric">0</span><div class="metric-label">Gaps Fixed</div></div>
+    <div class="metric"><span class="metric-value" id="utilMetric">0%</span><div class="metric-label">Utilization</div></div>
+    <div class="metric"><span class="metric-value" id="revenueMetric">$0</span><div class="metric-label">Revenue Saved</div></div>
+    <div class="metric"><span class="metric-grade" id="gradeMetric">C</span><div class="metric-label">Grade</div></div>
   </div>
-  <script>
-    // --- Scheduler logic ---
-    let timeSlots = ["8:00", "8:30", "9:00", "9:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "1:00"];
-    let slotPrices = {
-      "8:00": 60, "8:30": 60, "9:00": 60, "9:30": 60, "10:00": 120, "10:30": 60, "11:00": 60, "11:30": 60, "12:00": 120, "12:30": 60, "1:00": 160
-    };
-    let days = ["Day 1", "Day 2"];
-    function renderGrid() {
-      const tbody = document.getElementById('weekGridBody');
-      tbody.innerHTML = '';
-      timeSlots.forEach((slot, idx) => {
-        const tr = document.createElement('tr');
-        // Time slot cell + remove button
-        let tdTime = document.createElement('td');
-        tdTime.className = "timeslot";
-        tdTime.textContent = slot;
-        let btn = document.createElement('button');
-        btn.textContent = "×";
-        btn.className = "remove-time-btn";
-        btn.onclick = function() { removeTimeSlot(idx); };
-        tdTime.appendChild(btn);
-        tr.appendChild(tdTime);
-        for (let day = 0; day < 2; day++) {
-          let td = document.createElement('td');
-          let drop = document.createElement('div');
-          drop.className = "drop-target";
-          drop.ondragover = function(e) { e.preventDefault(); drop.style.background="#d2e3fc"; }
-          drop.ondragleave = function(e) { drop.style.background=""; }
-          drop.ondrop = function(e) {
-            e.preventDefault();
-            drop.style.background="";
-            let data = e.dataTransfer.getData("text/plain");
-            let elem = document.getElementById(data);
-            if (!elem) {
-              // Create a new card from therapist/session list
-              let val = e.dataTransfer.getData("text/session");
-              if (val) {
-                let card = document.createElement('span');
-                card.className = "session-card";
-                card.textContent = val;
-                card.draggable = true;
-                card.id = "card-" + Math.random().toString(36).substr(2,9);
-                card.ondragstart = dragStartHandler;
-                card.ondblclick = function() { card.remove(); };
-                drop.appendChild(card);
-              }
-            } else {
-              drop.appendChild(elem);
-            }
-          };
-          td.appendChild(drop);
-          tr.appendChild(td);
-        }
-        tbody.appendChild(tr);
-      });
-    }
-    renderGrid();
+  <div id="feedbackBox"></div>
+  <table class="schedule-table" id="scheduleTable"></table>
+</div>
+<div class="solution-toast" id="solutionToast">Optimal solution loaded.</div>
+<script>
+const therapistList = ["Gaia", "Jose", "Diaz", "Frankie"];
+const sessionPrice = 80; // per session slot
+const lunchPrice = 0;
+const calloutPrice = -60; // cost of call-out (lost revenue)
+const openPrice = 0;
 
-    function dragStartHandler(e) {
-      e.dataTransfer.setData("text/plain", e.target.id);
-    }
-    function dragStartSessionList(e) {
-      e.dataTransfer.setData("text/session", e.target.textContent.replace("×", "").trim());
-    }
-    function assignSidebarDrag() {
-      document.querySelectorAll('#sessionList li, #therapistList li').forEach(li => {
-        li.draggable = true;
-        li.id = "li-" + Math.random().toString(36).substr(2,9);
-        li.ondragstart = dragStartSessionList;
-      });
-    }
-    assignSidebarDrag();
+// Custom hours for each day
+const dayHours = {
+  "Sunday":   {start: 9, end: 20},
+  "Monday":   {start: 9, end: 20},
+  "Tuesday":  {start: 9, end: 20},
+  "Wednesday":{start: 9, end: 20},
+  "Thursday": {start: 9, end: 20},
+  "Friday":   {start: 9, end: 21},
+  "Saturday": {start: 9, end: 21}
+};
 
-    function addTherapist() {
-      let input = document.getElementById('addTherapistInput');
-      let val = input.value.trim();
-      if (val) {
-        let ul = document.getElementById('therapistList');
-        let li = document.createElement('li');
-        li.textContent = val;
-        li.draggable = true;
-        li.id = "li-" + Math.random().toString(36).substr(2,9);
-        li.ondragstart = dragStartSessionList;
-        let btn = document.createElement('button');
-        btn.className = "remove-btn";
-        btn.textContent = "×";
-        btn.onclick = function() { li.remove(); };
-        li.appendChild(btn);
-        ul.appendChild(li);
-        input.value = "";
-      }
-    }
-    function removeTherapist(btn) {
-      btn.parentElement.remove();
-    }
-    function addSession() {
-      let input = document.getElementById('addSessionInput');
-      let val = input.value.trim();
-      if (val) {
-        let ul = document.getElementById('sessionList');
-        let li = document.createElement('li');
-        li.textContent = val;
-        li.draggable = true;
-        li.id = "li-" + Math.random().toString(36).substr(2,9);
-        li.ondragstart = dragStartSessionList;
-        let btn = document.createElement('button');
-        btn.className = "remove-btn";
-        btn.textContent = "×";
-        btn.onclick = function() { li.remove(); };
-        li.appendChild(btn);
-        ul.appendChild(li);
-        input.value = "";
-      }
-    }
-    function removeSession(btn) {
-      btn.parentElement.remove();
-    }
-    function addTimeSlot() {
-      let input = document.getElementById('addTimeInput');
-      let val = input.value.trim();
-      if (val && !timeSlots.includes(val)) {
-        timeSlots.push(val);
-        slotPrices[val] = 60; // Default price, can be edited later
-        renderGrid();
-        input.value = "";
-      }
-    }
-    function removeTimeSlot(idx) {
-      timeSlots.splice(idx, 1);
-      renderGrid();
-    }
+// Build time slots for a given day
+function buildTimes(day) {
+  let times = [];
+  let start = dayHours[day].start, end = dayHours[day].end;
+  for (let h = start; h <= end; h++) {
+    times.push((h < 12 ? h : h<=12?12:h-12) + ':00 ' + (h<12?'AM':h==12?'PM':'PM'));
+    times.push((h < end) ? ((h < 12 ? h : h<=12?12:h-12) + ':30 ' + (h<12?'AM':h==12?'PM':'PM')) : null);
+  }
+  return times.filter(x=>x);
+}
 
-    // --- Feedback/Reveal & Revenue Logic ---
-    function revealFeedback() {
-      // Get the schedule state
-      let tbody = document.getElementById('weekGridBody');
-      let lostRevenue = 0;
-      let missedSlots = [];
-      let explanation = [];
-      for (let i = 0; i < timeSlots.length; i++) {
-        for (let d = 0; d < 2; d++) {
-          let tr = tbody.children[i];
-          let td = tr.children[d + 1];
-          let drop = td.querySelector(".drop-target");
-          if (!drop || drop.children.length === 0) {
-            missedSlots.push({time: timeSlots[i], day: days[d], price: slotPrices[timeSlots[i]] || 60});
-            lostRevenue += slotPrices[timeSlots[i]] || 60;
-          } else if (drop.children.length > 1) {
-            explanation.push(`Double booking detected at ${timeSlots[i]} on ${days[d]}.`);
-          }
-        }
-      }
-      // Find gaps (non-consecutive bookings)
-      let gapCount = 0;
-      for (let d = 0; d < 2; d++) {
-        let lastBooked = -2;
-        for (let i = 0; i < timeSlots.length; i++) {
-          let tr = tbody.children[i];
-          let td = tr.children[d + 1];
-          let drop = td.querySelector(".drop-target");
-          if (drop && drop.children.length > 0) {
-            if (lastBooked >= 0 && i - lastBooked > 1) gapCount++;
-            lastBooked = i;
-          }
-        }
-      }
-      if (gapCount > 0) explanation.push(`${gapCount} gap(s) found between booked sessions.`);
-
-      let feedback = `<div class="feedback-block"><strong>Feedback:</strong><br>`;
-      feedback += `Total lost revenue from missed slots: <strong style="color:#c00;">$${lostRevenue.toLocaleString()}</strong><br>`;
-      feedback += `Missed slots:<ul>`;
-      missedSlots.slice(0, 5).forEach(s => {
-        feedback += `<li>${s.time} on ${s.day} <span style="color:#c00;">($${s.price})</span></li>`;
-      });
-      if (missedSlots.length > 5) feedback += `<li>...and ${missedSlots.length-5} more.</li>`;
-      feedback += `</ul>`;
-      feedback += explanation.length ? `<b>Issues:</b> <ul>` + explanation.map(e=>`<li>${e}</li>`).join("") + `</ul>` : "";
-      feedback += `</div>`;
-      document.getElementById('feedbackContainer').innerHTML = feedback;
+// Scenario data for each day
+const scenarioData = {
+  "Sunday": [
+    {
+      name: "Fill Gaps & Align Lunch",
+      description: "Gaia has gaps in the morning, Jose has back-to-back sessions, Diaz has a call-out in the afternoon. Goal: Fill Gaia's gaps, align all lunch breaks.",
+      problem: [
+        // therapist blocks for each time slot
+        // Gaia, Jose, Diaz, Frankie
+        ["OPEN","OPEN","OPEN","OPEN"], //9:00 AM
+        ["OPEN","80m","OPEN","OPEN"], //9:30 AM
+        ["80m","80m","OPEN","OPEN"], //10:00 AM
+        ["Lunch","80m","OPEN","OPEN"], //10:30 AM
+        ["OPEN","OPEN","OPEN","OPEN"], //11:00 AM
+        ["OPEN","OPEN","OPEN","OPEN"], //11:30 AM
+        ["80m","OPEN","Call-out","OPEN"], //12:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //12:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //1:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //1:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //2:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //2:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //3:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //3:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //4:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //4:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //5:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //5:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //6:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //6:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //7:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //7:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //8:00 PM
+      ],
+      solution: [
+        ["80m","80m","80m","80m"], //9:00 AM
+        ["80m","80m","80m","80m"], //9:30 AM
+        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
+        ["80m","80m","80m","80m"], //10:30 AM
+        ["80m","80m","80m","80m"], //11:00 AM
+        ["80m","80m","80m","80m"], //11:30 AM
+        ["80m","80m","80m","80m"], //12:00 PM
+        ["80m","80m","80m","80m"], //12:30 PM
+        ["80m","80m","80m","80m"], //1:00 PM
+        ["80m","80m","80m","80m"], //1:30 PM
+        ["80m","80m","80m","80m"], //2:00 PM
+        ["80m","80m","80m","80m"], //2:30 PM
+        ["80m","80m","80m","80m"], //3:00 PM
+        ["80m","80m","80m","80m"], //3:30 PM
+        ["80m","80m","80m","80m"], //4:00 PM
+        ["80m","80m","80m","80m"], //4:30 PM
+        ["80m","80m","80m","80m"], //5:00 PM
+        ["80m","80m","80m","80m"], //5:30 PM
+        ["80m","80m","80m","80m"], //6:00 PM
+        ["80m","80m","80m","80m"], //6:30 PM
+        ["80m","80m","80m","80m"], //7:00 PM
+        ["80m","80m","80m","80m"], //7:30 PM
+        ["80m","80m","80m","80m"], //8:00 PM
+      ]
+    },
+    {
+      name: "No-Show Call-Outs",
+      description: "Multiple call-outs and open slots. Goal: Rearrange sessions to minimize revenue loss from call-outs.",
+      problem: [
+        ["80m","OPEN","Call-out","OPEN"], //9:00 AM
+        ["OPEN","OPEN","OPEN","OPEN"], //9:30 AM
+        ["OPEN","OPEN","OPEN","Call-out"], //10:00 AM
+        ["OPEN","80m","OPEN","OPEN"], //10:30 AM
+        ["OPEN","OPEN","OPEN","OPEN"], //11:00 AM
+        ["OPEN","OPEN","OPEN","OPEN"], //11:30 AM
+        ["OPEN","OPEN","OPEN","OPEN"], //12:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //12:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //1:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //1:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //2:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //2:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //3:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //3:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //4:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //4:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //5:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //5:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //6:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //6:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //7:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //7:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //8:00 PM
+      ],
+      solution: [
+        ["80m","80m","80m","80m"], //9:00 AM
+        ["80m","80m","80m","80m"], //9:30 AM
+        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
+        ["80m","80m","80m","80m"], //10:30 AM
+        ["80m","80m","80m","80m"], //11:00 AM
+        ["80m","80m","80m","80m"], //11:30 AM
+        ["80m","80m","80m","80m"], //12:00 PM
+        ["80m","80m","80m","80m"], //12:30 PM
+        ["80m","80m","80m","80m"], //1:00 PM
+        ["80m","80m","80m","80m"], //1:30 PM
+        ["80m","80m","80m","80m"], //2:00 PM
+        ["80m","80m","80m","80m"], //2:30 PM
+        ["80m","80m","80m","80m"], //3:00 PM
+        ["80m","80m","80m","80m"], //3:30 PM
+        ["80m","80m","80m","80m"], //4:00 PM
+        ["80m","80m","80m","80m"], //4:30 PM
+        ["80m","80m","80m","80m"], //5:00 PM
+        ["80m","80m","80m","80m"], //5:30 PM
+        ["80m","80m","80m","80m"], //6:00 PM
+        ["80m","80m","80m","80m"], //6:30 PM
+        ["80m","80m","80m","80m"], //7:00 PM
+        ["80m","80m","80m","80m"], //7:30 PM
+        ["80m","80m","80m","80m"], //8:00 PM
+      ]
     }
+  ],
+  // Repeat similar structure for Monday to Saturday
+  "Monday": [
+    {
+      name: "Misaligned Breaks",
+      description: "Therapists have breaks at different times, causing scheduling inefficiency. Goal: Align lunch breaks and fill gaps.",
+      problem: [
+        ["80m","OPEN","OPEN","OPEN"], //9:00 AM
+        ["OPEN","80m","OPEN","OPEN"], //9:30 AM
+        ["OPEN","OPEN","80m","OPEN"], //10:00 AM
+        ["OPEN","OPEN","OPEN","80m"], //10:30 AM
+        ["Lunch","OPEN","OPEN","OPEN"], //11:00 AM
+        ["OPEN","Lunch","OPEN","OPEN"], //11:30 AM
+        ["OPEN","OPEN","Lunch","OPEN"], //12:00 PM
+        ["OPEN","OPEN","OPEN","Lunch"], //12:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //1:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //1:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //2:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //2:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //3:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //3:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //4:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //4:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //5:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //5:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //6:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //6:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //7:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //7:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //8:00 PM
+      ],
+      solution: [
+        ["80m","80m","80m","80m"], //9:00 AM
+        ["80m","80m","80m","80m"], //9:30 AM
+        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
+        ["80m","80m","80m","80m"], //10:30 AM
+        ["80m","80m","80m","80m"], //11:00 AM
+        ["80m","80m","80m","80m"], //11:30 AM
+        ["80m","80m","80m","80m"], //12:00 PM
+        ["80m","80m","80m","80m"], //12:30 PM
+        ["80m","80m","80m","80m"], //1:00 PM
+        ["80m","80m","80m","80m"], //1:30 PM
+        ["80m","80m","80m","80m"], //2:00 PM
+        ["80m","80m","80m","80m"], //2:30 PM
+        ["80m","80m","80m","80m"], //3:00 PM
+        ["80m","80m","80m","80m"], //3:30 PM
+        ["80m","80m","80m","80m"], //4:00 PM
+        ["80m","80m","80m","80m"], //4:30 PM
+        ["80m","80m","80m","80m"], //5:00 PM
+        ["80m","80m","80m","80m"], //5:30 PM
+        ["80m","80m","80m","80m"], //6:00 PM
+        ["80m","80m","80m","80m"], //6:30 PM
+        ["80m","80m","80m","80m"], //7:00 PM
+        ["80m","80m","80m","80m"], //7:30 PM
+        ["80m","80m","80m","80m"], //8:00 PM
+      ]
+    },
+    {
+      name: "Late Evening Gaps",
+      description: "Several open slots in the evening. Goal: Fill late gaps and maximize utilization.",
+      problem: [
+        ["80m","80m","80m","80m"], //9:00 AM
+        ["80m","80m","80m","80m"], //9:30 AM
+        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
+        ["80m","80m","80m","80m"], //10:30 AM
+        ["80m","80m","80m","80m"], //11:00 AM
+        ["80m","80m","80m","80m"], //11:30 AM
+        ["80m","80m","80m","80m"], //12:00 PM
+        ["80m","80m","80m","80m"], //12:30 PM
+        ["80m","80m","80m","80m"], //1:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //1:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //2:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //2:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //3:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //3:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //4:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //4:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //5:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //5:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //6:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //6:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //7:00 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //7:30 PM
+        ["OPEN","OPEN","OPEN","OPEN"], //8:00 PM
+      ],
+      solution: [
+        ["80m","80m","80m","80m"], //9:00 AM
+        ["80m","80m","80m","80m"], //9:30 AM
+        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
+        ["80m","80m","80m","80m"], //10:30 AM
+        ["80m","80m","80m","80m"], //11:00 AM
+        ["80m","80m","80m","80m"], //11:30 AM
+        ["80m","80m","80m","80m"], //12:00 PM
+        ["80m","80m","80m","80m"], //12:30 PM
+        ["80m","80m","80m","80m"], //1:00 PM
+        ["80m","80m","80m","80m"], //1:30 PM
+        ["80m","80m","80m","80m"], //2:00 PM
+        ["80m","80m","80m","80m"], //2:30 PM
+        ["80m","80m","80m","80m"], //3:00 PM
+        ["80m","80m","80m","80m"], //3:30 PM
+        ["80m","80m","80m","80m"], //4:00 PM
+        ["80m","80m","80m","80m"], //4:30 PM
+        ["80m","80m","80m","80m"], //5:00 PM
+        ["80m","80m","80m","80m"], //5:30 PM
+        ["80m","80m","80m","80m"], //6:00 PM
+        ["80m","80m","80m","80m"], //6:30 PM
+        ["80m","80m","80m","80m"], //7:00 PM
+        ["80m","80m","80m","80m"], //7:30 PM
+        ["80m","80m","80m","80m"], //8:00 PM
+      ]
+    }
+  ],
+  // ...Repeat for Tuesday through Saturday (for brevity, these can be clones of the above, or you can specify differences)
+  // For demonstration, use Sunday/Monday scenarios for other days. You can expand as needed!
+};
+["Tuesday","Wednesday","Thursday","Friday","Saturday"].forEach(day=>{
+  scenarioData[day] = JSON.parse(JSON.stringify(scenarioData["Sunday"]));
+  scenarioData[day][0].name = "Fill Gaps & Align Lunch";
+  scenarioData[day][1].name = "No-Show Call-Outs";
+  scenarioData[day][0].description = "Gaia has gaps in the morning, Jose has back-to-back sessions, Diaz has a call-out in the afternoon. Goal: Fill Gaia's gaps, align all lunch breaks.";
+  scenarioData[day][1].description = "Multiple call-outs and open slots. Goal: Rearrange sessions to minimize revenue loss from call-outs.";
+});
 
-    // --- Quiz logic ---
-    function quizFeedback(answer) {
-      const feedbackDiv = document.getElementById('quizFeedback');
-      if (answer === 'A') {
-        feedbackDiv.textContent = "Correct! Optimization means minimizing gaps, booking efficiently, and meeting client demand.";
-        feedbackDiv.style.color = "#39824f";
-      } else if (answer === 'B') {
-        feedbackDiv.textContent = "Not quite! Too many gaps mean lost revenue and therapist downtime.";
-        feedbackDiv.style.color = "#86612c";
-      } else if (answer === 'C') {
-        feedbackDiv.textContent = "Overbooking isn't efficient and can lead to burnout!";
-        feedbackDiv.style.color = "#c00";
+let currentDay = "Sunday";
+let currentScenarioIdx = 0;
+let currentState = null;
+let moveCount = 0;
+
+function updateScenarioBar() {
+  const daySelect = document.getElementById('daySelect');
+  daySelect.innerHTML = Object.keys(scenarioData).map(d=>`<option value="${d}">${d}</option>`).join('');
+  daySelect.value = currentDay;
+  daySelect.onchange = function() {
+    currentDay = daySelect.value;
+    currentScenarioIdx = 0;
+    resetProgress();
+  };
+  const scenarioSelect = document.getElementById('scenarioSelect');
+  scenarioSelect.innerHTML = scenarioData[currentDay].map((s,idx)=>`<option value="${idx}">${s.name}</option>`).join('');
+  scenarioSelect.value = currentScenarioIdx;
+  scenarioSelect.onchange = function() {
+    currentScenarioIdx = parseInt(scenarioSelect.value);
+    resetProgress();
+  };
+}
+
+function resetProgress() {
+  moveCount = 0;
+  currentState = null;
+  renderScenario();
+  hideToast();
+}
+
+function nextScenario() {
+  currentScenarioIdx = (currentScenarioIdx+1) % scenarioData[currentDay].length;
+  resetProgress();
+}
+
+function showSolution() {
+  currentState = JSON.parse(JSON.stringify(scenarioData[currentDay][currentScenarioIdx].solution));
+  moveCount = 0;
+  renderScenario();
+  showToast("Optimal solution loaded.");
+}
+
+function showToast(text) {
+  const toast = document.getElementById('solutionToast');
+  toast.textContent = text;
+  toast.style.display = "block";
+  setTimeout(hideToast, 1800);
+}
+function hideToast() {
+  document.getElementById('solutionToast').style.display = "none";
+}
+
+function renderScenario() {
+  updateScenarioBar();
+  const scenario = scenarioData[currentDay][currentScenarioIdx];
+  document.getElementById('scenarioDescription').textContent = scenario.description;
+
+  const times = buildTimes(currentDay);
+  const table = document.getElementById('scheduleTable');
+  table.innerHTML = '';
+  // Header
+  let thead = document.createElement('thead');
+  let hRow = document.createElement('tr');
+  hRow.innerHTML = `<th>Time</th>` + therapistList.map(n=>`<th>${n}</th>`).join('');
+  thead.appendChild(hRow);
+  table.appendChild(thead);
+
+  // Body
+  let tbody = document.createElement('tbody');
+  let state = currentState || scenario.problem;
+  for (let i=0; i<times.length; i++) {
+    let row = document.createElement('tr');
+    row.innerHTML = `<td>${times[i]}</td>`;
+    for (let t=0; t<therapistList.length; t++) {
+      let val = (state[i]&&state[i][t]) ? state[i][t] : "OPEN";
+      let cellClass = "schedule-block-open";
+      if (val==="80m") cellClass = "schedule-block-session";
+      if (val==="Lunch") cellClass = "schedule-block-lunch";
+      if (val==="Call-out") cellClass = "schedule-block-callout";
+      if (val==="GAP") cellClass = "schedule-block-gap";
+      row.innerHTML += `<td class="${cellClass}" 
+        draggable="true" ondragstart="dragCell(event,${i},${t})" 
+        ondrop="dropCell(event,${i},${t})" ondragover="event.preventDefault()">
+        ${val}
+        </td>`;
+    }
+    tbody.appendChild(row);
+  }
+  table.appendChild(tbody);
+
+  // Metrics
+  updateMetrics(state, scenario.solution);
+
+  // Feedback
+  renderFeedback(state, scenario.solution);
+}
+
+function dragCell(e,i,t) {
+  e.dataTransfer.setData("text/plain", JSON.stringify({i,t}));
+}
+function dropCell(e,i2,t2) {
+  let data = e.dataTransfer.getData("text/plain");
+  if (!data) return;
+  let {i: i1, t: t1} = JSON.parse(data);
+  if (i1==i2 && t1==t2) return;
+  let scenario = scenarioData[currentDay][currentScenarioIdx];
+  let times = buildTimes(currentDay);
+  let state = currentState || JSON.parse(JSON.stringify(scenario.problem));
+  // Swap cells
+  let tmp = state[i1][t1];
+  state[i1][t1] = state[i2][t2];
+  state[i2][t2] = tmp;
+  currentState = state;
+  moveCount++;
+  renderScenario();
+}
+
+function updateMetrics(state, solution) {
+  // Moves
+  document.getElementById('movesMetric').textContent = moveCount;
+  // Gaps fixed = number of non-OPEN blocks in state minus problem
+  let gapsFixed = 0;
+  for (let i=0;i<state.length;i++) {
+    for (let t=0;t<therapistList.length;t++) {
+      if (state[i][t]!=="OPEN" && scenarioData[currentDay][currentScenarioIdx].problem[i][t]==="OPEN") {
+        gapsFixed++;
       }
     }
-  </script>
+  }
+  document.getElementById('gapsMetric').textContent = gapsFixed;
+  // Utilization = percent of slots filled (not OPEN)
+  let filled = 0, total = state.length*therapistList.length;
+  for (let i=0;i<state.length;i++) for (let t=0;t<therapistList.length;t++) {
+    if (state[i][t]!=="OPEN") filled++;
+  }
+  let utilization = Math.round(100*filled/total);
+  document.getElementById('utilMetric').textContent = utilization+"%";
+  // Revenue Saved = (number of 80m blocks in state) * price, minus call-outs
+  let revenue = 0;
+  for (let i=0;i<state.length;i++) for (let t=0;t<therapistList.length;t++) {
+    if (state[i][t]==="80m") revenue += sessionPrice;
+    if (state[i][t]==="Call-out") revenue += calloutPrice;
+  }
+  document.getElementById('revenueMetric').textContent = "$"+revenue;
+  // Grade
+  let grade = "C";
+  if (utilization > 90) grade = "A";
+  else if (utilization > 75) grade = "B";
+  else if (utilization > 60) grade = "C";
+  else grade = "D";
+  document.getElementById('gradeMetric').textContent = grade;
+}
+
+function renderFeedback(state, solution) {
+  // List missed slots (OPEN), call-outs, and gaps
+  let missed = 0, callouts = 0;
+  let feedback = "<div class='feedback-box'><b>Feedback:</b><ul>";
+  for (let i=0;i<state.length;i++) for (let t=0;t<therapistList.length;t++) {
+    if (state[i][t]==="OPEN") {
+      feedback += `<li>Missed opportunity at ${buildTimes(currentDay)[i]} for ${therapistList[t]}</li>`;
+      missed++;
+    }
+    if (state[i][t]==="Call-out") {
+      feedback += `<li>Call-out at ${buildTimes(currentDay)[i]} for ${therapistList[t]} (lost revenue)</li>`;
+      callouts++;
+    }
+  }
+  feedback += `</ul>`;
+  feedback += `<b>Total missed slots:</b> ${missed}. <b>Call-outs:</b> ${callouts}.<br>`;
+  feedback += `<b>Estimated Lost Revenue:</b> $${missed*sessionPrice + callouts*(-calloutPrice)}.`;
+  feedback += "</div>";
+  document.getElementById('feedbackBox').innerHTML = feedback;
+}
+
+// Startup
+resetProgress();
+</script>
 </body>
 </html>
