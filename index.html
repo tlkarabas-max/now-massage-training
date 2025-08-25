@@ -1,1 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zenoti-Style Massage Optimization Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      /* Block colors extracted from Image 5 */
+      --break: #dcdcdc;
+      --lunch: #b3a7d6;
+      --personal: #e7e7e7;
+      --pto: #fff0b3;
+      --admin: #e7e7e7;
+      --soap: #e7e7e7;
+      --meeting: #e7e7e7;
+      --training: #e7e7e7;
+      --offsite: #e7e7e7;
+      --closure: #e7e7e7;
+      --leaving: #ffb3b3;
+      --late: #ffb3b3;
+      --callout: #e14545;
+      --shift: #e14545;
+      --hold: #c539c5;
+      --appointment: #e6f0ff;
+      --border: #d5d5d5;
+      --header-bg: #f4f6fa;
+      --header-title: #2d3d61;
+      --header-bar: #d09cc9;
+      --therapist-bar: #3a4a62;
+      --grid-bg: #fafafd;
+      --slot-divider: #e6e6eb;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      background: var(--grid-bg);
+      color: #222;
+    }
+    h1 {
+      background: var(--header-title);
+      color: #fff;
+      margin: 0;
+      font-size: 2.1em;
+      font-weight: 600;
+      padding: 22px 0 14px 0;
+      text-align: center;
+      box-shadow: 0 3px 12px rgba(44,70,131,0.08);
+    }
+    .tabs {
+      display: flex; gap: 12px; justify-content: center; margin-bottom: 18px;
+      background: var(--header-bg); padding: 16px 0 2px 0;
+      border-bottom: 3px solid var(--header-bar);
+    }
+    .tab {
+      padding: 8px 22px;
+      font-size: 1.07em;
+      background: #eee;
+      border: none;
+      border-radius: 7px 7px 0 0;
+      cursor: pointer;
+      color: #3a4a62;
+      font-weight: 500;
+    }
+    .tab.active {
+      background: var(--therapist-bar);
+      color: #fff;
+      font-weight: 700;
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+    /* Grid Layout */
+    .zenoti-grid-wrap {
+      overflow-x: auto;
+      padding: 0 18px 28px 18px;
+    }
+    .zenoti-grid {
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 0 auto;
+      min-width: 820px;
+      background: var(--grid-bg);
+    }
+    .zenoti-grid th,
+    .zenoti-grid td {
+      border: 1px solid var(--border);
+      text-align: center;
+      min-width: 110px;
+      vertical-align: top;
+      font-size: 0.99em;
+      padding: 0;
+      position: relative;
+    }
+    .zenoti-grid th {
+      background: var(--therapist-bar);
+      color: #fff;
+      font-size: 1.01em;
+      font-weight: 700;
+      height: 54px;
+      border-bottom: 4px solid var(--header-bar);
+      letter-spacing: 0.02em;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .zenoti-grid th.time {
+      background: #fff;
+      color: #4861a5;
+      font-weight: 700;
+      border-right: 2px solid var(--header-bar);
+      border-bottom: 4px solid var(--header-bar);
+      z-index: 3;
+    }
+    .zenoti-grid td.time {
+      background: #fff;
+      color: #3a4a62;
+      font-weight: 700;
+      font-size: 0.97em;
+      border-right: 2px solid var(--header-bar);
+      text-align: right;
+      padding-right: 10px;
+      min-width: 78px;
+      z-index: 1;
+    }
+    .zenoti-grid td {
+      background: var(--grid-bg);
+      height: 44px;
+      min-width: 110px;
+      border-top: 1px solid var(--slot-divider);
+      border-bottom: 1px solid var(--slot-divider);
+    }
+    /* Block styles */
+    .block {
+      border-radius: 7px;
+      box-shadow: 0 2px 6px rgba(44,70,131,0.08);
+      margin: 1px 0;
+      font-weight: 500;
+      font-size: 1.01em;
+      padding: 7px 7px 5px 7px;
+      color: #222;
+      cursor: pointer;
+      text-align: left;
+      border: 2px solid transparent;
+      position: absolute;
+      left: 2px; right: 2px; top: 2px; bottom: 2px;
+      z-index: 5;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      transition: box-shadow 0.2s, border 0.2s;
+      word-break: break-word;
+    }
+    /* Block colors */
+    .block.break { background: var(--break); border-color: var(--break);}
+    .block.lunch { background: var(--lunch); border-color: var(--lunch);}
+    .block.personal { background: var(--personal); border-color: var(--personal);}
+    .block.pto { background: var(--pto); border-color: var(--pto);}
+    .block.admin, .block.soap, .block.meeting, .block.training,
+    .block.offsite, .block.closure { background: var(--admin); border-color: var(--admin);}
+    .block.leaving, .block.late { background: var(--leaving); border-color: var(--leaving);}
+    .block.callout, .block.shift { background: var(--callout); border-color: var(--callout); color: #fff;}
+    .block.hold { background: var(--hold); border-color: var(--hold); color: #fff;}
+    .block.appointment { background: var(--appointment); border-color: #aac6f8;}
+    /* Drag selection highlight */
+    .drag-select {
+      background: rgba(44,70,131,0.11) !important;
+      outline: 2px dashed var(--therapist-bar);
+      z-index: 3;
+    }
+    /* Time/therapist bar */
+    .zenoti-bar {
+      background: var(--header-bar);
+      height: 7px;
+      border-bottom: 1px solid #e6e6eb;
+    }
+    /* Popup menu */
+    .block-popup {
+      position: absolute;
+      z-index: 9999;
+      background: #fff;
+      border: 2px solid var(--therapist-bar);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(44,70,131,0.22);
+      padding: 18px 20px 12px 20px;
+      top: 60px;
+      left: 50px;
+      min-width: 230px;
+      animation: fadein 0.18s;
+    }
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+    .block-popup h3 {
+      margin: 0 0 14px 0;
+      font-size: 1.15em;
+      color: var(--therapist-bar);
+    }
+    .block-popup label {
+      display: block;
+      margin-bottom: 8px;
+      padding: 7px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+      border: 2px solid transparent;
+      transition: background 0.1s, border 0.1s;
+    }
+    .block-popup label:hover, .block-popup label.selected {
+      background: var(--header-bg);
+      border: 2px solid var(--therapist-bar);
+    }
+    .block-popup .block-preview {
+      display: inline-block;
+      width: 22px; height: 22px;
+      vertical-align: middle;
+      border-radius: 6px;
+      margin-right: 8px;
+      border: 2px solid #b5b5b5;
+    }
+    .block-popup .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .block-popup button {
+      padding: 7px 22px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1em;
+      background: var(--therapist-bar);
+      color: #fff;
+      transition: background 0.18s;
+    }
+    .block-popup button.cancel {
+      background: #eee;
+      color: #444;
+      border: 1px solid #bbb;
+    }
+    /* Responsive tweaks */
+    @media (max-width: 1100px) {
+      .zenoti-grid-wrap { min-width: 0; padding: 0 2vw; }
+      .zenoti-grid { min-width: 620px; }
+      .block-popup { left: 8vw; min-width: 180px;}
+    }
+    @media (max-width: 700px) {
+      .zenoti-grid { font-size: 0.87em;}
+      .block-popup { left: 4vw; min-width: 120px;}
+    }
+  </style>
+</head>
+<body>
+  <h1>Zenoti-Style Massage Optimization Simulator</h1>
+  <div class="tabs">
+    <button class="tab active" onclick="showSection('simulator')">Optimization Simulator</button>
+    <button class="tab" onclick="showSection('block-definitions')">Block Definitions</button>
+  </div>
 
+  <!-- Simulator Section -->
+  <div id="simulator" class="section active">
+    <div class="zenoti-grid-wrap">
+      <div class="zenoti-bar"></div>
+      <table class="zenoti-grid" id="schedulerGrid">
+        <!-- Grid is rendered by JS -->
+      </table>
+    </div>
+  </div>
+
+  <!-- Block Definitions Section -->
+  <div id="block-definitions" class="section">
+    <div style="max-width:820px;margin:22px auto 0 auto;">
+      <img src="https://user-images.githubusercontent.com/your-image-path.png" alt="Block Definitions" style="width:100%;max-width:820px;border-radius:12px;box-shadow:0 3px 24px #6182;">
+      <!-- If you want to embed the table, use your previous HTML block definitions table here -->
+    </div>
+  </div>
+
+  <!-- Popup block type selector -->
+  <div id="blockPopup" class="block-popup" style="display:none;"></div>
+
+  <script>
+    // --- CONFIG ---
+    const THERAPISTS = [
+      "Amy (DT7, G)", "Jayna (DT7, CGH)", "Spencer (1-7, CH)", "Trang (DT8, CGH)", "Alexis DT7",
+      "Hank (DT9, CGHI)", "Bill (DT8, CHM)", "Corey (DT10, G)", "Diaz (DT8, CGHN)"
+    ];
+    // 8:00 AM - 7:00 PM at 30min intervals (as in your schedule)
+    const TIME_SLOTS = [
+      "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+      "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
+      "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM", "06:00 PM", "06:30 PM", "07:00 PM"
+    ];
+
+    // Block types/colors (extracted from your image 5)
+    const BLOCK_TYPES = [
+      { key: "appointment", label: "Appointment", color: "var(--appointment)" }, // default
+      { key: "break", label: "Break", color: "var(--break)" },
+      { key: "lunch", label: "Lunch", color: "var(--lunch)" },
+      { key: "personal", label: "Personal Time", color: "var(--personal)" },
+      { key: "pto", label: "Paid Time Off", color: "var(--pto)" },
+      { key: "admin", label: "Admin", color: "var(--admin)" },
+      { key: "soap", label: "SOAP Notes", color: "var(--soap)" },
+      { key: "meeting", label: "Meeting", color: "var(--meeting)" },
+      { key: "training", label: "Training", color: "var(--training)" },
+      { key: "offsite", label: "Offsite Event", color: "var(--offsite)" },
+      { key: "closure", label: "Boutique Closure", color: "var(--closure)" },
+      { key: "leaving", label: "Leaving Early", color: "var(--leaving)" },
+      { key: "late", label: "Running Late", color: "var(--late)" },
+      { key: "callout", label: "Call-Out", color: "var(--callout)" },
+      { key: "shift", label: "Shift Adjustment", color: "var(--shift)" },
+      { key: "hold", label: "Temp Hold", color: "var(--hold)" }
+    ];
+
+    // --- STATE ---
+    let blocks = []; // {start, end, therapistIdx, type, label}
+    let dragStart = null, dragEnd = null, dragTherapistIdx = null;
+    let popupActive = false;
+
+    // --- RENDER GRID ---
+    function renderGrid() {
+      const table = document.getElementById('schedulerGrid');
+      table.innerHTML = '';
+      // Header
+      const thead = document.createElement('thead');
+      const trh = document.createElement('tr');
+      const thTime = document.createElement('th');
+      thTime.className = 'time';
+      thTime.textContent = "Time";
+      trh.appendChild(thTime);
+      THERAPISTS.forEach((therapist, tIdx) => {
+        const th = document.createElement('th');
+        th.textContent = therapist;
+        th.title = therapist;
+        th.setAttribute('data-col', tIdx);
+        trh.appendChild(th);
+      });
+      thead.appendChild(trh);
+
+      // Therapist bar (colored row under header)
+      const trBar = document.createElement('tr');
+      const tdBarTime = document.createElement('td');
+      tdBarTime.className = 'time';
+      tdBarTime.innerHTML = '&nbsp;';
+      trBar.appendChild(tdBarTime);
+      THERAPISTS.forEach(() => {
+        const td = document.createElement('td');
+        td.innerHTML = '<div class="zenoti-bar"></div>';
+        trBar.appendChild(td);
+      });
+      thead.appendChild(trBar);
+
+      table.appendChild(thead);
+
+      // Body
+      const tbody = document.createElement('tbody');
+      TIME_SLOTS.forEach((slot, rIdx) => {
+        const tr = document.createElement('tr');
+        // Time cell
+        const tdTime = document.createElement('td');
+        tdTime.className = 'time';
+        tdTime.textContent = slot;
+        tr.appendChild(tdTime);
+        // Therapist columns
+        THERAPISTS.forEach((_, cIdx) => {
+          const td = document.createElement('td');
+          td.setAttribute('data-row', rIdx);
+          td.setAttribute('data-col', cIdx);
+          td.onmousedown = e => handleCellMouseDown(e, rIdx, cIdx);
+          td.onmouseenter = e => handleCellMouseEnter(e, rIdx, cIdx);
+          td.onmouseup = e => handleCellMouseUp(e, rIdx, cIdx);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+
+      // Render blocks (overlap logic)
+      renderBlocks();
+    }
+
+    function renderBlocks() {
+      // Remove old blocks
+      document.querySelectorAll('.block').forEach(b => b.remove());
+      blocks.forEach((block, idx) => {
+        for (let r = block.start; r <= block.end; r++) {
+          // Only render at start row (span via height)
+          if (r === block.start) {
+            const td = getCell(r, block.therapistIdx);
+            if (!td) continue;
+            const blockDiv = document.createElement('div');
+            blockDiv.className = `block ${block.type}`;
+            blockDiv.style.top = '2px';
+            blockDiv.style.height = (44 * (block.end-block.start+1) - 4) + 'px';
+            blockDiv.style.lineHeight = '1.25em';
+            blockDiv.textContent = BLOCK_TYPES.find(bt=>bt.key===block.type)?.label || block.label;
+            // Delete on right click
+            blockDiv.oncontextmenu = function(e) {
+              e.preventDefault();
+              blocks.splice(idx,1);
+              renderBlocks();
+            };
+            td.appendChild(blockDiv);
+          }
+        }
+      });
+    }
+
+    function getCell(row, col) {
+      const table = document.getElementById('schedulerGrid');
+      // Header + bar + body = body starts at 2
+      return table.rows[row + 2]?.cells[col + 1];
+    }
+
+    // --- DRAG TO SELECT ---
+    function handleCellMouseDown(e, rIdx, cIdx) {
+      if (popupActive) return;
+      dragStart = rIdx;
+      dragEnd = rIdx;
+      dragTherapistIdx = cIdx;
+      highlightCells(dragStart, dragEnd, dragTherapistIdx);
+      document.body.style.userSelect = 'none';
+    }
+    function handleCellMouseEnter(e, rIdx, cIdx) {
+      if (dragStart!==null && dragTherapistIdx===cIdx) {
+        dragEnd = rIdx;
+        highlightCells(dragStart, dragEnd, dragTherapistIdx);
+      }
+    }
+    function handleCellMouseUp(e, rIdx, cIdx) {
+      if (dragStart!==null && dragTherapistIdx===cIdx) {
+        dragEnd = rIdx;
+        const [row1,row2] = [dragStart,dragEnd].sort((a,b)=>a-b);
+        showBlockPopup(row1, row2, dragTherapistIdx, e.clientX, e.clientY);
+        clearHighlight();
+        dragStart = dragEnd = dragTherapistIdx = null;
+        document.body.style.userSelect = '';
+      }
+    }
+    function highlightCells(start, end, col) {
+      clearHighlight();
+      const [row1,row2] = [start,end].sort((a,b)=>a-b);
+      for(let r=row1;r<=row2;r++) {
+        const td = getCell(r,col);
+        if(td) td.classList.add('drag-select');
+      }
+    }
+    function clearHighlight() {
+      document.querySelectorAll('.drag-select').forEach(td=>td.classList.remove('drag-select'));
+    }
+
+    // --- BLOCK POPUP ---
+    function showBlockPopup(row1, row2, therapistIdx, x, y) {
+      popupActive = true;
+      const popup = document.getElementById('blockPopup');
+      // Position near mouse, but not offscreen
+      let left = x, top = y;
+      if (window.innerWidth - x < 350) left = window.innerWidth - 350;
+      if (window.innerHeight - y < 210) top = window.innerHeight - 210;
+      popup.style.left = left + 'px';
+      popup.style.top = top + 'px';
+      popup.style.display = 'block';
+
+      let html = `<h3>Select Block Type</h3>`;
+      BLOCK_TYPES.forEach(bt=>{
+        html += `<label>
+          <span class="block-preview" style="background:${bt.color};"></span>
+          <input type="radio" name="blocktype" value="${bt.key}" style="margin-right:8px;">
+          ${bt.label}
+        </label>`;
+      });
+      html += `<div class="actions">
+        <button onclick="confirmBlockType('${row1}', '${row2}', '${therapistIdx}')">Add</button>
+        <button class="cancel" onclick="closeBlockPopup()">Cancel</button>
+      </div>`;
+      popup.innerHTML = html;
+
+      // Select first by default
+      setTimeout(()=>{
+        const firstRadio = popup.querySelector('input[type="radio"]');
+        if(firstRadio) firstRadio.checked = true;
+      },50);
+    }
+    function closeBlockPopup() {
+      document.getElementById('blockPopup').style.display = 'none';
+      popupActive = false;
+    }
+    window.closeBlockPopup = closeBlockPopup;
+
+    function confirmBlockType(row1, row2, therapistIdx) {
+      const popup = document.getElementById('blockPopup');
+      const key = popup.querySelector('input[name="blocktype"]:checked')?.value;
+      if (key) {
+        blocks.push({
+          start: Number(row1),
+          end: Number(row2),
+          therapistIdx: Number(therapistIdx),
+          type: key,
+          label: BLOCK_TYPES.find(bt=>bt.key===key)?.label || key
+        });
+        closeBlockPopup();
+        renderBlocks();
+      }
+    }
+    window.confirmBlockType = confirmBlockType;
+
+    // --- TABS ---
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      Array.from(document.getElementsByClassName('tab')).forEach(tab => {
+        if (tab.textContent.replace(/\s+/g, '').toLowerCase().includes(id.replace('-', ''))) tab.classList.add('active');
+      });
+    }
+
+    // --- INIT ---
+    document.addEventListener("DOMContentLoaded", function() {
+      renderGrid();
+    });
+  </script>
+</body>
+</html>
