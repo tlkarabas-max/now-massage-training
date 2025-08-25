@@ -1,132 +1,878 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOW Massage - Schedule Optimization Training (Upgraded)</title>
-    <style>
-        /* ... (all your CSS here, unchanged for brevity) ... */
-        /* You can keep your original CSS from your previous HTML code */
-    </style>
+  <meta charset="UTF-8">
+  <title>Massage Optimization Simulator - Zenoti Style</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      /* Zenoti block colors from your references */
+      --break: #dcdcdc;
+      --lunch: #b3a7d6;
+      --personal: #e7e7e7;
+      --pto: #fff0b3;
+      --admin: #e7e7e7;
+      --soap: #e7e7e7;
+      --meeting: #e7e7e7;
+      --training: #e7e7e7;
+      --offsite: #e7e7e7;
+      --closure: #e7e7e7;
+      --leaving: #ffb3b3;
+      --late: #ffb3b3;
+      --callout: #e14545;
+      --shift: #e14545;
+      --hold: #c539c5;
+      --appointment: #e6f0ff;
+      --border: #d5d5d5;
+      --header-bg: #f4f6fa;
+      --header-title: #2d3d61;
+      --header-bar: #d09cc9;
+      --therapist-bar: #3a4a62;
+      --grid-bg: #fafafd;
+      --slot-divider: #e6e6eb;
+      /* Metrics colors */
+      --metric-bg: #f7fafd;
+      --metric-title: #4861a5;
+      --metric-value: #2d3d61;
+      --metric-grade-c: #f6c2c2;
+      --metric-grade-b: #f6e9c2;
+      --metric-grade-a: #c2f6d2;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      background: var(--grid-bg);
+      color: #222;
+    }
+    h1 {
+      background: var(--header-title);
+      color: #fff;
+      margin: 0;
+      font-size: 2em;
+      font-weight: 600;
+      padding: 20px 0 14px 0;
+      text-align: center;
+      box-shadow: 0 3px 12px rgba(44,70,131,0.08);
+    }
+    .scenario-bar {
+      background: var(--header-bg);
+      border-bottom: 2px solid var(--header-bar);
+      padding: 20px 14px 8px 14px;
+      margin-bottom: 0px;
+      box-shadow: 0 1px 6px rgba(44,70,131,0.06);
+    }
+    .scenario-title {
+      font-size: 1.13em;
+      font-weight: 600;
+      color: var(--header-title);
+      margin-bottom: 2px;
+    }
+    .scenario-goal {
+      font-size: 1.07em;
+      color: #397b59;
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+    .hint-bar {
+      background: #e8f4ff;
+      color: #222;
+      font-size: 1.04em;
+      font-weight: 500;
+      padding: 10px 16px;
+      border-left: 5px solid #3a4a62;
+      margin-bottom: 12px;
+      border-radius: 0 0 12px 12px;
+    }
+    .metrics-bar {
+      display: flex; gap: 18px; justify-content: flex-start;
+      background: var(--metric-bg);
+      padding: 16px 16px 8px 16px;
+      border-bottom: 1px solid var(--header-bar);
+      margin-bottom: 0;
+      align-items: flex-end;
+    }
+    .metric {
+      flex: 1 1 120px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 7px 18px 8px 18px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(44,70,131,0.08);
+      margin-right: 0;
+      font-size: 1em;
+    }
+    .metric-title {
+      font-size: 0.98em;
+      color: var(--metric-title);
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .metric-value {
+      font-size: 1.32em;
+      color: var(--metric-value);
+      font-weight: 700;
+      margin-bottom: 1px;
+      letter-spacing: 0.03em;
+    }
+    .metric.grade .metric-value {
+      color: #fff;
+      background: var(--metric-grade-c);
+      border-radius: 8px;
+      padding: 6px 0;
+      width: 60px;
+      display: inline-block;
+      font-size: 1.12em;
+    }
+    .metric.grade.gradeA .metric-value { background: var(--metric-grade-a); color: #1c9a46;}
+    .metric.grade.gradeB .metric-value { background: var(--metric-grade-b); color: #d4b112;}
+    .metric.grade.gradeC .metric-value { background: var(--metric-grade-c); color: #c32d2d;}
+    .controls-bar {
+      display: flex;
+      gap: 14px;
+      margin: 0 0 12px 16px;
+      align-items: center;
+    }
+    .controls-bar select,
+    .controls-bar button {
+      padding: 7px 16px;
+      font-size: 1em;
+      border-radius: 7px;
+      border: 1.5px solid var(--header-bar);
+      background: #fff;
+      color: #3a4a62;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0;
+      transition: background 0.13s, color 0.13s, border 0.13s;
+    }
+    .controls-bar button {
+      background: var(--header-bar);
+      color: #fff;
+      border: none;
+    }
+    .controls-bar button:disabled {
+      background: #eee;
+      color: #999;
+      border: 1.5px solid #bbb;
+      cursor: not-allowed;
+    }
+    .zenoti-grid-wrap {
+      overflow-x: auto;
+      padding: 0 18px 36px 18px;
+      background: var(--grid-bg);
+      border-bottom: 1.5px solid var(--header-bar);
+    }
+    .zenoti-bar {
+      background: var(--header-bar);
+      height: 7px;
+      border-bottom: 1px solid #e6e6eb;
+    }
+    .zenoti-grid {
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 0 auto;
+      min-width: 820px;
+      background: var(--grid-bg);
+    }
+    .zenoti-grid th,
+    .zenoti-grid td {
+      border: 1px solid var(--border);
+      text-align: center;
+      min-width: 110px;
+      vertical-align: top;
+      font-size: 0.99em;
+      padding: 0;
+      position: relative;
+    }
+    .zenoti-grid th {
+      background: var(--therapist-bar);
+      color: #fff;
+      font-size: 1.01em;
+      font-weight: 700;
+      height: 54px;
+      border-bottom: 4px solid var(--header-bar);
+      letter-spacing: 0.02em;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .zenoti-grid th.time {
+      background: #fff;
+      color: #4861a5;
+      font-weight: 700;
+      border-right: 2px solid var(--header-bar);
+      border-bottom: 4px solid var(--header-bar);
+      z-index: 3;
+    }
+    .zenoti-grid td.time {
+      background: #fff;
+      color: #3a4a62;
+      font-weight: 700;
+      font-size: 0.97em;
+      border-right: 2px solid var(--header-bar);
+      text-align: right;
+      padding-right: 10px;
+      min-width: 78px;
+      z-index: 1;
+    }
+    .zenoti-grid td {
+      background: var(--grid-bg);
+      height: 44px;
+      min-width: 110px;
+      border-top: 1px solid var(--slot-divider);
+      border-bottom: 1px solid var(--slot-divider);
+    }
+    .block {
+      border-radius: 7px;
+      box-shadow: 0 2px 6px rgba(44,70,131,0.08);
+      margin: 1px 0;
+      font-weight: 500;
+      font-size: 1.01em;
+      padding: 7px 7px 5px 7px;
+      color: #222;
+      cursor: pointer;
+      text-align: left;
+      border: 2px solid transparent;
+      position: absolute;
+      left: 2px; right: 2px; top: 2px; bottom: 2px;
+      z-index: 5;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      transition: box-shadow 0.2s, border 0.2s;
+      word-break: break-word;
+    }
+    .block.break { background: var(--break); border-color: var(--break);}
+    .block.lunch { background: var(--lunch); border-color: var(--lunch);}
+    .block.personal { background: var(--personal); border-color: var(--personal);}
+    .block.pto { background: var(--pto); border-color: var(--pto);}
+    .block.admin, .block.soap, .block.meeting, .block.training,
+    .block.offsite, .block.closure { background: var(--admin); border-color: var(--admin);}
+    .block.leaving, .block.late { background: var(--leaving); border-color: var(--leaving);}
+    .block.callout, .block.shift { background: var(--callout); border-color: var(--callout); color: #fff;}
+    .block.hold { background: var(--hold); border-color: var(--hold); color: #fff;}
+    .block.appointment { background: var(--appointment); border-color: #aac6f8;}
+    /* Drag selection highlight */
+    .drag-select {
+      background: rgba(44,70,131,0.11) !important;
+      outline: 2px dashed var(--therapist-bar);
+      z-index: 3;
+    }
+    /* Popup menu */
+    .block-popup {
+      position: absolute;
+      z-index: 9999;
+      background: #fff;
+      border: 2px solid var(--therapist-bar);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(44,70,131,0.22);
+      padding: 18px 20px 12px 20px;
+      top: 60px;
+      left: 50px;
+      min-width: 230px;
+      animation: fadein 0.18s;
+    }
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+    .block-popup h3 { margin: 0 0 14px 0; font-size: 1.15em; color: var(--therapist-bar);}
+    .block-popup label {
+      display: block;
+      margin-bottom: 8px;
+      padding: 7px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+      border: 2px solid transparent;
+      transition: background 0.1s, border 0.1s;
+    }
+    .block-popup label:hover, .block-popup label.selected {
+      background: var(--header-bg);
+      border: 2px solid var(--therapist-bar);
+    }
+    .block-popup .block-preview {
+      display: inline-block;
+      width: 22px; height: 22px;
+      vertical-align: middle;
+      border-radius: 6px;
+      margin-right: 8px;
+      border: 2px solid #b5b5b5;
+    }
+    .block-popup .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .block-popup button {
+      padding: 7px 22px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1em;
+      background: var(--therapist-bar);
+      color: #fff;
+      transition: background 0.18s;
+    }
+    .block-popup button.cancel {
+      background: #eee;
+      color: #444;
+      border: 1px solid #bbb;
+    }
+    /* Responsive tweaks */
+    @media (max-width: 1100px) {
+      .zenoti-grid-wrap { min-width: 0; padding: 0 2vw; }
+      .zenoti-grid { min-width: 620px; }
+      .block-popup { left: 8vw; min-width: 180px;}
+    }
+    @media (max-width: 700px) {
+      .zenoti-grid { font-size: 0.87em;}
+      .block-popup { left: 4vw; min-width: 120px;}
+    }
+    /* Solution overlay */
+    .solution-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44,70,131,0.13);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.34em;
+      font-weight: 600;
+      color: var(--header-title);
+      pointer-events: none;
+      animation: fadein 0.5s;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>
-            <div class="logo">NOW</div>
-            Schedule Optimization Training (Upgraded)
-        </h1>
-        <div class="subtitle">Master the art of maximizing revenue through smart scheduling</div>
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('overview')">Overview</button>
-            <button class="tab" onclick="showTab('simulator')">Schedule Simulator</button>
-            <button class="tab" onclick="showTab('calculator')">Revenue Calculator</button>
-            <button class="tab" onclick="showTab('scenarios')">Practice Scenarios</button>
-            <button class="tab" onclick="showTab('quiz')">Knowledge Quiz</button>
-            <button class="tab" onclick="showTab('templates')">Script Templates</button>
-            <button class="tab" onclick="showTab('progress')">Progress Tracker</button>
-        </div>
-        <!-- ... (your tab content sections here, unchanged) ... -->
+  <h1>Massage Optimization Simulator</h1>
+  <div class="scenario-bar">
+    <div class="scenario-title" id="scenarioTitle"></div>
+    <div class="scenario-goal" id="scenarioGoal"></div>
+  </div>
+  <div class="metrics-bar">
+    <div class="metric">
+      <div class="metric-title">Moves</div>
+      <div class="metric-value" id="metricMoves">0</div>
     </div>
-<script>
-/* ---- CONFIG ---- */
-const BUSINESS_HOURS = {
-  sunday:    { open: "9:00", close: "20:00" },
-  monday:    { open: "9:00", close: "20:00" },
-  tuesday:   { open: "9:00", close: "20:00" },
-  wednesday: { open: "9:00", close: "20:00" },
-  thursday:  { open: "9:00", close: "20:00" },
-  friday:    { open: "9:00", close: "21:00" },
-  saturday:  { open: "9:00", close: "21:00" }
-};
-const SERVICE_PRICES = {
-  "Sanctuary x1 50 min": 85,
-  "Pampered x1 80 min": 125,
-  "Sanctuary x2 50 min": 170,
-  "Pampered x2 80 min": 250,
-  "25 min": 70,
-  "50 min": 120,
-  "80 min": 160,
-  "Hemp Calm Balm": 15,
-  "Herbal Heat": 15,
-  "Gua Sha": 15,
-  "Deep Tissue": 20,
-  "Crystal Hot Stone": 30,
-  "Cupping": 30,
-  "All other": 10
-};
-const ENHANCEMENT_LIST = ["Hemp Calm Balm", "Herbal Heat", "Gua Sha", "Deep Tissue", "Crystal Hot Stone", "Cupping", "All other"];
+    <div class="metric">
+      <div class="metric-title">Gaps Fixed</div>
+      <div class="metric-value" id="metricGaps">0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-title">Utilization</div>
+      <div class="metric-value" id="metricUtil">0%</div>
+    </div>
+    <div class="metric">
+      <div class="metric-title">Revenue</div>
+      <div class="metric-value" id="metricRevenue">$0</div>
+    </div>
+    <div class="metric grade gradeC" id="metricGradeWrap">
+      <div class="metric-title">Grade</div>
+      <div class="metric-value" id="metricGrade">C</div>
+    </div>
+  </div>
+  <div class="controls-bar">
+    <label>
+      Select Day:
+      <select id="daySelect"></select>
+    </label>
+    <button id="resetBtn">Reset Progress</button>
+    <button id="hintBtn">Hint</button>
+    <button id="checkBtn">Check</button>
+    <button id="showSolutionBtn" disabled>Show Solution</button>
+    <button id="nextScenarioBtn">Next Scenario</button>
+  </div>
+  <div class="hint-bar" id="hintBar" style="display:none;"></div>
+  <div class="zenoti-grid-wrap">
+    <div class="zenoti-bar"></div>
+    <table class="zenoti-grid" id="schedulerGrid"></table>
+  </div>
+  <div id="blockPopup" class="block-popup" style="display:none;"></div>
+  <div id="solutionOverlay" class="solution-overlay" style="display:none;">Optimal solution loaded.</div>
+  <script>
+    // --- SCENARIO DATA ---
+    // You can add more scenarios to this array. Each has description, goal, day, therapists, initialGrid, optimalGrid, and hint.
+    const SCENARIOS = [
+      {
+        description: "Diaz has a call-out in the afternoon, Gaia has back-to-back sessions. Optimize Jose’s lunch timing and fill gaps in Diaz's schedule.",
+        goal: "Fill Diaz’s gaps, optimize Jose’s lunch timing, and maximize utilization.",
+        day: "Tuesday",
+        hint: "Drag sessions to fill gaps. Move call-outs to OPEN. Place lunch breaks in the middle of the shift. Combine adjacent gaps to create 50 or 80-min session opportunities.",
+        therapists: ["Gaia", "Jose", "Diaz", "Frankie"],
+        // 9:00-8:00 (23 slots at 30 min intervals)
+        timeSlots: (() => {
+          let slots = [];
+          let hour = 9, min = 0;
+          for(let i=0; i<23; i++) {
+            let ap = hour >= 12 ? 'PM':'AM';
+            let h = hour > 12 ? hour-12 : hour;
+            slots.push(`${h.toString().padStart(2,'0')}:${min===0?'00':'30'} ${ap}`);
+            min += 30;
+            if(min >= 60) { min = 0; hour++; }
+          }
+          return slots;
+        })(),
+        // Initial grid: [row][col]
+        initialGrid: [
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["80m","80m","OPEN","OPEN"],
+          ["OPEN","Lunch","OPEN","OPEN"],
+          ["80m","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["Lunch","OPEN","OPEN","OPEN"],
+          ["80m","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","Call-out","OPEN"],
+          ["OPEN","OPEN","Call-out","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+        ],
+        // Optimal solution grid
+        optimalGrid: [
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["80m","80m","OPEN","OPEN"],
+          ["OPEN","Lunch","OPEN","OPEN"],
+          ["80m","50m","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","80m","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["Lunch","OPEN","OPEN","OPEN"],
+          ["80m","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],
+        ]
+      }
+    ];
 
-const BLOCK_TYPES = {
-    booked_25: { label: "25m", colorclass: "booked-25"},
-    booked_50: { label: "50m", colorclass: "booked-50"},
-    booked_80: { label: "80m", colorclass: "booked-80"},
-    sanctuaryx2: { label: "Sanctuary x2", colorclass: "sanctuaryx2"},
-    pamperedx2: { label: "Pampered x2", colorclass: "pamperedx2"},
-    break: { label: "Break", colorclass: "break"},
-    lunch: { label: "Lunch", colorclass: "lunch"},
-    pto: { label: "PTO", colorclass: "pto"},
-    callout: { label: "Call-out", colorclass: "callout"},
-    runninglate: { label: "Running Late", colorclass: "runninglate"},
-    leaveearly: { label: "Leave Early", colorclass: "leaveearly"},
-    admin: { label: "Admin", colorclass: "admin"},
-    training: { label: "Training", colorclass: "training"},
-    meeting: { label: "Meeting", colorclass: "meeting"},
-    gap: { label: "GAP", colorclass: "gap"},
-    enhancement: { label: "Enhancement", colorclass: "enhancement"},
-    open: { label: "OPEN", colorclass: "open"},
-    group: { label: "Group", colorclass: "group"},
-    end: { label: "End", colorclass: "end"},
-    close: { label: "Close", colorclass: "close"},
-    x: { label: "X", colorclass: "x"}
-};
+    // --- CONFIG ---
+    const BLOCK_TYPES = [
+      { key: "appointment", label: "Appointment", color: "var(--appointment)",
+        durations: ["25", "50", "80"] },
+      { key: "break", label: "Break", color: "var(--break)" },
+      { key: "lunch", label: "Lunch", color: "var(--lunch)" },
+      { key: "callout", label: "Call-out", color: "var(--callout)" }
+      // Add more if you wish
+    ];
+    const SESSION_PRICING = { // for base session revenue
+      "25": 70,
+      "50": 120,
+      "80": 160
+    };
+    // --- STATE ---
+    let scenarioIdx = 0;
+    let blocks = []; // {start, end, therapistIdx, type, duration, label}
+    let dragStart = null, dragEnd = null, dragTherapistIdx = null;
+    let popupActive = false;
+    let attemptCount = 0;
+    let gridRows = 0, gridCols = 0, timeSlots = [], therapists = [];
 
-/* ---- Sample Therapists ---- */
-const THERAPISTS = ["Emma", "Sofia", "James", "Olivia", "Liam", "Ava"];
+    // --- INIT ---
+    function setupScenario(idx) {
+      // Load scenario
+      const scenario = SCENARIOS[idx];
+      document.getElementById("scenarioTitle").textContent = scenario.description;
+      document.getElementById("scenarioGoal").textContent = "Goal: " + scenario.goal;
+      document.getElementById("hintBar").textContent = scenario.hint;
+      document.getElementById("hintBar").style.display = "none";
+      therapists = scenario.therapists;
+      timeSlots = scenario.timeSlots;
+      gridRows = timeSlots.length;
+      gridCols = therapists.length;
 
-/* ---- Scenarios Data ---- */
-const ALL_SCENARIOS = {
-  monday: [
-    // ... (your original scenarios for Monday, unchanged)
-  ],
-  friday: [
-    {
-      name: "Friday Late Appointments",
-      description: "Optimize for late bookings up to 9 PM.",
-      displaced: ["80-Jordan (was MT2 8:00 PM)"],
-      schedule: [
-        { therapist: "Emma", slots: ["open", "booked_50", "gap", "lunch", "open", "booked_80", "open", "booked_80"] }, // last slot is 8:30 PM
-        { therapist: "Sofia", slots: ["open", "booked_80", "break", "open", "lunch", "booked_80", "open", "open"] },
-        { therapist: "James", slots: ["booked_80", "open", "open", "lunch", "booked_50", "open", "open", "booked_80"] },
-        { therapist: "Olivia", slots: ["booked_50", "open", "booked_80", "break", "open", "open", "booked_80", "gap"] },
-        { therapist: "Liam", slots: ["break", "booked_80", "open", "open", "lunch", "open", "open", "booked_80"] },
-        { therapist: "Ava", slots: ["open", "booked_50", "booked_80", "open", "lunch", "open", "gap", "open"] }
-      ],
-      correctMoves: ["Jordan to James 8:00 PM", "Fill all late gaps", "Maximize evening utilization"],
-      incorrectMoves: ["Leaving late gaps", "Unused slots after 8 PM"]
-    },
-    // Add more Friday scenarios as needed
-  ],
-  saturday: [
-    {
-      name: "Saturday Late Appointments",
-      description: "Fill late evening appointments and avoid gaps.",
-      displaced: [],
-      schedule: [
-        { therapist: "Emma", slots: ["open", "booked_80", "open", "lunch", "booked_50", "open", "booked_80", "booked_50"] }, // last slot is 8:30 PM
-        { therapist: "Sofia", slots: ["booked_50", "open", "lunch", "booked_80", "open", "booked_80", "open", "open"] },
-        { therapist: "James", slots: ["open", "booked_80", "break", "open", "lunch", "booked_80", "open", "booked_80"] },
-        { therapist: "Olivia", slots: ["booked_80", "open", "booked_50", "open", "lunch", "open", "booked_80", "gap"] },
-        { therapist: "Liam", slots: ["break", "booked_80", "open", "open", "lunch", "open", "booked_50", "open"] },
-        { therapist: "Ava", slots: ["open", "booked_50", "booked_80", "open", "lunch", "open", "gap", "booked_80"] }
-      ],
-      correctMoves: ["Fill all late gaps", "Maximize bookings between 8–9 PM", "No unused slots after 8 PM"],
-      incorrectMoves: ["Leaving any gap in last two slots", "Unused open slots after 8 PM"]
-    },
-    // Add more Saturday scenarios as needed
-  ],
-  // ... (repeat for other days, keeping slots ending at 8 PM except Friday/Saturday)
-};
-/* ... (rest of your JS unchanged) ... */
-</script>
+      blocks = [];
+      attemptCount = 0;
+      document.getElementById("showSolutionBtn").disabled = true;
+      document.getElementById("solutionOverlay").style.display = "none";
+
+      // Render grid
+      renderGrid();
+      // Load initial blocks from scenario.initialGrid
+      for(let r=0; r<gridRows; r++) {
+        for(let c=0; c<gridCols; c++) {
+          let cell = scenario.initialGrid[r][c];
+          if(cell && cell !== "OPEN") {
+            if(cell === "Lunch") {
+              blocks.push({ start:r, end:r, therapistIdx:c, type:"lunch", label:"Lunch" });
+            } else if(cell === "Call-out") {
+              blocks.push({ start:r, end:r, therapistIdx:c, type:"callout", label:"Call-out" });
+            } else if(cell === "80m" || cell === "50m" || cell === "25m") {
+              let duration = cell.replace("m","");
+              blocks.push({ start:r, end:r, therapistIdx:c, type:"appointment", duration:duration, label:cell });
+            }
+          }
+        }
+      }
+      renderBlocks();
+      updateMetrics();
+      updateDaySelect(scenario.day);
+    }
+
+    function updateDaySelect(day) {
+      const select = document.getElementById("daySelect");
+      select.innerHTML = "";
+      let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      days.forEach(d => {
+        let opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        if(d===day) opt.selected = true;
+        select.appendChild(opt);
+      });
+      select.onchange = () => {
+        // For now, just reload scenario with the selected day
+        // Real app: would load day-specific grid/hours
+        SCENARIOS[scenarioIdx].day = select.value;
+        setupScenario(scenarioIdx);
+      };
+    }
+
+    function renderGrid() {
+      const table = document.getElementById('schedulerGrid');
+      table.innerHTML = '';
+      // Header
+      const thead = document.createElement('thead');
+      const trh = document.createElement('tr');
+      const thTime = document.createElement('th');
+      thTime.className = 'time';
+      thTime.textContent = "Time";
+      trh.appendChild(thTime);
+      therapists.forEach((therapist, tIdx) => {
+        const th = document.createElement('th');
+        th.textContent = therapist;
+        th.title = therapist;
+        th.setAttribute('data-col', tIdx);
+        trh.appendChild(th);
+      });
+      thead.appendChild(trh);
+
+      // Therapist bar
+      const trBar = document.createElement('tr');
+      const tdBarTime = document.createElement('td');
+      tdBarTime.className = 'time';
+      tdBarTime.innerHTML = '&nbsp;';
+      trBar.appendChild(tdBarTime);
+      therapists.forEach(() => {
+        const td = document.createElement('td');
+        td.innerHTML = '<div class="zenoti-bar"></div>';
+        trBar.appendChild(td);
+      });
+      thead.appendChild(trBar);
+
+      table.appendChild(thead);
+
+      // Body
+      const tbody = document.createElement('tbody');
+      timeSlots.forEach((slot, rIdx) => {
+        const tr = document.createElement('tr');
+        // Time cell
+        const tdTime = document.createElement('td');
+        tdTime.className = 'time';
+        tdTime.textContent = slot;
+        tr.appendChild(tdTime);
+        // Therapist columns
+        therapists.forEach((_, cIdx) => {
+          const td = document.createElement('td');
+          td.setAttribute('data-row', rIdx);
+          td.setAttribute('data-col', cIdx);
+          td.onmousedown = e => handleCellMouseDown(e, rIdx, cIdx);
+          td.onmouseenter = e => handleCellMouseEnter(e, rIdx, cIdx);
+          td.onmouseup = e => handleCellMouseUp(e, rIdx, cIdx);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+
+      renderBlocks();
+    }
+
+    function renderBlocks(showOptimal=false) {
+      // Remove old blocks
+      document.querySelectorAll('.block').forEach(b => b.remove());
+      let renderList = showOptimal
+        ? blocksFromGrid(SCENARIOS[scenarioIdx].optimalGrid)
+        : blocks.slice();
+      renderList.forEach((block, idx) => {
+        // Only render at start row (span via height)
+        for (let r = block.start; r <= block.end; r++) {
+          if (r === block.start) {
+            const td = getCell(r, block.therapistIdx);
+            if (!td) continue;
+            const blockDiv = document.createElement('div');
+            blockDiv.className = `block ${block.type}`;
+            blockDiv.style.top = '2px';
+            blockDiv.style.height = (44 * (block.end-block.start+1) - 4) + 'px';
+            blockDiv.style.lineHeight = '1.25em';
+            blockDiv.textContent = block.label || BLOCK_TYPES.find(bt=>bt.key===block.type)?.label || "";
+            // Delete on right-click
+            if(!showOptimal) {
+              blockDiv.oncontextmenu = function(e) {
+                e.preventDefault();
+                blocks.splice(idx,1);
+                renderBlocks();
+                updateMetrics();
+              };
+            }
+            td.appendChild(blockDiv);
+          }
+        }
+      });
+    }
+
+    function getCell(row, col) {
+      const table = document.getElementById('schedulerGrid');
+      // Header + bar + body = body starts at 2
+      return table.rows[row + 2]?.cells[col + 1];
+    }
+
+    // --- DRAG TO SELECT ---
+    function handleCellMouseDown(e, rIdx, cIdx) {
+      if (popupActive) return;
+      dragStart = rIdx;
+      dragEnd = rIdx;
+      dragTherapistIdx = cIdx;
+      highlightCells(dragStart, dragEnd, dragTherapistIdx);
+      document.body.style.userSelect = 'none';
+    }
+    function handleCellMouseEnter(e, rIdx, cIdx) {
+      if (dragStart!==null && dragTherapistIdx===cIdx) {
+        dragEnd = rIdx;
+        highlightCells(dragStart, dragEnd, dragTherapistIdx);
+      }
+    }
+    function handleCellMouseUp(e, rIdx, cIdx) {
+      if (dragStart!==null && dragTherapistIdx===cIdx) {
+        dragEnd = rIdx;
+        const [row1,row2] = [dragStart,dragEnd].sort((a,b)=>a-b);
+        showBlockPopup(row1, row2, dragTherapistIdx, e.clientX, e.clientY);
+        clearHighlight();
+        dragStart = dragEnd = dragTherapistIdx = null;
+        document.body.style.userSelect = '';
+      }
+    }
+    function highlightCells(start, end, col) {
+      clearHighlight();
+      const [row1,row2] = [start,end].sort((a,b)=>a-b);
+      for(let r=row1;r<=row2;r++) {
+        const td = getCell(r,col);
+        if(td) td.classList.add('drag-select');
+      }
+    }
+    function clearHighlight() {
+      document.querySelectorAll('.drag-select').forEach(td=>td.classList.remove('drag-select'));
+    }
+
+    // --- BLOCK POPUP ---
+    function showBlockPopup(row1, row2, therapistIdx, x, y) {
+      popupActive = true;
+      const popup = document.getElementById('blockPopup');
+      let left = x, top = y;
+      if (window.innerWidth - x < 350) left = window.innerWidth - 350;
+      if (window.innerHeight - y < 210) top = window.innerHeight - 210;
+      popup.style.left = left + 'px';
+      popup.style.top = top + 'px';
+      popup.style.display = 'block';
+
+      let html = `<h3>Select Block Type</h3>`;
+      BLOCK_TYPES.forEach(bt=>{
+        html += `<label>
+          <span class="block-preview" style="background:${bt.color};"></span>
+          <input type="radio" name="blocktype" value="${bt.key}" data-label="${bt.label}" style="margin-right:8px;">
+          ${bt.label}`;
+        if(bt.key==="appointment") {
+          html += ` <select name="duration">
+            <option value="25">25 min</option>
+            <option value="50">50 min</option>
+            <option value="80">80 min</option>
+          </select>`;
+        }
+        html += `</label>`;
+      });
+      html += `<div class="actions">
+        <button onclick="confirmBlockType('${row1}', '${row2}', '${therapistIdx}')">Add</button>
+        <button class="cancel" onclick="closeBlockPopup()">Cancel</button>
+      </div>`;
+      popup.innerHTML = html;
+      setTimeout(()=>{
+        const firstRadio = popup.querySelector('input[type="radio"]');
+        if(firstRadio) firstRadio.checked = true;
+      },50);
+    }
+    function closeBlockPopup() {
+      document.getElementById('blockPopup').style.display = 'none';
+      popupActive = false;
+    }
+    window.closeBlockPopup = closeBlockPopup;
+
+    function confirmBlockType(row1, row2, therapistIdx) {
+      const popup = document.getElementById('blockPopup');
+      const radio = popup.querySelector('input[name="blocktype"]:checked');
+      let key = radio?.value;
+      let label = radio?.getAttribute("data-label");
+      let duration = null;
+      if(key==="appointment") {
+        duration = popup.querySelector('select[name="duration"]').value;
+        label = duration + "m";
+      }
+      if (key) {
+        blocks.push({
+          start: Number(row1),
+          end: Number(row2),
+          therapistIdx: Number(therapistIdx),
+          type: key,
+          duration: duration,
+          label: label
+        });
+        closeBlockPopup();
+        renderBlocks();
+        updateMetrics();
+      }
+    }
+    window.confirmBlockType = confirmBlockType;
+
+    // --- METRICS ---
+    function updateMetrics() {
+      // Moves: total blocks added or removed
+      document.getElementById("metricMoves").textContent = blocks.length;
+      // Gaps fixed: count how many OPEN slots have been replaced with appointment blocks (simulated)
+      let openSlots = 0, bookedSlots = 0;
+      for(let r=0; r<gridRows; r++) {
+        for(let c=0; c<gridCols; c++) {
+          let hasBlock = blocks.some(b=>b.start<=r && b.end>=r && b.therapistIdx===c);
+          if(!hasBlock) openSlots++;
+          else {
+            let block = blocks.find(b=>b.start<=r && b.end>=r && b.therapistIdx===c);
+            if(block.type==="appointment") bookedSlots++;
+          }
+        }
+      }
+      let gapsFixed = Math.max(0, bookedSlots - 4); // simulate (original 4 appointments in sample)
+      document.getElementById("metricGaps").textContent = gapsFixed;
+      // Utilization: percent of slots booked with appointments
+      let utilization = Math.round(100 * bookedSlots / (gridRows * gridCols));
+      document.getElementById("metricUtil").textContent = utilization + "%";
+      // Revenue: sum of base pricing for appointment blocks
+      let revenue = 0;
+      blocks.forEach(block => {
+        if(block.type==="appointment") {
+          let duration = block.duration || "50";
+          revenue += SESSION_PRICING[duration] || 0;
+        }
+      });
+      document.getElementById("metricRevenue").textContent = "$" + revenue;
+      // Grade: simple logic
+      let grade = "C";
+      let gradeWrap = document.getElementById("metricGradeWrap");
+      gradeWrap.classList.remove("gradeA","gradeB","gradeC");
+      if(utilization > 80 && gapsFixed>=3) { grade="A"; gradeWrap.classList.add("gradeA"); }
+      else if(utilization > 60) { grade="B"; gradeWrap.classList.add("gradeB"); }
+      else { grade="C"; gradeWrap.classList.add("gradeC"); }
+      document.getElementById("metricGrade").textContent = grade;
+    }
+
+    // --- CONTROLS ---
+    document.getElementById("resetBtn").onclick = function() {
+      setupScenario(scenarioIdx);
+    };
+    document.getElementById("hintBtn").onclick = function() {
+      document.getElementById("hintBar").style.display = "block";
+    };
+    document.getElementById("checkBtn").onclick = function() {
+      attemptCount++;
+      if(attemptCount>=4) {
+        document.getElementById("showSolutionBtn").disabled = false;
+      }
+      // Optionally: show feedback
+      updateMetrics();
+    };
+    document.getElementById("showSolutionBtn").onclick = function() {
+      renderBlocks(true); // show optimal grid
+      document.getElementById("solutionOverlay").style.display = "flex";
+      setTimeout(()=>document.getElementById("solutionOverlay").style.display="none",1700);
+    };
+    document.getElementById("nextScenarioBtn").onclick = function() {
+      scenarioIdx = (scenarioIdx+1) % SCENARIOS.length;
+      setupScenario(scenarioIdx);
+    };
+
+    // --- UTIL ---
+    function blocksFromGrid(grid) {
+      // Parse grid to blocks (single slot blocks only)
+      let result = [];
+      for(let r=0; r<grid.length; r++) {
+        for(let c=0; c<grid[r].length; c++) {
+          let cell = grid[r][c];
+          if(cell && cell !== "OPEN") {
+            if(cell === "Lunch") {
+              result.push({ start:r, end:r, therapistIdx:c, type:"lunch", label:"Lunch" });
+            } else if(cell === "Call-out") {
+              result.push({ start:r, end:r, therapistIdx:c, type:"callout", label:"Call-out" });
+            } else if(cell === "80m" || cell === "50m" || cell === "25m") {
+              let duration = cell.replace("m","");
+              result.push({ start:r, end:r, therapistIdx:c, type:"appointment", duration:duration, label:cell });
+            }
+          }
+        }
+      }
+      return result;
+    }
+
+    // --- INIT ---
+    document.addEventListener("DOMContentLoaded", function() {
+      setupScenario(scenarioIdx);
+    });
+
+    // --- STEP-BY-STEP HOW TO ADD SCENARIOS ---
+    window.showScenarioHelp = function() {
+      alert([
+        "How to add new scenarios:",
+        "",
+        "1. Add a new object to the SCENARIOS array at the top of index.html.",
+        "2. Each scenario needs:",
+        "   - description: string describing the scenario.",
+        "   - goal: string describing the optimization goal.",
+        "   - day: string (e.g. 'Tuesday').",
+        "   - hint: string (tip for users).",
+        "   - therapists: array of therapist names/IDs.",
+        "   - timeSlots: array of slot labels (auto-generated or custom).",
+        "   - initialGrid: array of arrays (row = time slot, col = therapist), each cell is 'OPEN', 'Lunch', 'Call-out', '25m', '50m', or '80m'.",
+        "   - optimalGrid: same format, showing the optimized solution.",
+        "",
+        "3. Save and refresh. The new scenario will appear when you click 'Next Scenario'.",
+        "",
+        "You can copy and modify the existing scenario as a template."
+      ].join('\n'));
+    };
+  </script>
+  <div style="text-align:right;padding:6px 24px 12px 0;">
+    <a href="javascript:void(0)" onclick="showScenarioHelp()" style="color:#3a4a62;font-size:0.98em;text-decoration:underline;">How to add scenarios</a>
+  </div>
 </body>
 </html>
