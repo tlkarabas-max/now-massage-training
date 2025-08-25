@@ -1,1 +1,156 @@
+<!-- ... keep your head, styles, and UI tabs ... -->
 
+<script>
+/* ---- CONFIG ---- */
+const BUSINESS_HOURS = {
+  sunday:    { open: "9:00", close: "20:00" },
+  monday:    { open: "9:00", close: "20:00" },
+  tuesday:   { open: "9:00", close: "20:00" },
+  wednesday: { open: "9:00", close: "20:00" },
+  thursday:  { open: "9:00", close: "20:00" },
+  friday:    { open: "9:00", close: "21:00" },
+  saturday:  { open: "9:00", close: "21:00" }
+};
+const BLOCK_TYPES = {
+    "booked_80": {label: "80m", colorclass: "booked-80"},
+    "booked_50": {label: "50m", colorclass: "booked-50"},
+    "gap": {label: "GAP", colorclass: "gap"},
+    "open": {label: "OPEN", colorclass: "open"},
+    "break": {label: "Break", colorclass: "break"},
+    "lunch": {label: "Lunch", colorclass: "lunch"},
+    "callout": {label: "Call-out", colorclass: "callout"},
+    "shift_adj": {label: "Shift Adj.", colorclass: "callout"},
+    "requested_off": {label: "Req. Off", colorclass: "lunch"}
+};
+
+/* ---- Realistic Therapist Lists for Each Day ---- */
+const THERAPISTS_REAL = {
+  scenario1: ["Aaron", "Amy", "Bill", "Gaia", "Hank", "Marti", "Seydonia", "Spencer", "Trang", "Alexis", "Jose", "Crawford"],
+  scenario2: ["Amy", "Bill", "Frankie", "Marti", "Trang", "Vicente", "Victor", "Hank", "Jose", "Alexis", "Diaz", "Gaia", "Jayna", "Jon", "Sean"],
+  scenario3: ["Amy", "Bill", "Jayna", "Tomas", "Trang", "Vicente", "Sean", "Hank", "Corey", "Frankie", "Spencer"],
+  scenario4: ["Amy", "Jayna", "Spencer", "Trang", "Alexis", "Hank", "Bill", "Corey", "Diaz", "Frankie", "Yari"]
+};
+
+/* ---- Generate Time Slot Array ---- */
+function generateTimeSlots(day) {
+    let times = [];
+    let hours = BUSINESS_HOURS[day];
+    let [openH, openM] = hours.open.split(':').map(Number);
+    let [closeH, closeM] = hours.close.split(':').map(Number);
+    let dt = new Date(2020,0,1,openH,openM);
+    let end = new Date(2020,0,1,closeH,closeM);
+    while(dt < end) {
+        let s = dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        times.push(s);
+        dt.setMinutes(dt.getMinutes()+30);
+    }
+    return times;
+}
+
+/* ---- Real-Life Simulated Scenarios (representative, more can be added) ---- */
+const ALL_SCENARIOS = {
+  sunday: [
+    {
+      name: "Sunday Real Case: Callout & Shift Adjustments (from Image 4)",
+      description: "Simulates a day with callouts, shift adjustments, and staggered bookings.",
+      therapists: THERAPISTS_REAL.scenario1,
+      schedule: [
+        // Each therapist's slots for the time grid, based on the actual patterns in the image
+        // You can expand or tweak these as you add more real examples.
+        // For brevity, partial day sample for Aaron:
+        {
+          therapist: "Aaron",
+          slots: ["shift_adj","","booked_80","booked_80","booked_80","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"]
+        },
+        // Amy
+        {
+          therapist: "Amy",
+          slots: ["callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout"]
+        },
+        // Bill
+        {
+          therapist: "Bill",
+          slots: ["shift_adj","","booked_80","booked_80","booked_50","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"]
+        },
+        // ...fill out the rest for other therapists similar to above (based on image)
+      ],
+      correctMoves: [
+        "Fill gaps created by shift adjustments and callouts.",
+        "Stagger late bookings.",
+        "Maintain coverage for peak hours."
+      ],
+      incorrectMoves: [
+        "Leaving gaps after callouts.",
+        "Unused open slots late afternoon and evening."
+      ]
+    }
+  ],
+  monday: [
+    {
+      name: "Monday Real Case: Multiple Break Patterns (from Image 5)",
+      description: "Day with callouts, shift adjustments, breaks, and variable bookings.",
+      therapists: THERAPISTS_REAL.scenario2,
+      schedule: [
+        { therapist: "Amy", slots: ["callout","callout","callout","callout","break","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        { therapist: "Bill", slots: ["shift_adj","shift_adj","","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        // ...complete for each therapist as in the image
+      ],
+      correctMoves: [
+        "Fill gaps after break and shift adjustments.",
+        "Avoid simultaneous lunch breaks.",
+        "Maximize coverage late day."
+      ],
+      incorrectMoves: [
+        "Multiple gaps in evening.",
+        "Unused open slots."
+      ]
+    }
+  ],
+  tuesday: [
+    {
+      name: "Tuesday Real Case: Requested Off, Dense Bookings (from Image 6)",
+      description: "Day with requested off, shift adjustments, staggered lunches, and high booking volume.",
+      therapists: THERAPISTS_REAL.scenario3,
+      schedule: [
+        { therapist: "Amy", slots: ["booked_80","booked_80","break","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        // ...complete as per the real schedule
+      ],
+      correctMoves: [
+        "Shift adjustment coverage.",
+        "Stagger breaks and lunches.",
+        "Optimize evening slots."
+      ],
+      incorrectMoves: [
+        "Leaving therapists unused after 5 PM.",
+        "Too many gaps in evening."
+      ]
+    }
+  ],
+  wednesday: [
+    {
+      name: "Wednesday Real Case: Lunch Waves & Shift Adjustments (from Image 7)",
+      description: "Lunches and shift adjustments are staggered, appointments and gaps variable.",
+      therapists: THERAPISTS_REAL.scenario4,
+      schedule: [
+        { therapist: "Amy", slots: ["lunch","booked_80","booked_80","booked_80","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        // ...complete as per the real schedule
+      ],
+      correctMoves: [
+        "Stagger lunch breaks.",
+        "Fill late afternoon gaps.",
+        "Use shift adjustments for coverage."
+      ],
+      incorrectMoves: [
+        "Simultaneous shifts/lunches.",
+        "Unused evening slots."
+      ]
+    }
+  ]
+  // Repeat for other days or add more real scenarios as you upload more!
+};
+
+/* ---- UI Tab Logic ---- */
+// (Keep the rest of your UI tab, scenario selector, and simulator code as above, but update to use therapists from scenario.)
+// When rendering the grid, use scenario.therapists and scenario.schedule for more realistic columns and slot data.
+
+</script>
