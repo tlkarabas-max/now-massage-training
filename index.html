@@ -2,509 +2,622 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Schedule Optimization Training</title>
+  <title>Schedule Optimization Training (Advanced Local)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fd; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fd; margin: 0; }
     .container { max-width: 1200px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 10px #eee; padding: 32px; }
-    h1 { color: #6170f7; font-size: 2.8em; margin-bottom: 0.5em; }
-    .subtitle { color: #333; font-size: 1.2em; margin-bottom: 2rem; }
-    .scenario-bar { display: flex; gap: 16px; margin-bottom: 14px; }
-    .scenario-label { font-weight: 600; color: #6170f7; }
-    select, button { font-size: 1em; padding: 8px 16px; border-radius: 6px; border: 1px solid #dbe2fa; margin-right: 10px; }
-    button { background: #eef3ff; color: #6170f7; font-weight: 700; border: none; margin-top: 8px; cursor: pointer;}
-    button.active, button:active { background: #dbe2fa; }
-    button:disabled { background: #eee; color: #999; }
-    .metrics { display: flex; gap: 32px; margin: 1.6em 0 1em 0;}
-    .metric { background: #f7f3fb; border-radius: 8px; padding: 18px; text-align: center; min-width: 120px; }
-    .metric-value { font-size: 2em; color: #6170f7; font-weight: bold; }
-    .metric-label { font-size: 1em; color: #555; margin-top: 6px; }
-    .metric-grade { font-size: 1.5em; font-weight: bold; color: #789f42;}
-    .scenario-description { background: #f8faff; border-radius: 6px; padding: 18px; margin: 14px 0 20px 0; color: #425b89; font-size: 1.1em;}
-    table.schedule-table { border-collapse: collapse; width: 100%; margin-top: 18px;}
-    table.schedule-table th { background: #6170f7; color: #fff; padding: 10px; border-bottom: 2px solid #dbe2fa;}
-    table.schedule-table td { background: #fff; border: 1px solid #dbe2fa; padding: 8px 0; text-align: center; font-size: 1em;}
-    .schedule-block-open { background: #fdf3cf; color: #7b950f; font-weight: bold; cursor: pointer;}
-    .schedule-block-session { background: #dbe2fa; color: #3269b7; font-weight: bold;}
-    .schedule-block-callout { background: #fcdbdb; color: #c32929; font-weight: bold;}
-    .schedule-block-lunch { background: #f3db9b; color: #b56c21; font-weight: bold;}
-    .schedule-block-gap { background: #ffe5e5; color: #c32929; font-weight: bold;}
-    .solution-toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: #f8f2ff; border: 2px solid #dbe2fa; color: #6170f7; border-radius: 10px; padding: 18px 38px; font-size: 1.3em; font-weight: 700; box-shadow: 0 2px 8px #e3e2fd; display: none; z-index: 1000;}
-    .feedback-box { margin-top: 22px; background: #fffbe9; border-left: 6px solid #f3c161; padding: 18px 24px; border-radius: 7px; color: #86612c; font-size: 1.07em;}
-    @media (max-width: 900px) {
-      .container { padding: 10px; }
-      table.schedule-table th, table.schedule-table td { padding: 6px 2px; font-size: .88em;}
-      .metrics { gap: 10px; }
-      .metric { padding: 12px; min-width: 80px;}
+    h1 { color: #6170f7; font-size: 2.8rem; margin-bottom: 0.5rem; }
+    .subtitle { color: #333; font-size: 1.2rem; margin-bottom: 2rem; }
+    .tabs { display: flex; border-bottom: 2px solid #e3e6ef; margin-bottom: 2rem; }
+    .tab { padding: 16px 32px; cursor: pointer; font-size: 1.1rem; color: #444; border: none; background: none; outline: none; }
+    .tab.active { color: #6170f7; font-weight: bold; border-bottom: 3px solid #6170f7; }
+    .tab:not(.active):hover { color: #6170f7; background: #eaf0ff; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .schedule-table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    .schedule-table th, .schedule-table td { border: 1px solid #e3e6ef; padding: 8px; text-align: center; min-width: 80px; }
+    .schedule-table th { background: #6170f7; color: #fff; }
+    .block-open { background: #eafaf1; cursor: pointer; }
+    .block-session { background: #d6eaf8; color: #154360; cursor: grab; }
+    .block-gap { background: #fcf3cf; color: #b7950b; font-weight: bold; cursor: pointer; }
+    .block-lunch { background: #d5d8dc; color: #636e72; font-weight: bold; cursor: not-allowed; }
+    .block-break { background: #c39bd3; color: #5b2c6f; font-weight: bold; cursor: not-allowed; }
+    .block-personal { background: #aed6f1; color: #21618c; font-weight: bold; cursor: not-allowed;}
+    .block-callout { background: #f5b7b1; color: #c0392b; font-weight: bold; cursor: pointer; }
+    .block-hold { background: #f7cac9; color: #922b21; font-weight: bold; cursor: pointer; }
+    .block { border-radius: 6px; padding: 6px 0; }
+    .simulator-metrics { display: flex; gap: 32px; margin: 1.5rem 0 1rem 0; }
+    .sim-metric { background: #f2f3f8; border-radius: 8px; padding: 10px 18px; text-align: center; min-width: 100px; }
+    .sim-metric-value { font-size: 1.5rem; color: #6170f7; font-weight: bold; }
+    .sim-metric-label { font-size: 1.1rem; color: #555; }
+    .simulator-actions { margin-bottom: 1rem; }
+    .simulator-actions button { margin-right: 8px; padding: 8px 18px; border-radius: 6px; border: none; font-size: 1rem; color: #6170f7; background: #f2f3f8; font-weight: bold; }
+    .simulator-actions button.active, .simulator-actions button:active { background: #dbe5ff; }
+    .simulator-actions button:disabled { color: #bbb; background: #f9f9f9; }
+    .scenario-desc { background: #f2f3f8; border-radius: 8px; padding: 14px 20px; margin-top: 1rem; margin-bottom: 1rem; }
+    .hint-text { color: #6170f7; background: #eaf0ff; border-radius: 6px; padding: 10px; margin-top: 1rem; margin-bottom: 1rem;}
+    .solution-table { margin-top: 2rem;}
+    .progress-table th, .progress-table td { border: 1px solid #e3e6ef; padding: 8px; text-align: left; }
+    .progress-table th { background: #6170f7; color: #fff; }
+    .progress-table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    .quiz-section { margin-top: 2rem;}
+    .quiz-question { margin-bottom: 1.2rem;}
+    .quiz-option { margin-left: 2rem;}
+    .badge { background: #d6eaf8; color: #154360; border-radius: 14px; padding: 4px 12px; margin-right: 8px;}
+    .reset-btn { background: #f5b7b1; color: #c0392b; border-radius: 7px; padding: 8px 15px; border: none; font-weight:bold; margin-top: 16px;}
+    .script-template { background: #f2f3f8; border-radius: 8px; padding: 14px 20px; margin-bottom: 1rem; }
+    /* Modal popup */
+    #popup-modal {
+      display:none;
+      position:fixed;
+      top:40%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      background:#fff;
+      padding:32px;
+      border-radius:14px;
+      box-shadow:0 6px 40px #618;
+      z-index:99;
+      font-size:1.3rem;
+      min-width:240px;
+      text-align:center;
+    }
+    @media (max-width: 600px) {
+      .container { padding: 8px; }
+      .tabs { flex-direction: column; }
+      .schedule-table th, .schedule-table td { font-size: 0.9rem; min-width: 60px; padding: 6px; }
+      #popup-modal { min-width:180px; padding:18px;}
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>Schedule Optimization Training</h1>
-  <div class="subtitle">Interactive simulator: Fix gaps, maximize utilization, and compare your solution to the optimal schedule!</div>
-  <div class="scenario-bar">
-    <span class="scenario-label">Select Day:</span>
-    <select id="daySelect"></select>
-    <span class="scenario-label">Scenario:</span>
-    <select id="scenarioSelect"></select>
-    <button onclick="resetProgress()">Reset Progress</button>
-    <button onclick="showSolution()">Show Solution</button>
-    <button onclick="nextScenario()">Next Scenario</button>
+  <div class="container" aria-label="Schedule Optimization Training">
+    <h1>Schedule Optimization Training (Advanced Local)</h1>
+    <div class="subtitle">Practice full-day schedule optimization, scenario-based logic, and interactive scheduling</div>
+    <div class="tabs" role="tablist">
+      <button class="tab active" onclick="showSection('simulator')" aria-label="Schedule Simulator">Schedule Simulator</button>
+      <button class="tab" onclick="showSection('progress')" aria-label="Progress Tracker">Progress Tracker</button>
+      <button class="tab" onclick="showSection('quiz')" aria-label="Knowledge Quiz">Knowledge Quiz</button>
+      <button class="tab" onclick="showSection('scripts')" aria-label="Script Templates">Script Templates</button>
+      <button class="tab" onclick="showSection('overview')" aria-label="Overview">Overview</button>
+    </div>
+
+    <!-- Pop-up Modal -->
+    <div id="popup-modal" role="dialog" aria-live="assertive"><span id="popup-content"></span></div>
+
+    <!-- Schedule Simulator Section -->
+    <div id="simulator" class="section active">
+      <h2>Schedule Simulator</h2>
+      <form id="simulator-form">
+        <label for="sim-day-sim">Select Day:</label>
+        <select id="sim-day-sim" name="sim-day-sim" onchange="loadScenario()" aria-label="Select Day">
+          <option>Sunday</option>
+          <option>Monday</option>
+          <option>Tuesday</option>
+          <option>Wednesday</option>
+          <option>Thursday</option>
+          <option>Friday</option>
+          <option>Saturday</option>
+        </select>
+        <button type="button" class="reset-btn" onclick="resetProgress()">Reset Progress</button>
+      </form>
+      <div class="scenario-desc" id="scenario-desc"></div>
+      <div class="simulator-metrics">
+        <div class="sim-metric"><div class="sim-metric-value" id="moves-count">0</div><div class="sim-metric-label">Moves</div></div>
+        <div class="sim-metric"><div class="sim-metric-value" id="gaps-count">0</div><div class="sim-metric-label">Gaps Fixed</div></div>
+        <div class="sim-metric"><div class="sim-metric-value" id="utilization">0%</div><div class="sim-metric-label">Utilization</div></div>
+        <div class="sim-metric"><div class="sim-metric-value" id="rev-saved">$0</div><div class="sim-metric-label">Revenue Saved</div></div>
+        <div class="sim-metric"><div class="sim-metric-value" id="grade">C</div><div class="sim-metric-label">Grade</div></div>
+      </div>
+      <div class="simulator-actions">
+        <button type="button" onclick="showHint()" aria-label="Show Hint">Hint</button>
+        <button type="button" onclick="showSolution()" aria-label="Show Solution">Show Solution</button>
+        <button type="button" onclick="nextScenario()" aria-label="Next Scenario">Next Scenario</button>
+      </div>
+      <div id="hint-area"></div>
+      <div id="schedule-table-wrapper"></div>
+      <div id="solution-table-wrapper"></div>
+    </div>
+
+    <!-- Progress Tracker Section -->
+    <div id="progress" class="section">
+      <h2>Progress Tracker</h2>
+      <div id="progress-badges"></div>
+      <table class="progress-table" aria-label="Progress Table">
+        <tr>
+          <th>Day</th>
+          <th>Scenario</th>
+          <th>Grade</th>
+          <th>Completed</th>
+          <th>Time Spent</th>
+        </tr>
+        <tbody id="progress-table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Quiz Section -->
+    <div id="quiz" class="section">
+      <h2>Knowledge Quiz</h2>
+      <div class="quiz-section" id="quiz-area"></div>
+      <div id="quiz-score"></div>
+    </div>
+
+    <!-- Script Templates Section -->
+    <div id="scripts" class="section">
+      <h2>Script Templates</h2>
+      <div class="script-template"><strong>Guest: “Why can’t I book with my favorite therapist at 2pm?”</strong><br>
+        <em>“I see that time is currently blocked for a required break or lunch, which helps our therapists provide their best care. Would you like to book the next available appointment or join our waitlist?”</em>
+      </div>
+      <div class="script-template"><strong>Guest: “What does a red block mean on the schedule?”</strong><br>
+        <em>“Red blocks indicate a call-out or shift adjustment, meaning the therapist is unavailable due to an emergency or management decision.”</em>
+      </div>
+      <div class="script-template"><strong>How to explain open blocks to guests:</strong><br>
+        <em>“Open blocks are available for booking! If you see ‘OPEN,’ we’d love to schedule your preferred service.”</em>
+      </div>
+    </div>
+
+    <!-- Overview Section -->
+    <div id="overview" class="section">
+      <h2>Welcome!</h2>
+      <p>This platform helps you practice full-day schedule optimization for boutique therapists. Use the Simulator and other tabs to master scheduling logic, script responses, and industry best practices!</p>
+    </div>
   </div>
-  <div class="scenario-description" id="scenarioDescription"></div>
-  <div class="metrics">
-    <div class="metric"><span class="metric-value" id="movesMetric">0</span><div class="metric-label">Moves</div></div>
-    <div class="metric"><span class="metric-value" id="gapsMetric">0</span><div class="metric-label">Gaps Fixed</div></div>
-    <div class="metric"><span class="metric-value" id="utilMetric">0%</span><div class="metric-label">Utilization</div></div>
-    <div class="metric"><span class="metric-value" id="revenueMetric">$0</span><div class="metric-label">Revenue Saved</div></div>
-    <div class="metric"><span class="metric-grade" id="gradeMetric">C</span><div class="metric-label">Grade</div></div>
-  </div>
-  <div id="feedbackBox"></div>
-  <table class="schedule-table" id="scheduleTable"></table>
-</div>
-<div class="solution-toast" id="solutionToast">Optimal solution loaded.</div>
-<script>
-const therapistList = ["Gaia", "Jose", "Diaz", "Frankie"];
-const sessionPrice = 80; // per session slot
-const lunchPrice = 0;
-const calloutPrice = -60; // cost of call-out (lost revenue)
-const openPrice = 0;
-
-// Custom hours for each day
-const dayHours = {
-  "Sunday":   {start: 9, end: 20},
-  "Monday":   {start: 9, end: 20},
-  "Tuesday":  {start: 9, end: 20},
-  "Wednesday":{start: 9, end: 20},
-  "Thursday": {start: 9, end: 20},
-  "Friday":   {start: 9, end: 21},
-  "Saturday": {start: 9, end: 21}
-};
-
-// Build time slots for a given day
-function buildTimes(day) {
-  let times = [];
-  let start = dayHours[day].start, end = dayHours[day].end;
-  for (let h = start; h <= end; h++) {
-    times.push((h < 12 ? h : h<=12?12:h-12) + ':00 ' + (h<12?'AM':h==12?'PM':'PM'));
-    times.push((h < end) ? ((h < 12 ? h : h<=12?12:h-12) + ':30 ' + (h<12?'AM':h==12?'PM':'PM')) : null);
-  }
-  return times.filter(x=>x);
-}
-
-// Scenario data for each day
-const scenarioData = {
-  "Sunday": [
-    {
-      name: "Fill Gaps & Align Lunch",
-      description: "Gaia has gaps in the morning, Jose has back-to-back sessions, Diaz has a call-out in the afternoon. Goal: Fill Gaia's gaps, align all lunch breaks.",
-      problem: [
-        // therapist blocks for each time slot
-        // Gaia, Jose, Diaz, Frankie
-        ["OPEN","OPEN","OPEN","OPEN"], //9:00 AM
-        ["OPEN","80m","OPEN","OPEN"], //9:30 AM
-        ["80m","80m","OPEN","OPEN"], //10:00 AM
-        ["Lunch","80m","OPEN","OPEN"], //10:30 AM
-        ["OPEN","OPEN","OPEN","OPEN"], //11:00 AM
-        ["OPEN","OPEN","OPEN","OPEN"], //11:30 AM
-        ["80m","OPEN","Call-out","OPEN"], //12:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //12:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //1:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //1:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //2:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //2:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //3:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //3:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //4:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //4:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //5:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //5:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //6:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //6:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //7:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //7:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //8:00 PM
-      ],
-      solution: [
-        ["80m","80m","80m","80m"], //9:00 AM
-        ["80m","80m","80m","80m"], //9:30 AM
-        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
-        ["80m","80m","80m","80m"], //10:30 AM
-        ["80m","80m","80m","80m"], //11:00 AM
-        ["80m","80m","80m","80m"], //11:30 AM
-        ["80m","80m","80m","80m"], //12:00 PM
-        ["80m","80m","80m","80m"], //12:30 PM
-        ["80m","80m","80m","80m"], //1:00 PM
-        ["80m","80m","80m","80m"], //1:30 PM
-        ["80m","80m","80m","80m"], //2:00 PM
-        ["80m","80m","80m","80m"], //2:30 PM
-        ["80m","80m","80m","80m"], //3:00 PM
-        ["80m","80m","80m","80m"], //3:30 PM
-        ["80m","80m","80m","80m"], //4:00 PM
-        ["80m","80m","80m","80m"], //4:30 PM
-        ["80m","80m","80m","80m"], //5:00 PM
-        ["80m","80m","80m","80m"], //5:30 PM
-        ["80m","80m","80m","80m"], //6:00 PM
-        ["80m","80m","80m","80m"], //6:30 PM
-        ["80m","80m","80m","80m"], //7:00 PM
-        ["80m","80m","80m","80m"], //7:30 PM
-        ["80m","80m","80m","80m"], //8:00 PM
-      ]
-    },
-    {
-      name: "No-Show Call-Outs",
-      description: "Multiple call-outs and open slots. Goal: Rearrange sessions to minimize revenue loss from call-outs.",
-      problem: [
-        ["80m","OPEN","Call-out","OPEN"], //9:00 AM
-        ["OPEN","OPEN","OPEN","OPEN"], //9:30 AM
-        ["OPEN","OPEN","OPEN","Call-out"], //10:00 AM
-        ["OPEN","80m","OPEN","OPEN"], //10:30 AM
-        ["OPEN","OPEN","OPEN","OPEN"], //11:00 AM
-        ["OPEN","OPEN","OPEN","OPEN"], //11:30 AM
-        ["OPEN","OPEN","OPEN","OPEN"], //12:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //12:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //1:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //1:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //2:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //2:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //3:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //3:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //4:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //4:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //5:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //5:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //6:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //6:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //7:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //7:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //8:00 PM
-      ],
-      solution: [
-        ["80m","80m","80m","80m"], //9:00 AM
-        ["80m","80m","80m","80m"], //9:30 AM
-        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
-        ["80m","80m","80m","80m"], //10:30 AM
-        ["80m","80m","80m","80m"], //11:00 AM
-        ["80m","80m","80m","80m"], //11:30 AM
-        ["80m","80m","80m","80m"], //12:00 PM
-        ["80m","80m","80m","80m"], //12:30 PM
-        ["80m","80m","80m","80m"], //1:00 PM
-        ["80m","80m","80m","80m"], //1:30 PM
-        ["80m","80m","80m","80m"], //2:00 PM
-        ["80m","80m","80m","80m"], //2:30 PM
-        ["80m","80m","80m","80m"], //3:00 PM
-        ["80m","80m","80m","80m"], //3:30 PM
-        ["80m","80m","80m","80m"], //4:00 PM
-        ["80m","80m","80m","80m"], //4:30 PM
-        ["80m","80m","80m","80m"], //5:00 PM
-        ["80m","80m","80m","80m"], //5:30 PM
-        ["80m","80m","80m","80m"], //6:00 PM
-        ["80m","80m","80m","80m"], //6:30 PM
-        ["80m","80m","80m","80m"], //7:00 PM
-        ["80m","80m","80m","80m"], //7:30 PM
-        ["80m","80m","80m","80m"], //8:00 PM
-      ]
+  <script>
+    // ---- MODAL POPUP ----
+    function showPopup(msg, timeout=2500) {
+      document.getElementById('popup-content').textContent = msg;
+      let modal = document.getElementById('popup-modal');
+      modal.style.display = 'block';
+      setTimeout(()=>{modal.style.display='none';}, timeout);
     }
-  ],
-  // Repeat similar structure for Monday to Saturday
-  "Monday": [
-    {
-      name: "Misaligned Breaks",
-      description: "Therapists have breaks at different times, causing scheduling inefficiency. Goal: Align lunch breaks and fill gaps.",
-      problem: [
-        ["80m","OPEN","OPEN","OPEN"], //9:00 AM
-        ["OPEN","80m","OPEN","OPEN"], //9:30 AM
-        ["OPEN","OPEN","80m","OPEN"], //10:00 AM
-        ["OPEN","OPEN","OPEN","80m"], //10:30 AM
-        ["Lunch","OPEN","OPEN","OPEN"], //11:00 AM
-        ["OPEN","Lunch","OPEN","OPEN"], //11:30 AM
-        ["OPEN","OPEN","Lunch","OPEN"], //12:00 PM
-        ["OPEN","OPEN","OPEN","Lunch"], //12:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //1:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //1:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //2:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //2:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //3:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //3:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //4:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //4:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //5:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //5:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //6:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //6:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //7:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //7:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //8:00 PM
-      ],
-      solution: [
-        ["80m","80m","80m","80m"], //9:00 AM
-        ["80m","80m","80m","80m"], //9:30 AM
-        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
-        ["80m","80m","80m","80m"], //10:30 AM
-        ["80m","80m","80m","80m"], //11:00 AM
-        ["80m","80m","80m","80m"], //11:30 AM
-        ["80m","80m","80m","80m"], //12:00 PM
-        ["80m","80m","80m","80m"], //12:30 PM
-        ["80m","80m","80m","80m"], //1:00 PM
-        ["80m","80m","80m","80m"], //1:30 PM
-        ["80m","80m","80m","80m"], //2:00 PM
-        ["80m","80m","80m","80m"], //2:30 PM
-        ["80m","80m","80m","80m"], //3:00 PM
-        ["80m","80m","80m","80m"], //3:30 PM
-        ["80m","80m","80m","80m"], //4:00 PM
-        ["80m","80m","80m","80m"], //4:30 PM
-        ["80m","80m","80m","80m"], //5:00 PM
-        ["80m","80m","80m","80m"], //5:30 PM
-        ["80m","80m","80m","80m"], //6:00 PM
-        ["80m","80m","80m","80m"], //6:30 PM
-        ["80m","80m","80m","80m"], //7:00 PM
-        ["80m","80m","80m","80m"], //7:30 PM
-        ["80m","80m","80m","80m"], //8:00 PM
-      ]
-    },
-    {
-      name: "Late Evening Gaps",
-      description: "Several open slots in the evening. Goal: Fill late gaps and maximize utilization.",
-      problem: [
-        ["80m","80m","80m","80m"], //9:00 AM
-        ["80m","80m","80m","80m"], //9:30 AM
-        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
-        ["80m","80m","80m","80m"], //10:30 AM
-        ["80m","80m","80m","80m"], //11:00 AM
-        ["80m","80m","80m","80m"], //11:30 AM
-        ["80m","80m","80m","80m"], //12:00 PM
-        ["80m","80m","80m","80m"], //12:30 PM
-        ["80m","80m","80m","80m"], //1:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //1:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //2:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //2:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //3:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //3:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //4:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //4:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //5:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //5:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //6:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //6:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //7:00 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //7:30 PM
-        ["OPEN","OPEN","OPEN","OPEN"], //8:00 PM
-      ],
-      solution: [
-        ["80m","80m","80m","80m"], //9:00 AM
-        ["80m","80m","80m","80m"], //9:30 AM
-        ["Lunch","Lunch","Lunch","Lunch"], //10:00 AM
-        ["80m","80m","80m","80m"], //10:30 AM
-        ["80m","80m","80m","80m"], //11:00 AM
-        ["80m","80m","80m","80m"], //11:30 AM
-        ["80m","80m","80m","80m"], //12:00 PM
-        ["80m","80m","80m","80m"], //12:30 PM
-        ["80m","80m","80m","80m"], //1:00 PM
-        ["80m","80m","80m","80m"], //1:30 PM
-        ["80m","80m","80m","80m"], //2:00 PM
-        ["80m","80m","80m","80m"], //2:30 PM
-        ["80m","80m","80m","80m"], //3:00 PM
-        ["80m","80m","80m","80m"], //3:30 PM
-        ["80m","80m","80m","80m"], //4:00 PM
-        ["80m","80m","80m","80m"], //4:30 PM
-        ["80m","80m","80m","80m"], //5:00 PM
-        ["80m","80m","80m","80m"], //5:30 PM
-        ["80m","80m","80m","80m"], //6:00 PM
-        ["80m","80m","80m","80m"], //6:30 PM
-        ["80m","80m","80m","80m"], //7:00 PM
-        ["80m","80m","80m","80m"], //7:30 PM
-        ["80m","80m","80m","80m"], //8:00 PM
-      ]
+
+    // ---- TAB NAVIGATION ----
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      let index = {simulator:0, progress:1, quiz:2, scripts:3, overview:4}[id];
+      document.querySelectorAll('.tab')[index].classList.add('active');
+      if (id === 'progress') updateProgressTable();
+      if (id === 'quiz') renderQuiz();
     }
-  ],
-  // ...Repeat for Tuesday through Saturday (for brevity, these can be clones of the above, or you can specify differences)
-  // For demonstration, use Sunday/Monday scenarios for other days. You can expand as needed!
-};
-["Tuesday","Wednesday","Thursday","Friday","Saturday"].forEach(day=>{
-  scenarioData[day] = JSON.parse(JSON.stringify(scenarioData["Sunday"]));
-  scenarioData[day][0].name = "Fill Gaps & Align Lunch";
-  scenarioData[day][1].name = "No-Show Call-Outs";
-  scenarioData[day][0].description = "Gaia has gaps in the morning, Jose has back-to-back sessions, Diaz has a call-out in the afternoon. Goal: Fill Gaia's gaps, align all lunch breaks.";
-  scenarioData[day][1].description = "Multiple call-outs and open slots. Goal: Rearrange sessions to minimize revenue loss from call-outs.";
-});
 
-let currentDay = "Sunday";
-let currentScenarioIdx = 0;
-let currentState = null;
-let moveCount = 0;
+    // ---- DATA ----
+    const therapistNames = {
+      "Sunday": ["Amy", "Bill", "Gabriella", "Hank"],
+      "Monday": ["Marti", "Seydonia", "Spencer", "Trang"],
+      "Tuesday": ["Gaia", "Jose", "Diaz", "Frankie"],
+      "Wednesday": ["Rhandi", "Victor", "Yari", "Sean"],
+      "Thursday": ["Aaron", "Edoward", "Gabriella", "Spencer"],
+      "Friday": ["Vicente", "Gaia", "Jon", "Jayna"],
+      "Saturday": ["Bill", "Corey", "Diaz", "Victor"]
+    };
 
-function updateScenarioBar() {
-  const daySelect = document.getElementById('daySelect');
-  daySelect.innerHTML = Object.keys(scenarioData).map(d=>`<option value="${d}">${d}</option>`).join('');
-  daySelect.value = currentDay;
-  daySelect.onchange = function() {
-    currentDay = daySelect.value;
-    currentScenarioIdx = 0;
-    resetProgress();
-  };
-  const scenarioSelect = document.getElementById('scenarioSelect');
-  scenarioSelect.innerHTML = scenarioData[currentDay].map((s,idx)=>`<option value="${idx}">${s.name}</option>`).join('');
-  scenarioSelect.value = currentScenarioIdx;
-  scenarioSelect.onchange = function() {
-    currentScenarioIdx = parseInt(scenarioSelect.value);
-    resetProgress();
-  };
-}
+    const timeSlots = [
+      "08:00 AM","08:30 AM","09:00 AM","09:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
+      "12:00 PM","12:30 PM","01:00 PM","01:30 PM","02:00 PM","02:30 PM","03:00 PM","03:30 PM",
+      "04:00 PM","04:30 PM","05:00 PM","05:30 PM","06:00 PM","06:30 PM","07:00 PM"
+    ];
 
-function resetProgress() {
-  moveCount = 0;
-  currentState = null;
-  renderScenario();
-  hideToast();
-}
+    // Use the same scenarios as previous files, for brevity
+    const scenarios = {
+      "Sunday": {
+        desc: `<strong>Scenario:</strong> Amy has a midday call-out, Bill has gaps, Gabriella lunch at noon.<br>
+          <strong>Goal:</strong> Move appointments to fill gaps and minimize open slots.`,
+        initial: [
+          ["OPEN","OPEN","80m","OPEN"],["80m","OPEN","OPEN","OPEN"],["OPEN","GAP","OPEN","OPEN"],["OPEN","OPEN","Lunch","OPEN"],
+          ["Call-out","OPEN","OPEN","OPEN"],["Lunch","GAP","OPEN","OPEN"],["OPEN","OPEN","80m","OPEN"],["80m","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","Lunch","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["80m","OPEN","OPEN","OPEN"],["OPEN","OPEN","80m","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["Lunch","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ],
+        solution: [
+          ["80m","OPEN","80m","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","Lunch","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["Lunch","OPEN","OPEN","OPEN"],["OPEN","OPEN","80m","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","Lunch","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["80m","OPEN","OPEN","OPEN"],["OPEN","OPEN","80m","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["Lunch","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ]
+      },
+      "Monday": {
+        desc: `<strong>Scenario:</strong> Marti and Seydonia have overlapping breaks, Spencer has a call-out at open.<br>
+          <strong>Goal:</strong> Redistribute Spencer's sessions, stagger breaks.`,
+        initial: [
+          ["Call-out","OPEN","OPEN","OPEN"],["OPEN","80m","OPEN","OPEN"],["OPEN","OPEN","Lunch","Lunch"],["Lunch","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","80m","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["Break","Break","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","80m","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["Lunch","Lunch","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ],
+        solution: [
+          ["OPEN","80m","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","Lunch","Lunch"],["Lunch","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","80m","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["Break","OPEN","Break","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","80m","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["Lunch","OPEN","Lunch","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ]
+      },
+      "Tuesday": {
+        desc: `<strong>Scenario:</strong> Jose has back-to-back sessions, Diaz has call-out in afternoon.<br>
+          <strong>Goal:</strong> Fill Diaz's gaps, optimize Jose's lunch timing.`,
+        initial: [
+          ["80m","OPEN","OPEN","OPEN"],["80m","OPEN","OPEN","OPEN"],["Lunch","Lunch","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","Call-out","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["80m","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["Lunch","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ],
+        solution: [
+          ["80m","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["Lunch","Lunch","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["80m","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["Lunch","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ]
+      },
+      "Wednesday": {
+        desc: `<strong>Scenario:</strong> Rhandi and Victor need staggered breaks, Sean has a temp hold.<br>
+          <strong>Goal:</strong> Avoid overlapping breaks and fill temp hold blocks.`,
+        initial: [
+          ["OPEN","OPEN","OPEN","Hold"],["Break","OPEN","OPEN","OPEN"],["OPEN","Break","OPEN","OPEN"],["OPEN","OPEN","Break","OPEN"],
+          ["Lunch","OPEN","Lunch","OPEN"],["OPEN","Lunch","OPEN","Lunch"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","Hold","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ],
+        solution: [
+          ["OPEN","OPEN","OPEN","OPEN"],["Break","OPEN","OPEN","OPEN"],["OPEN","Break","OPEN","OPEN"],["OPEN","OPEN","Break","OPEN"],
+          ["Lunch","OPEN","Lunch","OPEN"],["OPEN","Lunch","OPEN","Lunch"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ]
+      },
+      "Thursday": {
+        desc: `<strong>Scenario:</strong> Aaron has a personal time block, Edoward has a call-out, team needs coverage.<br>
+          <strong>Goal:</strong> Cover for call-out and personal time using open blocks.`,
+        initial: [
+          ["Personal","OPEN","OPEN","OPEN"],["OPEN","Call-out","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["Lunch","OPEN","Lunch","OPEN"],["OPEN","Lunch","OPEN","Lunch"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ],
+        solution: [
+          ["Personal","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["Lunch","OPEN","Lunch","OPEN"],["OPEN","Lunch","OPEN","Lunch"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ]
+      },
+      "Friday": {
+        desc: `<strong>Scenario:</strong> Jon and Jayna have overlapping sessions, Gaia needs a lunch break.<br>
+          <strong>Goal:</strong> Stagger sessions and breaks for better coverage.`,
+        initial: [
+          ["80m","80m","OPEN","OPEN"],["Lunch","OPEN","Lunch","OPEN"],["OPEN","Lunch","OPEN","Lunch"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ],
+        solution: [
+          ["80m","OPEN","OPEN","OPEN"],["Lunch","80m","Lunch","OPEN"],["OPEN","Lunch","OPEN","Lunch"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ]
+      },
+      "Saturday": {
+        desc: `<strong>Scenario:</strong> Bill has a call-out, Corey has personal time, Diaz has a temp hold.<br>
+          <strong>Goal:</strong> Cover for call-out, fill temp hold, and stagger personal blocks.`,
+        initial: [
+          ["OPEN","Call-out","OPEN","OPEN"],["OPEN","OPEN","Hold","OPEN"],["Personal","OPEN","OPEN","OPEN"],["OPEN","Personal","OPEN","OPEN"],
+          ["Lunch","OPEN","Lunch","OPEN"],["OPEN","Lunch","OPEN","Lunch"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ],
+        solution: [
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["Personal","OPEN","OPEN","OPEN"],["OPEN","Personal","OPEN","OPEN"],
+          ["Lunch","OPEN","Lunch","OPEN"],["OPEN","Lunch","OPEN","Lunch"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],
+          ["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"],["OPEN","OPEN","OPEN","OPEN"]
+        ]
+      }
+    };
 
-function nextScenario() {
-  currentScenarioIdx = (currentScenarioIdx+1) % scenarioData[currentDay].length;
-  resetProgress();
-}
+    // ---- PROGRESS ----
+    let currentDay = "Sunday";
+    let currentSchedule = [];
+    let moves = 0;
+    let scenarioStartTime = 0;
+    let progress = JSON.parse(localStorage.getItem('simProgress') || '{}') || {};
 
-function showSolution() {
-  currentState = JSON.parse(JSON.stringify(scenarioData[currentDay][currentScenarioIdx].solution));
-  moveCount = 0;
-  renderScenario();
-  showToast("Optimal solution loaded.");
-}
-
-function showToast(text) {
-  const toast = document.getElementById('solutionToast');
-  toast.textContent = text;
-  toast.style.display = "block";
-  setTimeout(hideToast, 1800);
-}
-function hideToast() {
-  document.getElementById('solutionToast').style.display = "none";
-}
-
-function renderScenario() {
-  updateScenarioBar();
-  const scenario = scenarioData[currentDay][currentScenarioIdx];
-  document.getElementById('scenarioDescription').textContent = scenario.description;
-
-  const times = buildTimes(currentDay);
-  const table = document.getElementById('scheduleTable');
-  table.innerHTML = '';
-  // Header
-  let thead = document.createElement('thead');
-  let hRow = document.createElement('tr');
-  hRow.innerHTML = `<th>Time</th>` + therapistList.map(n=>`<th>${n}</th>`).join('');
-  thead.appendChild(hRow);
-  table.appendChild(thead);
-
-  // Body
-  let tbody = document.createElement('tbody');
-  let state = currentState || scenario.problem;
-  for (let i=0; i<times.length; i++) {
-    let row = document.createElement('tr');
-    row.innerHTML = `<td>${times[i]}</td>`;
-    for (let t=0; t<therapistList.length; t++) {
-      let val = (state[i]&&state[i][t]) ? state[i][t] : "OPEN";
-      let cellClass = "schedule-block-open";
-      if (val==="80m") cellClass = "schedule-block-session";
-      if (val==="Lunch") cellClass = "schedule-block-lunch";
-      if (val==="Call-out") cellClass = "schedule-block-callout";
-      if (val==="GAP") cellClass = "schedule-block-gap";
-      row.innerHTML += `<td class="${cellClass}" 
-        draggable="true" ondragstart="dragCell(event,${i},${t})" 
-        ondrop="dropCell(event,${i},${t})" ondragover="event.preventDefault()">
-        ${val}
-        </td>`;
+    // ---- SCENARIO LOGIC ----
+    function loadScenario() {
+      document.getElementById('hint-area').innerHTML = "";
+      document.getElementById('solution-table-wrapper').innerHTML = "";
+      moves = 0;
+      document.getElementById('moves-count').textContent = moves;
+      document.getElementById('gaps-count').textContent = "0";
+      document.getElementById('rev-saved').textContent = "$0";
+      document.getElementById('grade').textContent = "C";
+      document.getElementById('utilization').textContent = "0%";
+      currentDay = document.getElementById('sim-day-sim').value;
+      document.getElementById('scenario-desc').innerHTML = scenarios[currentDay].desc;
+      currentSchedule = scenarios[currentDay].initial.map(row => row.slice());
+      scenarioStartTime = Date.now();
+      renderScheduleTable();
+      updateMetrics();
     }
-    tbody.appendChild(row);
-  }
-  table.appendChild(tbody);
 
-  // Metrics
-  updateMetrics(state, scenario.solution);
+    function renderScheduleTable() {
+      let names = therapistNames[currentDay];
+      let table = `<table class="schedule-table" id="sched-table"><tr><th>Time</th>`;
+      names.forEach(label => table += `<th>${label}</th>`);
+      table += `</tr>`;
+      for (let i = 0; i < timeSlots.length; i++) {
+        table += `<tr><td>${timeSlots[i]}</td>`;
+        for (let j = 0; j < names.length; j++) {
+          let cell = currentSchedule[i] ? currentSchedule[i][j] : "OPEN";
+          let blockClass = "block";
+          if (cell === "OPEN") blockClass += " block-open";
+          else if (cell.endsWith("m")) blockClass += " block-session";
+          else if (cell === "GAP") blockClass += " block-gap";
+          else if (cell === "Lunch") blockClass += " block-lunch";
+          else if (cell === "Break") blockClass += " block-break";
+          else if (cell === "Personal") blockClass += " block-personal";
+          else if (cell === "Call-out") blockClass += " block-callout";
+          else if (cell === "Hold") blockClass += " block-hold";
+          else blockClass += " block-open";
+          let interactive = ["OPEN","GAP","Call-out","Hold"].includes(cell) || cell.endsWith("m");
+          table += `<td class="${blockClass}" data-row="${i}" data-col="${j}" draggable="${interactive ? 'true' : 'false'}"
+            ondragstart="dragStart(event)" ondrop="dropBlock(event)" ondragover="allowDrop(event)"
+            ${interactive ? 'onclick="blockClicked(this)"' : ''} tabindex="0" aria-label="Schedule block">${cell}</td>`;
+        }
+        table += `</tr>`;
+      }
+      table += `</table>`;
+      document.getElementById('schedule-table-wrapper').innerHTML = table;
+    }
 
-  // Feedback
-  renderFeedback(state, scenario.solution);
-}
+    // Advanced drag-and-drop: merge sessions if adjacent and same therapist
+    let dragSource = null;
+    function dragStart(e) {
+      dragSource = e.target;
+      e.dataTransfer.setData("text/plain", dragSource.innerText);
+    }
+    function allowDrop(e) { e.preventDefault(); }
+    function dropBlock(e) {
+      e.preventDefault();
+      if (!dragSource) return;
+      let srcRow = parseInt(dragSource.getAttribute('data-row'));
+      let srcCol = parseInt(dragSource.getAttribute('data-col'));
+      let tgtRow = parseInt(e.target.getAttribute('data-row'));
+      let tgtCol = parseInt(e.target.getAttribute('data-col'));
+      let srcVal = currentSchedule[srcRow][srcCol];
+      let tgtVal = currentSchedule[tgtRow][tgtCol];
+      // Try to merge if both are session blocks and adjacent
+      if (srcVal.endsWith('m') && tgtVal.endsWith('m') && srcCol === tgtCol && (Math.abs(srcRow - tgtRow) === 1)) {
+        let srcLen = parseInt(srcVal);
+        let tgtLen = parseInt(tgtVal);
+        currentSchedule[tgtRow][tgtCol] = (srcLen + tgtLen) + 'm';
+        currentSchedule[srcRow][srcCol] = "OPEN";
+        moves++;
+        showPopup("Sessions merged!");
+        renderScheduleTable();
+        updateMetrics();
+        dragSource = null;
+        return;
+      }
+      // Otherwise, swap if allowed
+      let interactive = ["OPEN","GAP","Call-out","Hold"].includes(tgtVal) || tgtVal.endsWith("m");
+      if (interactive) {
+        currentSchedule[tgtRow][tgtCol] = srcVal;
+        currentSchedule[srcRow][srcCol] = "OPEN";
+        moves++;
+        showPopup("Block moved.");
+        renderScheduleTable();
+        updateMetrics();
+      } else {
+        showPopup("Cannot move to this block.");
+      }
+      dragSource = null;
+    }
 
-function dragCell(e,i,t) {
-  e.dataTransfer.setData("text/plain", JSON.stringify({i,t}));
-}
-function dropCell(e,i2,t2) {
-  let data = e.dataTransfer.getData("text/plain");
-  if (!data) return;
-  let {i: i1, t: t1} = JSON.parse(data);
-  if (i1==i2 && t1==t2) return;
-  let scenario = scenarioData[currentDay][currentScenarioIdx];
-  let times = buildTimes(currentDay);
-  let state = currentState || JSON.parse(JSON.stringify(scenario.problem));
-  // Swap cells
-  let tmp = state[i1][t1];
-  state[i1][t1] = state[i2][t2];
-  state[i2][t2] = tmp;
-  currentState = state;
-  moveCount++;
-  renderScenario();
-}
+    function blockClicked(td) {
+      let row = parseInt(td.getAttribute('data-row'));
+      let col = parseInt(td.getAttribute('data-col'));
+      let cell = currentSchedule[row][col];
+      // Cycle cell state: OPEN → 80m → GAP → Call-out → Hold → OPEN
+      let states = ["OPEN","80m","GAP","Call-out","Hold"];
+      let idx = states.indexOf(cell);
+      let nextIdx = (idx + 1) % states.length;
+      currentSchedule[row][col] = states[nextIdx];
+      moves++;
+      showPopup("Block changed to " + currentSchedule[row][col]);
+      renderScheduleTable();
+      updateMetrics();
+    }
 
-function updateMetrics(state, solution) {
-  // Moves
-  document.getElementById('movesMetric').textContent = moveCount;
-  // Gaps fixed = number of non-OPEN blocks in state minus problem
-  let gapsFixed = 0;
-  for (let i=0;i<state.length;i++) {
-    for (let t=0;t<therapistList.length;t++) {
-      if (state[i][t]!=="OPEN" && scenarioData[currentDay][currentScenarioIdx].problem[i][t]==="OPEN") {
-        gapsFixed++;
+    function updateMetrics() {
+      let gaps = 0, sessions = 0, callouts = 0, blocks = 0;
+      for (let i = 0; i < currentSchedule.length; i++) {
+        for (let j = 0; j < therapistNames[currentDay].length; j++) {
+          let cell = currentSchedule[i][j];
+          blocks++;
+          if (cell === "GAP") gaps++;
+          if (cell.endsWith("m")) sessions++;
+          if (cell === "Call-out") callouts++;
+        }
+      }
+      let utilization = Math.round((sessions/blocks)*100);
+      document.getElementById('gaps-count').textContent = gaps;
+      document.getElementById('rev-saved').textContent = "$" + (sessions * 80);
+      let grade = "C";
+      if (gaps === 0 && callouts === 0 && utilization > 80) grade = "A";
+      else if (gaps < 3 && callouts < 3 && utilization > 60) grade = "B";
+      document.getElementById('grade').textContent = grade;
+      document.getElementById('utilization').textContent = utilization + "%";
+      // Save progress locally
+      let timeSpent = Math.round((Date.now() - scenarioStartTime)/1000);
+      let progressObj = {grade, moves, completed: (grade === "A" || grade === "B"), utilization, gaps, sessions, callouts, timeSpent};
+      progress[currentDay] = progressObj;
+      localStorage.setItem('simProgress', JSON.stringify(progress));
+    }
+
+    function showHint() {
+      showPopup("Hint: Drag sessions to fill gaps, move call-out blocks to OPEN, and stagger lunches/breaks for full coverage.");
+      document.getElementById('hint-area').innerHTML = `<div class="hint-text">
+      <strong>Hint:</strong> Drag sessions to fill gaps, move call-out blocks to OPEN, and stagger lunches/breaks for full coverage.
+      </div>`;
+    }
+
+    function showSolution() {
+      let names = therapistNames[currentDay];
+      let solution = scenarios[currentDay].solution;
+      let table = `<table class="schedule-table solution-table"><tr><th>Time</th>`;
+      names.forEach(label => table += `<th>${label}</th>`);
+      table += `</tr>`;
+      for (let i = 0; i < timeSlots.length; i++) {
+        table += `<tr><td>${timeSlots[i]}</td>`;
+        for (let j = 0; j < names.length; j++) {
+          let cell = solution[i] ? solution[i][j] : "OPEN";
+          let blockClass = "block";
+          if (cell === "OPEN") blockClass += " block-open";
+          else if (cell.endsWith("m")) blockClass += " block-session";
+          else if (cell === "GAP") blockClass += " block-gap";
+          else if (cell === "Lunch") blockClass += " block-lunch";
+          else if (cell === "Break") blockClass += " block-break";
+          else if (cell === "Personal") blockClass += " block-personal";
+          else if (cell === "Call-out") blockClass += " block-callout";
+          else if (cell === "Hold") blockClass += " block-hold";
+          else blockClass += " block-open";
+          table += `<td class="${blockClass}">${cell}</td>`;
+        }
+        table += `</tr>`;
+      }
+      table += `</table>`;
+      document.getElementById('solution-table-wrapper').innerHTML = table;
+      showPopup("Optimal solution loaded.");
+    }
+
+    function nextScenario() {
+      let days = Object.keys(scenarios);
+      let idx = days.indexOf(currentDay);
+      let nextIdx = (idx + 1) % days.length;
+      document.getElementById('sim-day-sim').value = days[nextIdx];
+      loadScenario();
+      showPopup("Next scenario loaded.");
+    }
+
+    function updateProgressTable() {
+      let days = Object.keys(scenarios);
+      let tbody = "";
+      let badges = [];
+      for (let d of days) {
+        let p = progress[d] || {};
+        let badge = (p.grade === "A") ? `<span class="badge">Gold</span>` : (p.grade === "B") ? `<span class="badge">Silver</span>` : "";
+        if (badge) badges.push(badge);
+        tbody += `<tr><td>${d}</td><td>${scenarios[d].desc.split('<')[0]}</td><td>${p.grade || "-"}</td><td>${p.completed ? "✅" : ""}</td><td>${p.timeSpent || "-"} sec</td></tr>`;
+      }
+      document.getElementById('progress-table-body').innerHTML = tbody;
+      document.getElementById('progress-badges').innerHTML = badges.join("");
+    }
+
+    function resetProgress() {
+      localStorage.removeItem('simProgress');
+      progress = {};
+      loadScenario();
+      updateProgressTable();
+      showPopup("Progress reset.");
+    }
+
+    // ---- QUIZ ----
+    const quizQuestions = [
+      {
+        q: "What does a red block represent on the therapist schedule?",
+        opts: ["Lunch", "Call-out/Shift adjustment", "Break", "Personal time"],
+        answer: 1,
+        explanation: "Red blocks mean call-out or shift adjustment."
+      },
+      {
+        q: "What is the best practice for filling gaps during a call-out?",
+        opts: [
+          "Leave gaps for coverage later",
+          "Move sessions to open blocks on other therapists",
+          "Skip the session",
+          "Assign to personal time"
+        ],
+        answer: 1,
+        explanation: "Move sessions to open blocks on other therapists."
+      },
+      {
+        q: "What's the purpose of grey blocks?",
+        opts: ["Lunch or personal time", "Session", "Open", "Call-out"],
+        answer: 0,
+        explanation: "Grey blocks indicate lunch or personal time."
+      }
+    ];
+    let quizScore = 0;
+    function renderQuiz() {
+      quizScore = 0;
+      let area = document.getElementById('quiz-area');
+      let html = "";
+      quizQuestions.forEach((q, i) => {
+        html += `<div class="quiz-question"><b>${i+1}. ${q.q}</b><br>`;
+        q.opts.forEach((opt, j) => {
+          html += `<label class="quiz-option"><input type="radio" name="quiz${i}" value="${j}" onclick="quizAnswered(${i},${j})"> ${opt}</label><br>`;
+        });
+        html += `</div>`;
+      });
+      area.innerHTML = html;
+      document.getElementById('quiz-score').textContent = "";
+    }
+    function quizAnswered(qIdx, ansIdx) {
+      let q = quizQuestions[qIdx];
+      let radios = document.getElementsByName("quiz"+qIdx);
+      radios.forEach(r => r.disabled = true);
+      if (ansIdx === q.answer) {
+        quizScore++;
+        showPopup("Correct! " + q.explanation);
+      } else {
+        showPopup("Incorrect! " + q.explanation);
+      }
+      if (qIdx === quizQuestions.length-1) {
+        document.getElementById('quiz-score').textContent = "Quiz Complete! Score: "+quizScore+"/"+quizQuestions.length;
       }
     }
-  }
-  document.getElementById('gapsMetric').textContent = gapsFixed;
-  // Utilization = percent of slots filled (not OPEN)
-  let filled = 0, total = state.length*therapistList.length;
-  for (let i=0;i<state.length;i++) for (let t=0;t<therapistList.length;t++) {
-    if (state[i][t]!=="OPEN") filled++;
-  }
-  let utilization = Math.round(100*filled/total);
-  document.getElementById('utilMetric').textContent = utilization+"%";
-  // Revenue Saved = (number of 80m blocks in state) * price, minus call-outs
-  let revenue = 0;
-  for (let i=0;i<state.length;i++) for (let t=0;t<therapistList.length;t++) {
-    if (state[i][t]==="80m") revenue += sessionPrice;
-    if (state[i][t]==="Call-out") revenue += calloutPrice;
-  }
-  document.getElementById('revenueMetric').textContent = "$"+revenue;
-  // Grade
-  let grade = "C";
-  if (utilization > 90) grade = "A";
-  else if (utilization > 75) grade = "B";
-  else if (utilization > 60) grade = "C";
-  else grade = "D";
-  document.getElementById('gradeMetric').textContent = grade;
-}
 
-function renderFeedback(state, solution) {
-  // List missed slots (OPEN), call-outs, and gaps
-  let missed = 0, callouts = 0;
-  let feedback = "<div class='feedback-box'><b>Feedback:</b><ul>";
-  for (let i=0;i<state.length;i++) for (let t=0;t<therapistList.length;t++) {
-    if (state[i][t]==="OPEN") {
-      feedback += `<li>Missed opportunity at ${buildTimes(currentDay)[i]} for ${therapistList[t]}</li>`;
-      missed++;
-    }
-    if (state[i][t]==="Call-out") {
-      feedback += `<li>Call-out at ${buildTimes(currentDay)[i]} for ${therapistList[t]} (lost revenue)</li>`;
-      callouts++;
-    }
-  }
-  feedback += `</ul>`;
-  feedback += `<b>Total missed slots:</b> ${missed}. <b>Call-outs:</b> ${callouts}.<br>`;
-  feedback += `<b>Estimated Lost Revenue:</b> $${missed*sessionPrice + callouts*(-calloutPrice)}.`;
-  feedback += "</div>";
-  document.getElementById('feedbackBox').innerHTML = feedback;
-}
+    // ---- ACCESSIBILITY ----
+    document.addEventListener('keydown', function(e){
+      if (e.key === "Escape") document.getElementById('popup-modal').style.display = 'none';
+    });
 
-// Startup
-resetProgress();
-</script>
+    document.addEventListener('DOMContentLoaded', function() {
+      loadScenario();
+      updateProgressTable();
+      renderQuiz();
+    });
+  </script>
 </body>
 </html>
+
