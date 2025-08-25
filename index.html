@@ -2,126 +2,403 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Schedule Optimization Training (Advanced Local)</title>
+  <title>Massage Schedule & Optimization Training</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* ...existing styles... */
-    /* Modal styling for block definitions */
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 2em;
+      font-weight: 600;
+      text-align: center;
+      padding: 24px 0 14px 0;
+      background: #2d3d61;
+      color: #fff;
+      box-shadow: 0 3px 12px rgba(44,70,131,0.08);
+    }
+    .tabs { display: flex; gap: 10px; margin: 0 auto 22px auto; justify-content: center; }
+    .tab { padding: 10px 18px; border: none; background: #eee; cursor: pointer; border-radius: 6px; }
+    .tab.active { background: #3a4a62; color: #fff; }
+    .section { display: none; }
+    .section.active { display: block; }
     #block-definitions-modal {
       display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%);
       background:#fff; border-radius:14px; box-shadow:0 6px 40px #618; z-index:1999;
       font-size:1.1rem; min-width:350px; max-width:98vw; padding:30px;
     }
+    .callout-btn {
+      background: #f8d8d8;
+      border: none;
+      color: #c0392b;
+      font-size: 1.1em;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 10px;
+      font-weight: bold;
+    }
+    .simSlot.callout {
+      background: #f8d8d8 !important;
+      color: #c0392b !important;
+      font-weight: bold;
+    }
+
+    /* Optimization grid styles */
+    .opt-grid-table {
+      border-collapse: collapse;
+      margin: 32px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 18px rgba(44,70,131,0.08);
+      overflow: hidden;
+      min-width: 620px;
+    }
+    .opt-grid-table th, .opt-grid-table td {
+      border: 1px solid #e3e7ed;
+      text-align: center;
+      padding: 8px;
+      min-width: 80px;
+      position: relative;
+    }
+    .opt-grid-table th {
+      background: #e7f1ff;
+      color: #32547f;
+      font-size: 1em;
+      font-weight: 600;
+    }
+    .optSlot {
+      cursor: pointer;
+      background: #f7fbff;
+      transition: background 0.15s;
+    }
+    .optSlot.callout {
+      background: #f8d8d8 !important;
+      color: #c0392b !important;
+      font-weight: bold;
+    }
+    .optCalloutBtn {
+      background: #f8d8d8;
+      border: none;
+      color: #c0392b;
+      font-size: 1em;
+      padding: 3px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 2px;
+      font-weight: bold;
+      vertical-align: middle;
+    }
+    .optDragArea {
+      background: rgba(200,0,0,0.08);
+      outline: 2px solid #f8d8d8;
+    }
   </style>
 </head>
 <body>
-  <div class="container" aria-label="Schedule Optimization Training">
-    <h1>Schedule Optimization Training (Advanced Local)</h1>
-    <div class="subtitle">Practice full-day schedule optimization, scenario-based logic, and interactive scheduling</div>
-    <div class="tabs" role="tablist">
-      <button class="tab active" onclick="showSection('simulator')" aria-label="Schedule Simulator">Schedule Simulator</button>
-      <button class="tab" onclick="showSection('progress')" aria-label="Progress Tracker">Progress Tracker</button>
-      <button class="tab" onclick="showSection('quiz')" aria-label="Knowledge Quiz">Knowledge Quiz</button>
-      <button class="tab" onclick="showSection('scripts')" aria-label="Script Templates">Script Templates</button>
-      <button class="tab" onclick="showSection('overview')" aria-label="Overview">Overview</button>
-    </div>
-    <!-- Block Definitions Button -->
-    <button onclick="document.getElementById('block-definitions-modal').style.display='block';"
-      style="margin:14px 0 12px 0; background:#eaf0ff; color:#3a4a62; border:none; border-radius:7px; padding:8px 18px; font-weight:bold; cursor:pointer;">
-      Block Definitions
-    </button>
-    <!-- Block Definitions Modal -->
-    <div id="block-definitions-modal">
-      <h2 style="margin-top:0;">Scheduling Block Definitions</h2>
-      <div style="margin-bottom:18px;">
-        The new standard for Scheduling Blocks in Zenoti is to enhance efficiency, accuracy, and transparency in managing Massage Therapist schedules and tracking their utilization effectively. <em>Always</em> include notes in scheduling blocks. Notes help others understand why a specific block is on the schedule.
-      </div>
-      <table style="border-collapse:collapse; width:100%;">
+  <h1>Massage Schedule & Optimization Training</h1>
+  <div class="tabs">
+    <button class="tab active" onclick="showSection('simulator')">Schedule Simulator</button>
+    <button class="tab" onclick="showSection('optimization')">Optimization Training</button>
+    <button class="tab" onclick="showSection('block-definitions')">Block Definitions</button>
+  </div>
+
+  <!-- Schedule Simulator Section -->
+  <div id="simulator" class="section active">
+    <p>This is the Schedule Simulator section.</p>
+    <table id="simulatorTable">
+      <thead>
+        <tr>
+          <th>Therapist</th>
+          <th>Slot 1</th>
+          <th>Slot 2</th>
+          <th>Slot 3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>MT1 <button class="callout-btn" onclick="calloutWholeDay(this)">🟥</button></td>
+          <td class="simSlot">Available</td>
+          <td class="simSlot">Available</td>
+          <td class="simSlot">Available</td>
+        </tr>
+        <tr>
+          <td>MT2 <button class="callout-btn" onclick="calloutWholeDay(this)">🟥</button></td>
+          <td class="simSlot">Available</td>
+          <td class="simSlot">Available</td>
+          <td class="simSlot">Available</td>
+        </tr>
+        <tr>
+          <td>MT3 <button class="callout-btn" onclick="calloutWholeDay(this)">🟥</button></td>
+          <td class="simSlot">Available</td>
+          <td class="simSlot">Available</td>
+          <td class="simSlot">Available</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Optimization Training Section -->
+  <div id="optimization" class="section">
+    <div style="max-width:900px;margin:0 auto;">
+      <h2>Optimization Training Grid</h2>
+      <p>
+        <b>Click</b> any slot to set it to Call-out.<br>
+        <b>🟥</b> button fills all time slots for that therapist.<br>
+        <b>Excel-style fill:</b> Click and hold, then drag horizontally to fill multiple slots as Call-out.
+      </p>
+      <table class="opt-grid-table" id="optGridTable">
         <thead>
           <tr>
-            <th style="background:#3a4a62; color:#fff; padding:10px; border:1px solid #dde;">REASON</th>
-            <th style="background:#3a4a62; color:#fff; padding:10px; border:1px solid #dde;">DEFINITION</th>
+            <th>Therapist</th>
+            <th>8:00</th>
+            <th>8:30</th>
+            <th>9:00</th>
+            <th>9:30</th>
+            <th>10:00</th>
+            <th>10:30</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">BREAK</td>
-            <td style="border:1px solid #dde; padding:8px;">A required rest period (usually 10 -15 minutes) mandated by labor laws and company policies.</td>
-          </tr>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">LUNCH</td>
-            <td style="border:1px solid #dde; padding:8px;">A designated 30-minute time slot for a required meal break, typically scheduled midway through the shift.</td>
-          </tr>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">PERSONAL TIME</td>
-            <td style="border:1px solid #dde; padding:8px;">Pre-approved time off requested in advance for personal matters. (Example: doctor's appointments, personal errands, family obligations)</td>
-          </tr>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">PAID TIME OFF</td>
-            <td style="border:1px solid #dde; padding:8px;">Approved time off accrued based on tenure and company policies. (Includes vacations, personal days, mental health days)</td>
-          </tr>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">ADMIN</td>
-            <td style="border:1px solid #dde; padding:8px;">Specific to Leads. Reserved time for administrative tasks assigned to Leads. (Example: Scheduling, inventory management, team coordination)</td>
-          </tr>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">SOAP NOTES</td>
-            <td style="border:1px solid #dde; padding:8px;"><em>For boutiques that require SOAP Notes.</em> Dedicated time for MTs to update SOAP notes, ensuring proper documentation.</td>
-          </tr>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">MEETING</td>
-            <td style="border:1px solid #dde; padding:8px;">Reserved time for team or individual meetings, and the MT is not available for services.</td>
-          </tr>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">TRAINING</td>
-            <td style="border:1px solid #dde; padding:8px;">Scheduled time for training sessions or workshops to enhance skills and knowledge. <em>Including new service training and compliance training sessions.</em></td>
-          </tr>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">OFFSITE EVENT</td>
-            <td style="border:1px solid #dde; padding:8px;">Scheduled time for special events or occasions outside the boutique, such as company-sponsored activities or Pop-ups.</td>
-          </tr>
-          <tr>
-            <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">BOUTIQUE CLOSURE</td>
-            <td style="border:1px solid #dde; padding:8px;">Indicates the boutique will be closed or closing early due to emergencies, maintenance, severe weather, or team events.</td>
-          </tr>
-          <tr>
-            <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">LEAVING EARLY</td>
-            <td style="border:1px solid #dde; padding:8px;">An early departure from a scheduled shift, recorded on the schedule. Leaving early due to a sudden personal issue, reduced guest appointments.</td>
-          </tr>
-          <tr>
-            <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">RUNNING LATE</td>
-            <td style="border:1px solid #dde; padding:8px;">Indicates that the MT will be arriving late for their scheduled shift, noted on the schedule. (Example: traffic delays, childcare issues, car trouble)</td>
-          </tr>
-          <tr>
-            <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">CALL-OUT</td>
-            <td style="border:1px solid #dde; padding:8px;">An unplanned absence from work due to reasons such as illness, emergency, or other unforeseen circumstances.</td>
-          </tr>
-          <tr>
-            <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">SHIFT ADJUSTMENT</td>
-            <td style="border:1px solid #dde; padding:8px;">A manager-directed change where a MT is informed not to report for their scheduled shift for low bookings, overstaffing, last-minute schedule changes.</td>
-          </tr>
-          <tr>
-            <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">TEMP HOLD</td>
-            <td style="border:1px solid #dde; padding:8px;">A temporary block placed on the schedule to accommodate pending adjustments or awaiting confirmations. Ask your manager about your policy.</td>
-          </tr>
+          <!-- Rows are generated by JS -->
         </tbody>
       </table>
-      <div style="margin-top:18px; color:#c0392b; font-size:0.98em;">
-        <strong>Seeing a lot of RED?</strong> Be sure to let a manager know; this means we need to get more coverage. High occurrences of red blocks can impact the boutique's ability to meet guest demand and maintain operational efficiency. Promptly inform a manager and take action, such as rescheduling appointments, calling in additional staff, or adjusting the schedule to ensure adequate coverage and the maintain guest experience.
-      </div>
-      <button onclick="document.getElementById('block-definitions-modal').style.display='none';"
-        style="margin-top:18px; background:#3a4a62; color:#fff; border:none; border-radius:6px; padding:10px 28px; font-size:1rem; cursor:pointer;">
-        Close
-      </button>
     </div>
-    <!-- ...existing code follows... -->
-    <!-- Pop-up Modal -->
-    <div id="popup-modal" role="dialog" aria-live="assertive"><span id="popup-content"></span></div>
-    <!-- Schedule Simulator Section -->
-    <!-- ...the rest of your HTML remains unchanged... -->
   </div>
+
+  <!-- Block Definitions Section -->
+  <div id="block-definitions" class="section">
+    <button onclick="document.getElementById('block-definitions-modal').style.display='block';"
+      style="background:#eaf0ff; color:#3a4a62; border:none; border-radius:7px; padding:8px 18px; font-weight:bold; cursor:pointer;">
+      Show Block Definitions
+    </button>
+  </div>
+  <!-- Block Definitions Modal -->
+  <div id="block-definitions-modal">
+    <h2 style="margin-top:0;">Scheduling Block Definitions</h2>
+    <div style="margin-bottom:18px;">
+      The new standard for Scheduling Blocks in Zenoti is to enhance efficiency, accuracy, and transparency in managing Massage Therapist schedules and tracking their utilization effectively. <em>Always</em> include notes in scheduling blocks. Notes help others understand why a specific block is on the schedule.
+    </div>
+    <table style="border-collapse:collapse; width:100%;">
+      <thead>
+        <tr>
+          <th style="background:#3a4a62; color:#fff; padding:10px; border:1px solid #dde;">REASON</th>
+          <th style="background:#3a4a62; color:#fff; padding:10px; border:1px solid #dde;">DEFINITION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">BREAK</td>
+          <td style="border:1px solid #dde; padding:8px;">A required rest period (usually 10 -15 minutes) mandated by labor laws and company policies.</td>
+        </tr>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">LUNCH</td>
+          <td style="border:1px solid #dde; padding:8px;">A designated 30-minute time slot for a required meal break, typically scheduled midway through the shift.</td>
+        </tr>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">PERSONAL TIME</td>
+          <td style="border:1px solid #dde; padding:8px;">Pre-approved time off requested in advance for personal matters. (Example: doctor's appointments, personal errands, family obligations)</td>
+        </tr>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">PAID TIME OFF</td>
+          <td style="border:1px solid #dde; padding:8px;">Approved time off accrued based on tenure and company policies. (Includes vacations, personal days, mental health days)</td>
+        </tr>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">ADMIN</td>
+          <td style="border:1px solid #dde; padding:8px;">Specific to Leads. Reserved time for administrative tasks assigned to Leads. (Example: Scheduling, inventory management, team coordination)</td>
+        </tr>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">SOAP NOTES</td>
+          <td style="border:1px solid #dde; padding:8px;"><em>For boutiques that require SOAP Notes.</em> Dedicated time for MTs to update SOAP notes, ensuring proper documentation.</td>
+        </tr>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">MEETING</td>
+          <td style="border:1px solid #dde; padding:8px;">Reserved time for team or individual meetings, and the MT is not available for services.</td>
+        </tr>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">TRAINING</td>
+          <td style="border:1px solid #dde; padding:8px;">Scheduled time for training sessions or workshops to enhance skills and knowledge. <em>Including new service training and compliance training sessions.</em></td>
+        </tr>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">OFFSITE EVENT</td>
+          <td style="border:1px solid #dde; padding:8px;">Scheduled time for special events or occasions outside the boutique, such as company-sponsored activities or Pop-ups.</td>
+        </tr>
+        <tr>
+          <td style="background:#e9eaea; font-weight:bold; border:1px solid #dde; padding:8px;">BOUTIQUE CLOSURE</td>
+          <td style="border:1px solid #dde; padding:8px;">Indicates the boutique will be closed or closing early due to emergencies, maintenance, severe weather, or team events.</td>
+        </tr>
+        <tr>
+          <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">LEAVING EARLY</td>
+          <td style="border:1px solid #dde; padding:8px;">An early departure from a scheduled shift, recorded on the schedule. Leaving early due to a sudden personal issue, reduced guest appointments.</td>
+        </tr>
+        <tr>
+          <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">RUNNING LATE</td>
+          <td style="border:1px solid #dde; padding:8px;">Indicates that the MT will be arriving late for their scheduled shift, noted on the schedule. (Example: traffic delays, childcare issues, car trouble)</td>
+        </tr>
+        <tr>
+          <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">CALL-OUT</td>
+          <td style="border:1px solid #dde; padding:8px;">An unplanned absence from work due to reasons such as illness, emergency, or other unforeseen circumstances.</td>
+        </tr>
+        <tr>
+          <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">SHIFT ADJUSTMENT</td>
+          <td style="border:1px solid #dde; padding:8px;">A manager-directed change where a MT is informed not to report for their scheduled shift for low bookings, overstaffing, last-minute schedule changes.</td>
+        </tr>
+        <tr>
+          <td style="background:#f8d8d8; font-weight:bold; border:1px solid #dde; padding:8px;">TEMP HOLD</td>
+          <td style="border:1px solid #dde; padding:8px;">A temporary block placed on the schedule to accommodate pending adjustments or awaiting confirmations. Ask your manager about your policy.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:18px; color:#c0392b; font-size:0.98em;">
+      <strong>Seeing a lot of RED?</strong> Be sure to let a manager know; this means we need to get more coverage. High occurrences of red blocks can impact the boutique's ability to meet guest demand and maintain operational efficiency. Promptly inform a manager and take action, such as rescheduling appointments, calling in additional staff, or adjusting the schedule to ensure adequate coverage and the maintain guest experience.
+    </div>
+    <button onclick="document.getElementById('block-definitions-modal').style.display='none';"
+      style="margin-top:18px; background:#3a4a62; color:#fff; border:none; border-radius:6px; padding:10px 28px; font-size:1rem; cursor:pointer;">
+      Close
+    </button>
+  </div>
+
   <script>
-    // ...existing script unchanged...
+    // Tabs logic
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      Array.from(document.getElementsByClassName('tab')).forEach(tab => {
+        if (tab.textContent.replace(/\s+/g, '').toLowerCase().includes(id.replace('-', ''))) tab.classList.add('active');
+      });
+    }
+
+    // "Call-out whole day" button logic for simulator
+    function calloutWholeDay(btn) {
+      const row = btn.closest('tr');
+      Array.from(row.querySelectorAll('.simSlot')).forEach(slot => {
+        slot.textContent = "Call-out";
+        slot.classList.add('callout');
+      });
+    }
+
+    // ---- Optimization Training Excel-style Fill Logic ----
+    const optMTs = ["MT1", "MT2", "MT3"];
+    const optSlots = ["8:00", "8:30", "9:00", "9:30", "10:00", "10:30"];
+
+    function renderOptGrid() {
+      const tbody = document.getElementById('optGridTable').querySelector('tbody');
+      tbody.innerHTML = "";
+      optMTs.forEach((mt, rIdx) => {
+        const tr = document.createElement('tr');
+        // Therapist name + whole row call-out btn
+        const tdMT = document.createElement('td');
+        tdMT.innerHTML = `<button class="optCalloutBtn" title="Call-out whole day" onclick="optCalloutWholeRow(${rIdx})">🟥</button> ${mt}`;
+        tr.appendChild(tdMT);
+        // Time slots
+        optSlots.forEach((slot, cIdx) => {
+          const td = document.createElement('td');
+          td.className = "optSlot";
+          td.textContent = "Available";
+          td.setAttribute('data-row', rIdx);
+          td.setAttribute('data-col', cIdx);
+          td.setAttribute('data-mt', mt);
+          td.setAttribute('data-time', slot);
+
+          // Individual slot call-out btn
+          const btn = document.createElement('button');
+          btn.className = "optCalloutBtn";
+          btn.textContent = "🟥";
+          btn.title = "Set Call-out";
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            setOptSlotCallout(td);
+          };
+          td.appendChild(btn);
+
+          // Click to set call-out
+          td.onclick = function(e) {
+            if (e.target !== btn) setOptSlotCallout(td);
+          };
+
+          // Mouse drag to fill
+          td.onmousedown = function(e) {
+            if (e.button === 0) {
+              startOptFill(rIdx, cIdx);
+              e.preventDefault();
+            }
+          };
+          td.onmouseenter = function(e) {
+            if (optFillActive && optFillRow === rIdx) {
+              optFillToCol(cIdx);
+            }
+          };
+          td.onmouseup = function(e) {
+            endOptFill();
+          };
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      document.addEventListener("mouseup",endOptFill);
+    }
+    function setOptSlotCallout(td) {
+      td.textContent = "Call-out";
+      td.classList.add("callout");
+      // Re-add button
+      const btn = document.createElement('button');
+      btn.className = "optCalloutBtn";
+      btn.textContent = "🟥";
+      btn.title = "Set Call-out";
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        setOptSlotCallout(td);
+      };
+      td.appendChild(btn);
+    }
+    function optCalloutWholeRow(rowIdx) {
+      const tbody = document.getElementById('optGridTable').querySelector('tbody');
+      const tr = tbody.children[rowIdx];
+      Array.from(tr.querySelectorAll('.optSlot')).forEach(td => setOptSlotCallout(td));
+    }
+
+    // Excel-style fill logic
+    let optFillActive = false, optFillRow = null, optFillColStart = null;
+    function startOptFill(row, col) {
+      optFillActive = true;
+      optFillRow = row;
+      optFillColStart = col;
+      highlightOptFill(row, col, col);
+    }
+    function optFillToCol(colEnd) {
+      highlightOptFill(optFillRow, optFillColStart, colEnd);
+    }
+    function highlightOptFill(row, colStart, colEnd) {
+      const tbody = document.getElementById('optGridTable').querySelector('tbody');
+      const tr = tbody.children[row];
+      Array.from(tr.querySelectorAll('.optSlot')).forEach((td, cIdx) => {
+        td.classList.remove('optDragArea');
+        if ((cIdx >= Math.min(colStart,colEnd)) && (cIdx <= Math.max(colStart,colEnd))) {
+          td.classList.add('optDragArea');
+        }
+      });
+    }
+    function endOptFill() {
+      if (!optFillActive) return;
+      const tbody = document.getElementById('optGridTable').querySelector('tbody');
+      const tr = tbody.children[optFillRow];
+      Array.from(tr.querySelectorAll('.optSlot')).forEach((td, cIdx) => {
+        if (td.classList.contains('optDragArea')) {
+          setOptSlotCallout(td);
+          td.classList.remove('optDragArea');
+        }
+      });
+      optFillActive = false; optFillRow = null; optFillColStart = null;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      renderOptGrid();
+    });
   </script>
 </body>
 </html>
