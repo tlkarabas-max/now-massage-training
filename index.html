@@ -1,5 +1,101 @@
-<!-- ... keep your head, styles, and UI tabs ... -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOW Massage - Schedule Optimization Training (Upgraded)</title>
+    <!-- Styles omitted for brevity, same as before -->
+    <style>
+        /* ... same CSS as previous version ... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ... header, tabs, page layout ... -->
 
+        <!-- PRACTICE SCENARIOS -->
+        <div id="scenarios" class="content">
+            <h2>Practice Scenarios</h2>
+            <div class="directions-box">
+                <strong>Step-by-step Directions for Trainees:</strong><br>
+                1. Select the Day and Scenario (Easy, Medium, Hard) you want to practice.<br>
+                2. Read the scenario description and review the "Optimal Solution" and "Avoid" advice.<br>
+                3. Note any displaced appointments and instructions.<br>
+                4. Switch to the <span style="color:#667eea;font-weight:bold;">Schedule Simulator</span> tab.<br>
+                5. Apply what you've learned by adjusting the schedule to meet the scenario goals.<br>
+                6. Use "Show Solution" or "Hint" buttons for guidance.<br>
+                7. When finished, check your results and compare to the optimal solution.
+            </div>
+            <div class="schedule-controls">
+                <label for="scenarioDay">Day:</label>
+                <select id="scenarioDay"></select>
+                <label for="scenarioNum">Scenario:</label>
+                <select id="scenarioNum"></select>
+                <button class="btn btn-primary" onclick="loadPracticeScenario()">Load Scenario</button>
+            </div>
+            <div id="practiceScenarioBox"></div>
+        </div>
+
+        <!-- SCHEDULE SIMULATOR -->
+        <div id="simulator" class="content">
+            <h2>Interactive Schedule Simulator</h2>
+            <div class="directions-box">
+                <strong>Step-by-step Directions for Trainees:</strong><br>
+                1. Select the Day and Scenario to load the full business day schedule grid.<br>
+                2. Drag and drop appointments between slots to optimize the schedule.<br>
+                3. Use the “Add Massage” panel below to drag new appointments into open slots.<br>
+                4. You can also click any slot to cycle its type.<br>
+                5. Fix gaps, avoid mistakes, and optimize coverage especially in the late afternoon and evening.<br>
+                6. Use "Hint" or "Show Solution" buttons for help.<br>
+                7. Review your work and compare to the optimal solution.
+            </div>
+            <div class="schedule-controls">
+                <label for="simDay">Day:</label>
+                <select id="simDay"></select>
+                <label for="simScenario">Scenario:</label>
+                <select id="simScenario"></select>
+                <button class="btn btn-primary" onclick="loadSimulatorScenario()">Load Scenario</button>
+                <button class="btn btn-secondary" onclick="clearSchedule()">Clear Schedule</button>
+            </div>
+            <div id="addMassagePanel" style="margin-bottom:24px;">
+                <strong>Add Massage:</strong>
+                <div style="display:flex; gap:10px; margin-top:8px;">
+                    <div class="time-slot booked-80" draggable="true" ondragstart="dragStart(event)" data-type="booked_80">80m</div>
+                    <div class="time-slot booked-50" draggable="true" ondragstart="dragStart(event)" data-type="booked_50">50m</div>
+                </div>
+            </div>
+            <div class="schedule-grid" id="scheduleGrid"></div>
+            <div class="score-panel">
+                <div class="score"><span id="movesCount">0</span><span class="score-label">Moves</span></div>
+                <div class="score"><span id="gapsFixedCount">0</span><span class="score-label">Gaps Fixed</span></div>
+                <div class="score"><span id="revenueSaved">$0</span><span class="score-label">Revenue Saved</span></div>
+                <div class="score"><span id="gradeValue">--</span><span class="score-label">Grade</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="utilizationRate">0%</div>
+                <div class="stat-label">Utilization Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="gapCount">0</div>
+                <div class="stat-label">Gaps</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="optimalPatterns">0</div>
+                <div class="stat-label">Optimal Patterns</div>
+            </div>
+            <div id="displacedAppointmentsBox" class="displaced-box" style="display:none;">
+                <strong>Displaced Appointments:</strong>
+                <ul id="displacedAppointmentsList"></ul>
+            </div>
+            <div id="hintBox" class="hint-box" style="display:none;"></div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="showHint()">Hint</button>
+                <button class="btn btn-primary" onclick="showSolution()">Show Solution</button>
+                <button class="btn btn-secondary" onclick="nextSimulatorScenario()">Next Scenario</button>
+            </div>
+        </div>
+        <!-- ... rest of your tabs ... -->
+    </div>
 <script>
 /* ---- CONFIG ---- */
 const BUSINESS_HOURS = {
@@ -23,14 +119,6 @@ const BLOCK_TYPES = {
     "requested_off": {label: "Req. Off", colorclass: "lunch"}
 };
 
-/* ---- Realistic Therapist Lists for Each Day ---- */
-const THERAPISTS_REAL = {
-  scenario1: ["Aaron", "Amy", "Bill", "Gaia", "Hank", "Marti", "Seydonia", "Spencer", "Trang", "Alexis", "Jose", "Crawford"],
-  scenario2: ["Amy", "Bill", "Frankie", "Marti", "Trang", "Vicente", "Victor", "Hank", "Jose", "Alexis", "Diaz", "Gaia", "Jayna", "Jon", "Sean"],
-  scenario3: ["Amy", "Bill", "Jayna", "Tomas", "Trang", "Vicente", "Sean", "Hank", "Corey", "Frankie", "Spencer"],
-  scenario4: ["Amy", "Jayna", "Spencer", "Trang", "Alexis", "Hank", "Bill", "Corey", "Diaz", "Frankie", "Yari"]
-};
-
 /* ---- Generate Time Slot Array ---- */
 function generateTimeSlots(day) {
     let times = [];
@@ -47,32 +135,27 @@ function generateTimeSlots(day) {
     return times;
 }
 
-/* ---- Real-Life Simulated Scenarios (representative, more can be added) ---- */
+/* ---- Realistic Therapist Lists for Each Day ---- */
+const THERAPISTS_REAL = {
+  sunday: ["Aaron", "Amy", "Bill", "Gaia", "Hank", "Marti", "Seydonia", "Spencer", "Trang", "Alexis", "Jose", "Crawford"],
+  monday: ["Amy", "Bill", "Frankie", "Marti", "Trang", "Vicente", "Victor", "Hank", "Jose", "Alexis", "Diaz", "Gaia", "Jayna", "Jon", "Sean"],
+  tuesday: ["Jayna", "Jose", "Yari", "Carl", "Ryan", "Alexis", "Seydonia", "Hank", "Victor", "Aaron"],
+  wednesday: ["Amy", "Jayna", "Spencer", "Trang", "Alexis", "Hank", "Bill", "Corey", "Diaz", "Frankie", "Yari"]
+};
+
+/* ---- Real-Life and Mixed Scenarios (some same, some different) ---- */
 const ALL_SCENARIOS = {
   sunday: [
     {
-      name: "Sunday Real Case: Callout & Shift Adjustments (from Image 4)",
+      name: "Sunday Real Case: Callout & Shift Adjustments",
       description: "Simulates a day with callouts, shift adjustments, and staggered bookings.",
-      therapists: THERAPISTS_REAL.scenario1,
+      therapists: THERAPISTS_REAL.sunday,
       schedule: [
-        // Each therapist's slots for the time grid, based on the actual patterns in the image
-        // You can expand or tweak these as you add more real examples.
-        // For brevity, partial day sample for Aaron:
-        {
-          therapist: "Aaron",
-          slots: ["shift_adj","","booked_80","booked_80","booked_80","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"]
-        },
-        // Amy
-        {
-          therapist: "Amy",
-          slots: ["callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","callout"]
-        },
-        // Bill
-        {
-          therapist: "Bill",
-          slots: ["shift_adj","","booked_80","booked_80","booked_50","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"]
-        },
-        // ...fill out the rest for other therapists similar to above (based on image)
+        { therapist: "Aaron", slots: ["shift_adj","open","booked_80","booked_80","booked_50","open","open","booked_80","gap","open","open","booked_80","open","open","open","open","open","gap","open","open","open","open"] },
+        { therapist: "Amy", slots: ["callout","callout","callout","callout","callout","callout","callout","callout","callout","callout","booked_80","open","open","open","open","open","open","open","open","open","open","open"] },
+        { therapist: "Bill", slots: ["shift_adj","shift_adj","booked_80","booked_80","booked_50","open","open","open","open","open","open","booked_80","open","open","open","open","open","open","open","open","open","open"] },
+        { therapist: "Gaia", slots: ["booked_80","booked_80","open","open","booked_50","open","open","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        // ...repeat for other therapists, fill with mix of appointments, shift_adj, callout, open, gap, etc.
       ],
       correctMoves: [
         "Fill gaps created by shift adjustments and callouts.",
@@ -83,17 +166,37 @@ const ALL_SCENARIOS = {
         "Leaving gaps after callouts.",
         "Unused open slots late afternoon and evening."
       ]
+    },
+    {
+      name: "Sunday Different Case: Lunch Wave, Minimal Callouts",
+      description: "Focus on lunch coverage, only one callout. Fill gaps, avoid lunch overlaps.",
+      therapists: THERAPISTS_REAL.sunday,
+      schedule: [
+        { therapist: "Aaron", slots: ["booked_80","booked_80","open","lunch","open","open","booked_80","open","open","open","open","open","open","open","open","booked_80","open","open","open","open","open","open"] },
+        { therapist: "Amy", slots: ["booked_80","lunch","open","open","open","booked_50","open","open","open","open","open","callout","open","open","open","open","open","open","open","open","open","open"] },
+        { therapist: "Bill", slots: ["booked_50","open","open","open","lunch","booked_80","open","open","open","open","open","open","open","open","booked_80","open","open","open","open","open","open","open"] },
+        // ...repeat for other therapists, mix in lunch, open, booked, etc.
+      ],
+      correctMoves: [
+        "Stagger lunches.",
+        "Fill gaps after lunch breaks.",
+        "Cover callout with available staff."
+      ],
+      incorrectMoves: [
+        "All lunches at once.",
+        "Leaving gaps after lunch."
+      ]
     }
   ],
   monday: [
     {
-      name: "Monday Real Case: Multiple Break Patterns (from Image 5)",
+      name: "Monday Real Case: Multiple Break Patterns",
       description: "Day with callouts, shift adjustments, breaks, and variable bookings.",
-      therapists: THERAPISTS_REAL.scenario2,
+      therapists: THERAPISTS_REAL.monday,
       schedule: [
         { therapist: "Amy", slots: ["callout","callout","callout","callout","break","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
-        { therapist: "Bill", slots: ["shift_adj","shift_adj","","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
-        // ...complete for each therapist as in the image
+        { therapist: "Bill", slots: ["shift_adj","shift_adj","booked_80","open","break","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        // ...repeat for other therapists, fill as per image or mix in more breaks, booked, open, shift_adj, etc.
       ],
       correctMoves: [
         "Fill gaps after break and shift adjustments.",
@@ -104,16 +207,36 @@ const ALL_SCENARIOS = {
         "Multiple gaps in evening.",
         "Unused open slots."
       ]
+    },
+    {
+      name: "Monday Different Case: Early Shift Adjustment",
+      description: "Early shift adjustments and several gaps. Optimize for morning bookings.",
+      therapists: THERAPISTS_REAL.monday,
+      schedule: [
+        { therapist: "Amy", slots: ["shift_adj","shift_adj","booked_80","booked_50","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        { therapist: "Bill", slots: ["booked_50","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        // ...repeat for other therapists, mix in morning shift_adj, gaps, booked, open, etc.
+      ],
+      correctMoves: [
+        "Fill early morning gaps.",
+        "Use shift adjustment coverage.",
+        "Optimize bookings for morning demand."
+      ],
+      incorrectMoves: [
+        "Unused morning slots.",
+        "Leaving shift gaps unfilled."
+      ]
     }
   ],
   tuesday: [
     {
-      name: "Tuesday Real Case: Requested Off, Dense Bookings (from Image 6)",
+      name: "Tuesday Real Case: Requested Off, Dense Bookings",
       description: "Day with requested off, shift adjustments, staggered lunches, and high booking volume.",
-      therapists: THERAPISTS_REAL.scenario3,
+      therapists: THERAPISTS_REAL.tuesday,
       schedule: [
-        { therapist: "Amy", slots: ["booked_80","booked_80","break","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
-        // ...complete as per the real schedule
+        { therapist: "Jayna", slots: ["booked_80","booked_80","break","open","open","open","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        { therapist: "Jose", slots: ["requested_off","requested_off","requested_off","requested_off","open","open","open","open","open","open","open","open","open","open","booked_80","open","open","open","open","open","open","open"] },
+        // ...repeat for other therapists, reflect requested_off, booked, lunch, etc.
       ],
       correctMoves: [
         "Shift adjustment coverage.",
@@ -124,16 +247,36 @@ const ALL_SCENARIOS = {
         "Leaving therapists unused after 5 PM.",
         "Too many gaps in evening."
       ]
+    },
+    {
+      name: "Tuesday Different Case: Afternoon Callout Challenge",
+      description: "Midday callout and several lunch overlaps. Fill gaps and reassign appointments.",
+      therapists: THERAPISTS_REAL.tuesday,
+      schedule: [
+        { therapist: "Jayna", slots: ["booked_50","open","open","lunch","open","open","callout","open","open","open","open","open","open","open","open","open","booked_80","open","open","open","open","open"] },
+        { therapist: "Jose", slots: ["booked_80","open","open","open","open","lunch","open","open","callout","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        // ...repeat for other therapists, mix in lunch, callout, open, etc.
+      ],
+      correctMoves: [
+        "Cover callout with available staff.",
+        "Stagger lunch breaks.",
+        "Fill gaps after callout."
+      ],
+      incorrectMoves: [
+        "Lunch overlaps with callout.",
+        "Leaving callout gap unfilled."
+      ]
     }
   ],
   wednesday: [
     {
-      name: "Wednesday Real Case: Lunch Waves & Shift Adjustments (from Image 7)",
+      name: "Wednesday Real Case: Lunch Waves & Shift Adjustments",
       description: "Lunches and shift adjustments are staggered, appointments and gaps variable.",
-      therapists: THERAPISTS_REAL.scenario4,
+      therapists: THERAPISTS_REAL.wednesday,
       schedule: [
-        { therapist: "Amy", slots: ["lunch","booked_80","booked_80","booked_80","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
-        // ...complete as per the real schedule
+        { therapist: "Amy", slots: ["lunch","booked_80","booked_80","booked_80","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        { therapist: "Jayna", slots: ["booked_50","open","lunch","open","open","open","open","open","open","booked_80","open","open","open","open","open","open","open","open","open","open","open","open"] },
+        // ...repeat for other therapists, mix in lunch, booked, open, shift_adj, etc.
       ],
       correctMoves: [
         "Stagger lunch breaks.",
@@ -144,13 +287,235 @@ const ALL_SCENARIOS = {
         "Simultaneous shifts/lunches.",
         "Unused evening slots."
       ]
+    },
+    {
+      name: "Wednesday Different Case: Late Day Gaps",
+      description: "Few appointments late day. Spread bookings, fill open slots.",
+      therapists: THERAPISTS_REAL.wednesday,
+      schedule: [
+        { therapist: "Amy", slots: ["booked_80","booked_80","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","gap","gap","gap","gap","open"] },
+        { therapist: "Jayna", slots: ["booked_50","open","open","open","open","open","open","open","open","open","open","open","open","open","open","open","gap","gap","gap","gap","open","open"] },
+        // ...repeat for other therapists, fill with open/gap late slots
+      ],
+      correctMoves: [
+        "Spread appointments into gaps.",
+        "Maximize late day utilization.",
+        "Avoid multiple consecutive gaps."
+      ],
+      incorrectMoves: [
+        "Leaving late shifts empty.",
+        "Unused slots in last 2 hours."
+      ]
     }
   ]
-  // Repeat for other days or add more real scenarios as you upload more!
 };
 
-/* ---- UI Tab Logic ---- */
-// (Keep the rest of your UI tab, scenario selector, and simulator code as above, but update to use therapists from scenario.)
-// When rendering the grid, use scenario.therapists and scenario.schedule for more realistic columns and slot data.
-
+/* ---- Tab, Scenario, Simulator, Grid, Drag, Stats Logic as previous (unchanged) ---- */
+const DAY_LIST = Object.keys(BUSINESS_HOURS);
+function capitalize(str) {return str.charAt(0).toUpperCase()+str.slice(1);}
+function showTab(tab){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+    document.querySelector(`[onclick="showTab('${tab}')"]`).classList.add('active');
+    document.getElementById(tab).classList.add('active');
+    if(tab==="scenarios")renderScenarioControls();
+    if(tab==="simulator")renderSimulatorControls();
+}
+function renderScenarioControls(){
+    let daySel=document.getElementById('scenarioDay');
+    let scenSel=document.getElementById('scenarioNum');
+    daySel.innerHTML=DAY_LIST.map(d=>`<option value="${d}">${capitalize(d)}</option>`).join('');
+    let scens=ALL_SCENARIOS[DAY_LIST[0]];
+    scenSel.innerHTML=scens.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
+    daySel.onchange=function(){
+        let scens=ALL_SCENARIOS[daySel.value];
+        scenSel.innerHTML=scens.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
+    };
+}
+function loadPracticeScenario(){
+    let day=document.getElementById('scenarioDay').value;
+    let idx=+document.getElementById('scenarioNum').value;
+    let scenario=ALL_SCENARIOS[day][idx];
+    let box=document.getElementById('practiceScenarioBox');
+    box.innerHTML=`
+        <h3>${scenario.name}</h3>
+        <div>${scenario.description}</div>
+        <div class="hint-box"><strong>Optimal Solution:</strong><br>${scenario.correctMoves.join('<br>')}</div>
+        <div style="background:#ffe4c2;border-radius:8px;padding:10px;margin-top:8px;"><strong>Avoid:</strong><br>${scenario.incorrectMoves.join('<br>')}</div>
+    `;
+}
+function renderSimulatorControls(){
+    let daySel=document.getElementById('simDay');
+    let scenSel=document.getElementById('simScenario');
+    daySel.innerHTML=DAY_LIST.map(d=>`<option value="${d}">${capitalize(d)}</option>`).join('');
+    let scens=ALL_SCENARIOS[DAY_LIST[0]];
+    scenSel.innerHTML=scens.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
+    daySel.onchange=function(){
+        let scens=ALL_SCENARIOS[daySel.value];
+        scenSel.innerHTML=scens.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
+    };
+}
+let moves=0;
+function loadSimulatorScenario(){
+    let day=document.getElementById('simDay').value;
+    let idx=+document.getElementById('simScenario').value;
+    let scenario=ALL_SCENARIOS[day][idx];
+    renderScheduleGrid(day,scenario);
+    moves=0;
+    document.getElementById('movesCount').textContent=moves;
+    hideHint();
+}
+function clearSchedule(){
+    let day=document.getElementById('simDay').value;
+    let times=generateTimeSlots(day);
+    let grid=document.getElementById('scheduleGrid');
+    let therapists=THERAPISTS_REAL[day];
+    grid.innerHTML='';
+    grid.innerHTML+=`<div class="time-slot header">Time</div>`;
+    therapists.forEach(t=>grid.innerHTML+=`<div class="time-slot header">${t}</div>`);
+    for(let t=0;t<times.length;t++){
+        grid.innerHTML+=`<div class="time-slot time-header">${times[t]}</div>`;
+        for(let i=0;i<therapists.length;i++){
+            grid.innerHTML+=`<div class="time-slot open" data-type="open" data-tidx="${i}" data-time="${times[t]}" data-slot-id="${t+'-'+i}" draggable="true" ondragstart="slotDragStart(event)" ondragover="allowDrop(event)" ondrop="dropSlot(event)" onclick="toggleSlot(this)"></div>`;
+        }
+    }
+}
+function nextSimulatorScenario(){
+    let daySel=document.getElementById('simDay');
+    let scenSel=document.getElementById('simScenario');
+    let day=daySel.value;
+    let idx=+scenSel.value;
+    let scens=ALL_SCENARIOS[day];
+    idx=(idx+1)%scens.length;
+    scenSel.value=idx;
+    loadSimulatorScenario();
+}
+function showHint(){
+    let box=document.getElementById('hintBox');
+    box.style.display="block";
+    box.textContent="Tip: Drag appointments to fill gaps, focus on late day coverage!";
+}
+function hideHint(){
+    let box=document.getElementById('hintBox');
+    box.style.display="none";
+}
+function showSolution(){
+    let day=document.getElementById('simDay').value;
+    let idx=+document.getElementById('simScenario').value;
+    let scenario=ALL_SCENARIOS[day][idx];
+    let box=document.getElementById('hintBox');
+    box.style.display="block";
+    box.innerHTML=`<strong>Optimal Solution:</strong><br>${scenario.correctMoves.join('<br>')}`;
+}
+/* ---- Drag-and-Drop Logic ---- */
+let draggedType=null;
+let draggedSlot=null;
+function dragStart(e){
+    draggedType=e.target.dataset.type;
+    draggedSlot=null;
+    e.dataTransfer.effectAllowed="move";
+}
+function allowDrop(e){e.preventDefault();}
+function dropSlot(e){
+    e.preventDefault();
+    let slot=e.target;
+    if(draggedType){
+        slot.dataset.type=draggedType;
+        slot.className="time-slot "+(BLOCK_TYPES[draggedType]?.colorclass||"");
+        slot.textContent=BLOCK_TYPES[draggedType]?.label||"";
+        moves++;
+        document.getElementById('movesCount').textContent=moves;
+        hideHint();
+        draggedType=null;
+        draggedSlot=null;
+        updateScheduleStats();
+        return;
+    }
+    if(draggedSlot){
+        let fromSlot=document.querySelector(`[data-slot-id='${draggedSlot}']`);
+        let tempType=slot.dataset.type;
+        let tempLabel=slot.textContent;
+        let tempClass=slot.className;
+        slot.dataset.type=fromSlot.dataset.type;
+        slot.className=fromSlot.className;
+        slot.textContent=fromSlot.textContent;
+        fromSlot.dataset.type=tempType;
+        fromSlot.className=tempClass;
+        fromSlot.textContent=tempLabel;
+        moves++;
+        document.getElementById('movesCount').textContent=moves;
+        hideHint();
+        draggedType=null;
+        draggedSlot=null;
+        updateScheduleStats();
+        return;
+    }
+}
+function slotDragStart(e){
+    draggedType=e.target.dataset.type;
+    draggedSlot=e.target.dataset.slotId;
+    e.dataTransfer.effectAllowed="move";
+}
+/* ---- Click to cycle slot type ---- */
+const CYCLE_TYPES=["open","booked_80","booked_50","gap","break","lunch","callout","shift_adj","requested_off"];
+function toggleSlot(slot){
+    let cur=slot.dataset.type||"open";
+    let idx=CYCLE_TYPES.indexOf(cur);
+    let nextType=CYCLE_TYPES[(idx+1)%CYCLE_TYPES.length];
+    slot.dataset.type=nextType;
+    slot.className="time-slot "+(BLOCK_TYPES[nextType]?.colorclass||"");
+    slot.textContent=BLOCK_TYPES[nextType]?.label||"";
+    moves++;
+    document.getElementById('movesCount').textContent=moves;
+    hideHint();
+    updateScheduleStats();
+}
+/* ---- Render Schedule Grid ---- */
+function renderScheduleGrid(day,scenario){
+    let times=generateTimeSlots(day);
+    let grid=document.getElementById('scheduleGrid');
+    let therapists=scenario.therapists;
+    grid.innerHTML='';
+    grid.innerHTML+=`<div class="time-slot header">Time</div>`;
+    therapists.forEach(t=>grid.innerHTML+=`<div class="time-slot header">${t}</div>`);
+    let slotId=0;
+    for(let t=0;t<times.length;t++){
+        grid.innerHTML+=`<div class="time-slot time-header">${times[t]}</div>`;
+        for(let i=0;i<therapists.length;i++){
+            let type=(scenario.schedule[i]&&scenario.schedule[i].slots[t])||'open';
+            let block=BLOCK_TYPES[type]||{label:"",colorclass:""};
+            grid.innerHTML+=`<div class="time-slot ${block.colorclass}" data-type="${type}" data-tidx="${i}" data-time="${times[t]}" data-slot-id="${t+'-'+i}" draggable="true" ondragstart="slotDragStart(event)" ondragover="allowDrop(event)" ondrop="dropSlot(event)" onclick="toggleSlot(this)">${block.label||""}</div>`;
+            slotId++;
+        }
+    }
+    updateScheduleStats();
+}
+/* ---- Schedule Stats ---- */
+function updateScheduleStats(){
+    let slots=document.querySelectorAll('.schedule-grid .time-slot:not(.header):not(.time-header)');
+    let booked=0,gaps=0,open=0,optimal=0;
+    slots.forEach(s=>{
+        let type=s.dataset.type;
+        if(type==="open")open++;
+        if(type==="gap")gaps++;
+        if(type&&type.startsWith("booked"))booked++;
+        if(type==="booked_80"||type==="booked_50")optimal++;
+    });
+    let total=slots.length;
+    let utilization=Math.round(100*booked/total);
+    document.getElementById('utilizationRate').textContent=utilization+"%";
+    document.getElementById('gapCount').textContent=gaps;
+    document.getElementById('optimalPatterns').textContent=optimal;
+    document.getElementById('gapsFixedCount').textContent=gaps===0?"All":(total-gaps);
+    document.getElementById('revenueSaved').textContent="$"+(booked*120);
+    document.getElementById('gradeValue').textContent=utilization>80&&gaps===0?"A":utilization>70?"B":"C";
+}
+/* ---- INIT ---- */
+window.onload=function(){
+    showTab('overview');
+    renderScenarioControls();
+    renderSimulatorControls();
+};
 </script>
+</body>
+</html>
